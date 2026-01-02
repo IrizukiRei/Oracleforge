@@ -584,6 +584,8 @@
             border-radius: 12px;
             max-width: 800px;
             margin: 0 auto;
+            position: relative;
+            z-index: 2;
         }
 
         .ritual-section {
@@ -2736,7 +2738,7 @@
             const ritualScreen = document.getElementById('ritual-screen');
             if (!ritualScreen) return;
             
-            // 波紋コンテナを作成（背面に配置）
+            // 波紋コンテナを作成
             const rippleContainer = document.createElement('div');
             rippleContainer.style.cssText = `
                 position: absolute;
@@ -2745,9 +2747,10 @@
                 width: 100%;
                 height: 100%;
                 pointer-events: none;
-                z-index: 0;
                 overflow: hidden;
             `;
+            
+            // 儀式画面の先頭（最背面）に挿入
             ritualScreen.style.position = 'relative';
             ritualScreen.insertBefore(rippleContainer, ritualScreen.firstChild);
             
@@ -2757,23 +2760,21 @@
                     const ripple = document.createElement('div');
                     ripple.style.cssText = `
                         position: absolute;
-                        top: 30%;
+                        top: 15%;
                         left: 50%;
                         width: 50px;
                         height: 50px;
-                        border: 2px solid rgba(100, 200, 255, 0.6);
+                        border: 2px solid rgba(100, 200, 255, 0.5);
                         border-radius: 50%;
                         transform: translate(-50%, -50%) scale(0);
                         animation: rippleExpand 2.5s ease-out forwards;
                     `;
                     rippleContainer.appendChild(ripple);
                     
-                    // アニメーション終了後に削除
                     setTimeout(() => ripple.remove(), 2500);
                 }, i * 400);
             }
             
-            // コンテナを4秒後に削除
             setTimeout(() => rippleContainer.remove(), 4000);
         }
         
