@@ -908,6 +908,10 @@
 
         <!-- カード編集画面 -->
         <div id="edit-screen" class="screen active">
+            <div class="info-box" style="background:rgba(255,200,100,0.15);border-color:rgba(255,200,100,0.4);">
+                <p style="margin:0;" data-ja="🎴 タロット78枚のプリセットが「セット」タブにあります。すぐに占いを始められます！" data-en="🎴 A 78-card Tarot preset is available in the 'Sets' tab. Ready to read immediately!">🎴 タロット78枚のプリセットが「セット」タブにあります。すぐに占いを始められます！</p>
+            </div>
+            
             <div class="info-box">
                 <h3>📱 <span data-ja="スマホ対応版" data-en="Mobile Ready">スマホ対応版</span></h3>
                 <p data-ja="画像はブラウザに保存されます。データは端末に残ります。" data-en="Images are saved in browser. Data stays on your device.">画像はブラウザに保存されます。データは端末に残ります。</p>
@@ -1210,6 +1214,101 @@
         let useReversal = true; // 正逆を取るかどうか
         let currentLang = 'ja'; // 言語設定
         
+        // タロットプリセット（78枚）- 編集不可
+        const TAROT_PRESET = {
+            nameJa: 'タロット',
+            nameEn: 'Tarot',
+            isPreset: true,
+            cards: [
+                // 大アルカナ (0-21)
+                {id: 0, nameJa: '0. 愚者', nameEn: '0. The Fool', desc: ''},
+                {id: 1, nameJa: '1. 魔術師', nameEn: '1. The Magician', desc: ''},
+                {id: 2, nameJa: '2. 女教皇', nameEn: '2. The High Priestess', desc: ''},
+                {id: 3, nameJa: '3. 女帝', nameEn: '3. The Empress', desc: ''},
+                {id: 4, nameJa: '4. 皇帝', nameEn: '4. The Emperor', desc: ''},
+                {id: 5, nameJa: '5. 教皇', nameEn: '5. The Hierophant', desc: ''},
+                {id: 6, nameJa: '6. 恋人', nameEn: '6. The Lovers', desc: ''},
+                {id: 7, nameJa: '7. 戦車', nameEn: '7. The Chariot', desc: ''},
+                {id: 8, nameJa: '8. 力', nameEn: '8. Strength', desc: ''},
+                {id: 9, nameJa: '9. 隠者', nameEn: '9. The Hermit', desc: ''},
+                {id: 10, nameJa: '10. 運命の輪', nameEn: '10. Wheel of Fortune', desc: ''},
+                {id: 11, nameJa: '11. 正義', nameEn: '11. Justice', desc: ''},
+                {id: 12, nameJa: '12. 吊るされた男', nameEn: '12. The Hanged Man', desc: ''},
+                {id: 13, nameJa: '13. 死神', nameEn: '13. Death', desc: ''},
+                {id: 14, nameJa: '14. 節制', nameEn: '14. Temperance', desc: ''},
+                {id: 15, nameJa: '15. 悪魔', nameEn: '15. The Devil', desc: ''},
+                {id: 16, nameJa: '16. 塔', nameEn: '16. The Tower', desc: ''},
+                {id: 17, nameJa: '17. 星', nameEn: '17. The Star', desc: ''},
+                {id: 18, nameJa: '18. 月', nameEn: '18. The Moon', desc: ''},
+                {id: 19, nameJa: '19. 太陽', nameEn: '19. The Sun', desc: ''},
+                {id: 20, nameJa: '20. 審判', nameEn: '20. Judgement', desc: ''},
+                {id: 21, nameJa: '21. 世界', nameEn: '21. The World', desc: ''},
+                // ワンド (22-35)
+                {id: 22, nameJa: 'ワンドのエース', nameEn: 'Ace of Wands', desc: ''},
+                {id: 23, nameJa: 'ワンドの2', nameEn: 'Two of Wands', desc: ''},
+                {id: 24, nameJa: 'ワンドの3', nameEn: 'Three of Wands', desc: ''},
+                {id: 25, nameJa: 'ワンドの4', nameEn: 'Four of Wands', desc: ''},
+                {id: 26, nameJa: 'ワンドの5', nameEn: 'Five of Wands', desc: ''},
+                {id: 27, nameJa: 'ワンドの6', nameEn: 'Six of Wands', desc: ''},
+                {id: 28, nameJa: 'ワンドの7', nameEn: 'Seven of Wands', desc: ''},
+                {id: 29, nameJa: 'ワンドの8', nameEn: 'Eight of Wands', desc: ''},
+                {id: 30, nameJa: 'ワンドの9', nameEn: 'Nine of Wands', desc: ''},
+                {id: 31, nameJa: 'ワンドの10', nameEn: 'Ten of Wands', desc: ''},
+                {id: 32, nameJa: 'ワンドのペイジ', nameEn: 'Page of Wands', desc: ''},
+                {id: 33, nameJa: 'ワンドのナイト', nameEn: 'Knight of Wands', desc: ''},
+                {id: 34, nameJa: 'ワンドのクイーン', nameEn: 'Queen of Wands', desc: ''},
+                {id: 35, nameJa: 'ワンドのキング', nameEn: 'King of Wands', desc: ''},
+                // カップ (36-49)
+                {id: 36, nameJa: 'カップのエース', nameEn: 'Ace of Cups', desc: ''},
+                {id: 37, nameJa: 'カップの2', nameEn: 'Two of Cups', desc: ''},
+                {id: 38, nameJa: 'カップの3', nameEn: 'Three of Cups', desc: ''},
+                {id: 39, nameJa: 'カップの4', nameEn: 'Four of Cups', desc: ''},
+                {id: 40, nameJa: 'カップの5', nameEn: 'Five of Cups', desc: ''},
+                {id: 41, nameJa: 'カップの6', nameEn: 'Six of Cups', desc: ''},
+                {id: 42, nameJa: 'カップの7', nameEn: 'Seven of Cups', desc: ''},
+                {id: 43, nameJa: 'カップの8', nameEn: 'Eight of Cups', desc: ''},
+                {id: 44, nameJa: 'カップの9', nameEn: 'Nine of Cups', desc: ''},
+                {id: 45, nameJa: 'カップの10', nameEn: 'Ten of Cups', desc: ''},
+                {id: 46, nameJa: 'カップのペイジ', nameEn: 'Page of Cups', desc: ''},
+                {id: 47, nameJa: 'カップのナイト', nameEn: 'Knight of Cups', desc: ''},
+                {id: 48, nameJa: 'カップのクイーン', nameEn: 'Queen of Cups', desc: ''},
+                {id: 49, nameJa: 'カップのキング', nameEn: 'King of Cups', desc: ''},
+                // ソード (50-63)
+                {id: 50, nameJa: 'ソードのエース', nameEn: 'Ace of Swords', desc: ''},
+                {id: 51, nameJa: 'ソードの2', nameEn: 'Two of Swords', desc: ''},
+                {id: 52, nameJa: 'ソードの3', nameEn: 'Three of Swords', desc: ''},
+                {id: 53, nameJa: 'ソードの4', nameEn: 'Four of Swords', desc: ''},
+                {id: 54, nameJa: 'ソードの5', nameEn: 'Five of Swords', desc: ''},
+                {id: 55, nameJa: 'ソードの6', nameEn: 'Six of Swords', desc: ''},
+                {id: 56, nameJa: 'ソードの7', nameEn: 'Seven of Swords', desc: ''},
+                {id: 57, nameJa: 'ソードの8', nameEn: 'Eight of Swords', desc: ''},
+                {id: 58, nameJa: 'ソードの9', nameEn: 'Nine of Swords', desc: ''},
+                {id: 59, nameJa: 'ソードの10', nameEn: 'Ten of Swords', desc: ''},
+                {id: 60, nameJa: 'ソードのペイジ', nameEn: 'Page of Swords', desc: ''},
+                {id: 61, nameJa: 'ソードのナイト', nameEn: 'Knight of Swords', desc: ''},
+                {id: 62, nameJa: 'ソードのクイーン', nameEn: 'Queen of Swords', desc: ''},
+                {id: 63, nameJa: 'ソードのキング', nameEn: 'King of Swords', desc: ''},
+                // ペンタクル (64-77)
+                {id: 64, nameJa: 'ペンタクルのエース', nameEn: 'Ace of Pentacles', desc: ''},
+                {id: 65, nameJa: 'ペンタクルの2', nameEn: 'Two of Pentacles', desc: ''},
+                {id: 66, nameJa: 'ペンタクルの3', nameEn: 'Three of Pentacles', desc: ''},
+                {id: 67, nameJa: 'ペンタクルの4', nameEn: 'Four of Pentacles', desc: ''},
+                {id: 68, nameJa: 'ペンタクルの5', nameEn: 'Five of Pentacles', desc: ''},
+                {id: 69, nameJa: 'ペンタクルの6', nameEn: 'Six of Pentacles', desc: ''},
+                {id: 70, nameJa: 'ペンタクルの7', nameEn: 'Seven of Pentacles', desc: ''},
+                {id: 71, nameJa: 'ペンタクルの8', nameEn: 'Eight of Pentacles', desc: ''},
+                {id: 72, nameJa: 'ペンタクルの9', nameEn: 'Nine of Pentacles', desc: ''},
+                {id: 73, nameJa: 'ペンタクルの10', nameEn: 'Ten of Pentacles', desc: ''},
+                {id: 74, nameJa: 'ペンタクルのペイジ', nameEn: 'Page of Pentacles', desc: ''},
+                {id: 75, nameJa: 'ペンタクルのナイト', nameEn: 'Knight of Pentacles', desc: ''},
+                {id: 76, nameJa: 'ペンタクルのクイーン', nameEn: 'Queen of Pentacles', desc: ''},
+                {id: 77, nameJa: 'ペンタクルのキング', nameEn: 'King of Pentacles', desc: ''}
+            ]
+        };
+        
+        // プリセット使用中かどうか
+        let isUsingPreset = false;
+        
         // 言語切り替え
         function changeLang(lang) {
             currentLang = lang;
@@ -1260,6 +1359,13 @@
                 changeLang(savedLang);
             }
             
+            // プリセット使用フラグを読み込み
+            const savedPreset = localStorage.getItem('oracleIsPreset');
+            if (savedPreset === 'true') {
+                isUsingPreset = true;
+                currentSetName = currentLang === 'ja' ? 'タロット' : 'Tarot';
+            }
+            
             const savedMaster = localStorage.getItem('oracleCards');
             if (savedMaster) {
                 masterCards = JSON.parse(savedMaster);
@@ -1284,7 +1390,7 @@
             }
 
             const savedCurrentSet = localStorage.getItem('oracleCurrentSet');
-            if (savedCurrentSet && cardSets[savedCurrentSet]) {
+            if (savedCurrentSet && cardSets[savedCurrentSet] && !isUsingPreset) {
                 currentSetName = savedCurrentSet;
             }
             
@@ -1321,11 +1427,6 @@
 
         function saveSets() {
             localStorage.setItem('oracleSets', JSON.stringify(cardSets));
-        }
-
-        function getCurrentCards() {
-            const cardIds = cardSets[currentSetName] || [];
-            return cardIds.map(id => masterCards.find(c => c.id === id)).filter(Boolean);
         }
 
         function updateStorageInfo() {
@@ -1740,10 +1841,13 @@
 
         function switchSet(setName) {
             if (!cardSets[setName]) return;
+            isUsingPreset = false;
+            localStorage.setItem('oracleIsPreset', 'false');
             currentSetName = setName;
             localStorage.setItem('oracleCurrentSet', currentSetName);
             updateActiveCount();
             renderSetsList();
+            resetLottery();
         }
 
         function deleteSet(setName) {
@@ -1771,11 +1875,31 @@
             const editText = currentLang === 'ja' ? '編集' : 'Edit';
             const switchText = currentLang === 'ja' ? '切替' : 'Switch';
             const deleteText = currentLang === 'ja' ? '削除' : 'Delete';
+            const presetText = currentLang === 'ja' ? 'プリセット' : 'Preset';
             
+            // タロットプリセットを最初に表示
+            const tarotCard = document.createElement('div');
+            tarotCard.className = 'spread-card';
+            if (isUsingPreset && currentSetName === (currentLang === 'ja' ? 'タロット' : 'Tarot')) {
+                tarotCard.style.borderColor = 'rgba(255,200,100,0.8)';
+                tarotCard.style.background = 'rgba(255,200,100,0.2)';
+            }
+            const tarotName = currentLang === 'ja' ? TAROT_PRESET.nameJa : TAROT_PRESET.nameEn;
+            let tarotHtml = `<h3>🎴 ${tarotName}</h3><p>78${cardsText}</p>`;
+            tarotHtml += `<p style="color:#ffcc66;font-size:11px;">${presetText}</p>`;
+            if (isUsingPreset) {
+                tarotHtml += `<p style="color:#64c8ff;font-size:12px;">${activeText}</p>`;
+            } else {
+                tarotHtml += `<button class="btn" style="padding:8px 12px;font-size:12px;margin-top:8px;background:rgba(255,200,100,0.3);border-color:rgba(255,200,100,0.6);" onclick="switchToTarotPreset()">${switchText}</button>`;
+            }
+            tarotCard.innerHTML = tarotHtml;
+            list.appendChild(tarotCard);
+            
+            // ユーザーのカスタムセット
             Object.keys(cardSets).forEach(setName => {
                 const setCard = document.createElement('div');
                 setCard.className = 'spread-card';
-                if (setName === currentSetName) {
+                if (!isUsingPreset && setName === currentSetName) {
                     setCard.style.borderColor = 'rgba(100,200,255,0.8)';
                     setCard.style.background = 'rgba(100,200,255,0.2)';
                 }
@@ -1783,7 +1907,7 @@
                 const cardCount = cardSets[setName].length;
                 
                 let html = `<h3>${setName}</h3><p>${cardCount}${cardsText}</p>`;
-                if (setName === currentSetName) {
+                if (!isUsingPreset && setName === currentSetName) {
                     html += `<p style="color:#64c8ff;font-size:12px;">${activeText}</p>`;
                     html += `<button class="btn" style="padding:8px 12px;font-size:12px;margin-top:8px;" onclick="editSetCards()">${editText}</button>`;
                 } else {
@@ -1797,6 +1921,35 @@
                 setCard.innerHTML = html;
                 list.appendChild(setCard);
             });
+        }
+        
+        // タロットプリセットに切り替え
+        function switchToTarotPreset() {
+            isUsingPreset = true;
+            currentSetName = currentLang === 'ja' ? 'タロット' : 'Tarot';
+            localStorage.setItem('oracleIsPreset', 'true');
+            renderSetsList();
+            updateActiveCount();
+            resetLottery();
+        }
+        
+        // タロットプリセットのカードを取得
+        function getTarotCards() {
+            return TAROT_PRESET.cards.map(c => ({
+                id: c.id,
+                name: currentLang === 'ja' ? c.nameJa : c.nameEn,
+                description: c.desc,
+                imageData: '' // 画像は後で追加
+            }));
+        }
+        
+        // 現在のアクティブカードを取得（プリセット対応）
+        function getCurrentCards() {
+            if (isUsingPreset) {
+                return getTarotCards();
+            }
+            const activeIds = cardSets[currentSetName] || [];
+            return masterCards.filter(c => activeIds.includes(c.id));
         }
 
         function editSetCards() {
