@@ -1,0 +1,2704 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>OracleForge - Card Shuffler</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: 'Hiragino Mincho ProN', 'Yu Mincho', 'YuMincho', serif;
+            background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+            color: #fff;
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+            padding: 15px;
+            padding-bottom: 80px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            text-shadow: 0 0 10px rgba(100,200,255,0.5);
+            letter-spacing: 0.2em;
+            font-weight: 300;
+        }
+        
+        @media (min-width: 768px) {
+            h1 {
+                font-size: 2.2em;
+                letter-spacing: 0.3em;
+            }
+        }
+        
+        /* ナビゲーション */
+        .nav-tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .nav-tabs button {
+            padding: 10px 12px;
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: #fff;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 12px;
+            transition: all 0.3s;
+            flex: 1;
+            min-width: 60px;
+            max-width: 120px;
+        }
+        
+        @media (min-width: 768px) {
+            .nav-tabs button {
+                padding: 12px 24px;
+                font-size: 16px;
+                max-width: none;
+            }
+        }
+        
+        .nav-tabs button:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .nav-tabs button.active {
+            background: rgba(100,200,255,0.3);
+            border-color: rgba(100,200,255,0.8);
+        }
+        
+        .screen {
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+        
+        .screen.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* カードグリッド */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        @media (min-width: 768px) {
+            .card-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 15px;
+            }
+        }
+        
+        .card-item {
+            background: rgba(255,255,255,0.1);
+            padding: 10px;
+            border-radius: 8px;
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+        
+        .card-preview {
+            width: 100%;
+            aspect-ratio: 2/3;
+            background: #2a2a4a;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            color: #888;
+        }
+        
+        .card-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .card-item input[type="text"],
+        .card-item textarea {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border-radius: 4px;
+            border: 1px solid rgba(255,255,255,0.3);
+            background: rgba(0,0,0,0.3);
+            color: #fff;
+            font-size: 14px;
+        }
+        
+        .card-item textarea {
+            resize: vertical;
+            min-height: 50px;
+        }
+        
+        .upload-btn {
+            width: 100%;
+            padding: 10px;
+            background: rgba(100,200,255,0.2);
+            border: 1px solid rgba(100,200,255,0.5);
+            color: #fff;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+        
+        .upload-btn:active {
+            background: rgba(100,200,255,0.4);
+        }
+        
+        /* スプレッド選択 */
+        .spread-selection {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+        }
+        
+        @media (min-width: 768px) {
+            .spread-selection {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 15px;
+            }
+        }
+        
+        .spread-card {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid rgba(255,255,255,0.2);
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        
+        .spread-card:active {
+            background: rgba(255,255,255,0.2);
+            border-color: rgba(100,200,255,0.8);
+        }
+        
+        .spread-card h3 {
+            margin-bottom: 8px;
+            color: #64c8ff;
+            font-size: 1em;
+        }
+        
+        .spread-card p {
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        
+        /* スプレッド表示エリア */
+        .spread-display {
+            position: relative;
+            min-height: 350px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 20px;
+            background: rgba(0,0,0,0.3);
+            border: 3px solid rgba(100,200,255,0.5);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(100,200,255,0.3);
+            overflow-x: auto;
+        }
+        
+        .spread-inner {
+            position: relative;
+            min-width: 550px;
+            min-height: 300px;
+        }
+        
+        .card-slot {
+            width: 70px;
+            height: 105px;
+            background: rgba(255,255,255,0.1);
+            border: 2px dashed rgba(255,255,255,0.3);
+            border-radius: 6px;
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #888;
+            cursor: pointer;
+            transition: all 0.3s;
+            perspective: 1000px;
+            transform: translate(-50%, -50%);
+        }
+        
+        @media (min-width: 768px) {
+            .card-slot {
+                width: 100px;
+                height: 150px;
+                font-size: 12px;
+            }
+            
+            .spread-inner {
+                min-width: 700px;
+                min-height: 450px;
+            }
+        }
+        
+        .card-slot.filled {
+            border: 2px solid rgba(100,200,255,0.8);
+            background: transparent;
+        }
+        
+        /* ボタン */
+        .controls {
+            text-align: center;
+            margin: 20px 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        .btn {
+            padding: 12px 20px;
+            background: rgba(100,200,255,0.2);
+            border: 2px solid rgba(100,200,255,0.5);
+            color: #fff;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+            letter-spacing: 0.1em;
+        }
+        
+        .btn:active {
+            background: rgba(100,200,255,0.4);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* 情報ボックス */
+        .deck-info {
+            background: rgba(255,255,255,0.1);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 14px;
+        }
+        
+        .error-message {
+            background: rgba(220,53,69,0.3);
+            border: 2px solid #dc3545;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 15px 0;
+            text-align: center;
+            font-size: 14px;
+        }
+        
+        .card-number {
+            font-size: 10px;
+            color: #888;
+            margin-bottom: 5px;
+        }
+        
+        .add-cards-section {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .add-cards-section input {
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid rgba(255,255,255,0.3);
+            background: rgba(0,0,0,0.3);
+            color: #fff;
+            width: 80px;
+        }
+
+        .back-card-section {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .back-preview {
+            width: 60px;
+            height: 90px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 6px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .back-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .result-info {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .result-info h3 {
+            color: #64c8ff;
+            margin-bottom: 12px;
+            font-size: 1em;
+        }
+
+        .card-meaning {
+            margin: 8px 0;
+            padding: 10px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .card-meaning strong {
+            color: #64c8ff;
+        }
+
+        .info-box {
+            background: rgba(100,200,255,0.1);
+            border: 2px solid rgba(100,200,255,0.3);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 13px;
+        }
+
+        .info-box h3 {
+            color: #64c8ff;
+            margin-bottom: 8px;
+            font-size: 1em;
+        }
+
+        /* シャッフルアニメーション */
+        .shuffle-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 120px;
+            perspective: 1000px;
+        }
+        
+        .shuffle-card {
+            position: absolute;
+            width: 70px;
+            height: 105px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 6px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .shuffle-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+        
+        @keyframes shuffleSpread {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            50% { transform: translate(var(--tx), var(--ty)) rotate(var(--rot)); }
+            100% { transform: translate(0, 0) rotate(0deg); }
+        }
+        
+        @keyframes shuffleRiffle {
+            0%, 100% { transform: translateY(0) rotateX(0); }
+            25% { transform: translateY(-30px) rotateX(-15deg); }
+            75% { transform: translateY(-15px) rotateX(10deg); }
+        }
+        
+        @keyframes cardFlyOut {
+            0% { transform: translate(0, 0) scale(1); opacity: 1; }
+            100% { transform: translate(var(--fly-x), var(--fly-y)) scale(0.8); opacity: 0; }
+        }
+        
+        .shuffling .shuffle-card {
+            animation: shuffleRiffle 0.4s ease-in-out infinite;
+            animation-delay: var(--delay);
+        }
+        
+        .spreading .shuffle-card {
+            animation: shuffleSpread 0.6s ease-out forwards;
+        }
+
+        /* カードフリップ */
+        .card-inner {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+        }
+        
+        .card-inner.flipped {
+            transform: rotateY(180deg);
+        }
+        
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .card-back {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        
+        .card-back img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .card-front {
+            transform: rotateY(180deg);
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        
+        .card-front img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .card-front.reversed img,
+        .card-front.reversed .card-text {
+            transform: rotate(180deg);
+        }
+        
+        .card-text {
+            padding: 5px;
+            color: #333;
+            font-size: 10px;
+            text-align: center;
+        }
+
+        /* モーダル */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-image {
+            max-width: 90%;
+            max-height: 85%;
+            object-fit: contain;
+        }
+        
+        .modal-image.reversed {
+            transform: rotate(180deg);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 40px;
+            color: white;
+            cursor: pointer;
+            z-index: 10000;
+        }
+
+        /* 儀式画面 */
+        .ritual-container {
+            background: rgba(255,255,255,0.05);
+            padding: 20px;
+            border-radius: 12px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .ritual-section {
+            margin-bottom: 30px;
+        }
+
+        .ritual-section h3 {
+            color: #64c8ff;
+            margin-bottom: 12px;
+            font-size: 1em;
+        }
+
+        .ritual-section p {
+            line-height: 1.8;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        .question-list {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        .question-list li {
+            list-style: none;
+            padding: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-size: 14px;
+        }
+
+        .question-list li:active {
+            background: rgba(100,200,255,0.2);
+        }
+
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 2px solid rgba(100,200,255,0.3);
+            background: rgba(0,0,0,0.3);
+            color: #fff;
+            font-size: 14px;
+            min-height: 80px;
+            font-family: inherit;
+        }
+
+        .crystal-item {
+            background: rgba(100,200,255,0.05);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border-left: 3px solid #64c8ff;
+        }
+
+        .crystal-date {
+            font-size: 11px;
+            color: #888;
+            margin-bottom: 5px;
+        }
+
+        /* タイトル画面 */
+        .title-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0a0f14 0%, #1a1f2e 50%, #0f1a20 100%);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .title-screen.hidden {
+            display: none;
+        }
+
+        /* 背景の蜘蛛の巣アニメーション */
+        .web-bg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0.15;
+            background-image: 
+                radial-gradient(circle at 50% 50%, transparent 0%, transparent 40%, rgba(100,200,255,0.1) 41%, transparent 42%),
+                radial-gradient(circle at 50% 50%, transparent 0%, transparent 60%, rgba(100,200,255,0.08) 61%, transparent 62%),
+                radial-gradient(circle at 50% 50%, transparent 0%, transparent 80%, rgba(100,200,255,0.05) 81%, transparent 82%);
+            background-size: 100% 100%;
+            animation: webPulse 8s ease-in-out infinite;
+        }
+
+        .web-bg::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(0deg, transparent 49.5%, rgba(100,200,255,0.1) 50%, transparent 50.5%),
+                linear-gradient(60deg, transparent 49.5%, rgba(100,200,255,0.1) 50%, transparent 50.5%),
+                linear-gradient(120deg, transparent 49.5%, rgba(100,200,255,0.1) 50%, transparent 50.5%);
+            background-size: 100% 100%;
+        }
+
+        @keyframes webPulse {
+            0%, 100% { transform: scale(1); opacity: 0.15; }
+            50% { transform: scale(1.05); opacity: 0.25; }
+        }
+
+        /* 浮遊する結晶 */
+        .floating-crystal {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, rgba(100,200,255,0.6), rgba(180,100,255,0.6));
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+            animation: floatCrystal 6s ease-in-out infinite;
+            filter: blur(1px);
+        }
+
+        @keyframes floatCrystal {
+            0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.6; }
+            50% { transform: translateY(-20px) rotate(180deg); opacity: 1; }
+        }
+
+        /* メイン繭アイコン */
+        .cocoon-icon {
+            width: 120px;
+            height: 160px;
+            position: relative;
+            margin-bottom: 30px;
+            animation: cocoonFloat 4s ease-in-out infinite;
+        }
+
+        .cocoon-body {
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at 50% 30%, #fff 0%, #e8e8f0 40%, #c0c0d0 100%);
+            border-radius: 50% 50% 45% 45%;
+            position: relative;
+            box-shadow: 
+                0 0 30px rgba(100,200,255,0.3),
+                0 0 60px rgba(100,200,255,0.2),
+                inset 0 -20px 40px rgba(100,150,200,0.2);
+        }
+
+        .cocoon-body::before {
+            content: '🌿';
+            position: absolute;
+            top: 25%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 24px;
+        }
+
+        @keyframes cocoonFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* タイトルテキスト */
+        .title-text {
+            font-size: 2.5em;
+            letter-spacing: 0.4em;
+            color: #fff;
+            text-shadow: 
+                0 0 10px rgba(100,200,255,0.8),
+                0 0 20px rgba(100,200,255,0.5),
+                0 0 40px rgba(100,200,255,0.3);
+            margin-bottom: 10px;
+            animation: titleGlow 3s ease-in-out infinite;
+        }
+
+        .title-sub {
+            font-size: 1em;
+            letter-spacing: 0.3em;
+            color: rgba(200,220,255,0.7);
+            margin-bottom: 40px;
+        }
+
+        @keyframes titleGlow {
+            0%, 100% { text-shadow: 0 0 10px rgba(100,200,255,0.8), 0 0 20px rgba(100,200,255,0.5); }
+            50% { text-shadow: 0 0 20px rgba(100,200,255,1), 0 0 40px rgba(100,200,255,0.8), 0 0 60px rgba(180,100,255,0.5); }
+        }
+
+        .start-btn {
+            padding: 15px 50px;
+            background: transparent;
+            border: 2px solid rgba(100,200,255,0.5);
+            color: #fff;
+            font-size: 1.1em;
+            letter-spacing: 0.2em;
+            cursor: pointer;
+            border-radius: 30px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .start-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(100,200,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .start-btn:hover::before {
+            left: 100%;
+        }
+
+        .start-btn:hover {
+            background: rgba(100,200,255,0.2);
+            box-shadow: 0 0 20px rgba(100,200,255,0.5);
+        }
+
+        /* 蝶のアニメーション */
+        .butterfly {
+            position: absolute;
+            font-size: 20px;
+            opacity: 0.6;
+            animation: butterflyFly 15s linear infinite;
+        }
+
+        @keyframes butterflyFly {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(100px, -50px) rotate(10deg); }
+            50% { transform: translate(50px, -100px) rotate(-5deg); }
+            75% { transform: translate(-50px, -30px) rotate(5deg); }
+            100% { transform: translate(0, 0) rotate(0deg); }
+        }
+
+        /* セット管理 */
+        .sets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .set-input {
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid rgba(255,255,255,0.3);
+            background: rgba(0,0,0,0.3);
+            color: #fff;
+            width: 100%;
+            max-width: 250px;
+            margin-bottom: 10px;
+        }
+
+        /* ストレージ警告 */
+        .storage-warning {
+            background: rgba(255,193,7,0.2);
+            border: 2px solid #ffc107;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 13px;
+        }
+
+        .storage-info {
+            font-size: 12px;
+            color: #888;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- タイトル画面 -->
+    <div class="title-screen" id="titleScreen">
+        <div class="web-bg"></div>
+        
+        <!-- 浮遊する結晶 -->
+        <div class="floating-crystal" style="top:15%;left:20%;animation-delay:0s;"></div>
+        <div class="floating-crystal" style="top:25%;left:75%;animation-delay:1s;width:15px;height:15px;"></div>
+        <div class="floating-crystal" style="top:60%;left:15%;animation-delay:2s;width:25px;height:25px;"></div>
+        <div class="floating-crystal" style="top:70%;left:80%;animation-delay:3s;"></div>
+        <div class="floating-crystal" style="top:40%;left:85%;animation-delay:1.5s;width:12px;height:12px;"></div>
+        
+        <!-- 言語選択 -->
+        <div style="position:absolute;top:20px;right:20px;">
+            <select id="lang-select" onchange="changeLang(this.value)" style="padding:8px 12px;background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.4);color:#fff;border-radius:6px;font-size:14px;">
+                <option value="ja" style="color:#000;">日本語</option>
+                <option value="en" style="color:#000;">English</option>
+            </select>
+        </div>
+        
+        <!-- アイコン -->
+        <div style="font-size:80px;margin-bottom:20px;">🃏</div>
+        
+        <div class="title-text">OracleForge</div>
+        <div class="title-sub">Card Shuffler</div>
+        
+        <button class="start-btn" id="startBtn" data-ja="はじめる" data-en="START" onclick="hideTitle()">はじめる</button>
+    </div>
+
+    <div class="container">
+        <h1>OracleForge</h1>
+        
+        <div class="nav-tabs">
+            <button onclick="goHome()" style="background:rgba(255,200,100,0.2);border-color:rgba(255,200,100,0.5);">🏠</button>
+            <button class="active" onclick="showScreen('edit')" data-ja="編集" data-en="Edit">編集</button>
+            <button onclick="showScreen('sets')" data-ja="セット" data-en="Sets">セット</button>
+            <button onclick="showScreen('spread')" data-ja="展開" data-en="Spread">展開</button>
+            <button onclick="showScreen('reading')" data-ja="占う" data-en="Read">占う</button>
+            <button onclick="showScreen('lottery')" data-ja="くじ" data-en="Draw">くじ</button>
+            <button onclick="showScreen('ritual')" data-ja="記録" data-en="Notes">記録</button>
+        </div>
+
+        <!-- カード編集画面 -->
+        <div id="edit-screen" class="screen active">
+            <div class="info-box">
+                <h3>📱 <span data-ja="スマホ対応版" data-en="Mobile Ready">スマホ対応版</span></h3>
+                <p data-ja="画像はブラウザに保存されます。データは端末に残ります。" data-en="Images are saved in browser. Data stays on your device.">画像はブラウザに保存されます。データは端末に残ります。</p>
+            </div>
+
+            <div class="info-box" style="background:rgba(255,200,100,0.1);border-color:rgba(255,200,100,0.3);">
+                <h3>💾 <span data-ja="データ移行" data-en="Data Transfer">データ移行</span></h3>
+                <p style="margin-bottom:10px;" data-ja="PC↔スマホ間でデータを移すにはエクスポート/インポートを使用" data-en="Use Export/Import to transfer data between PC and mobile">PC↔スマホ間でデータを移すにはエクスポート/インポートを使用</p>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                    <button class="btn" onclick="exportData()" style="padding:10px 15px;font-size:13px;" data-ja="エクスポート" data-en="Export">エクスポート</button>
+                    <input type="file" accept=".json" style="display:none" id="import-file" onchange="importData(this)">
+                    <button class="btn" onclick="document.getElementById('import-file').click()" style="padding:10px 15px;font-size:13px;" data-ja="インポート" data-en="Import">インポート</button>
+                </div>
+            </div>
+
+            <div id="storage-warning" class="storage-warning" style="display:none;" data-ja="⚠️ ストレージ使用量が多くなっています。画像サイズを小さくするか、不要なカードを削除してください。" data-en="⚠️ Storage is running low. Reduce image sizes or delete unused cards.">
+                ⚠️ ストレージ使用量が多くなっています。画像サイズを小さくするか、不要なカードを削除してください。
+            </div>
+
+            <div class="deck-info">
+                <p><span data-ja="カード" data-en="Cards">カード</span>: <span id="master-count">0</span><span data-ja="枚" data-en=""> 枚</span> / <span data-ja="有効" data-en="Active">有効</span>: <span id="active-count">0</span><span data-ja="枚" data-en=""></span></p>
+                <div class="storage-info" id="storage-info"></div>
+            </div>
+
+            <div class="back-card-section">
+                <div>
+                    <div style="font-size:12px;margin-bottom:5px;" data-ja="裏面" data-en="Back">裏面</div>
+                    <div class="back-preview" id="back-preview">🔮</div>
+                </div>
+                <div style="flex:1;">
+                    <input type="file" accept="image/*" style="display:none" 
+                           id="back-file" onchange="selectBackImage(this)">
+                    <button class="btn" onclick="document.getElementById('back-file').click()" data-ja="裏面画像" data-en="Back Image">
+                        裏面画像
+                    </button>
+                </div>
+            </div>
+
+            <div class="back-card-section">
+                <div>
+                    <div style="font-size:12px;margin-bottom:5px;" data-ja="シグニフィケーター" data-en="Significator">シグニフィケーター</div>
+                    <div class="back-preview" id="sig-preview" style="background:rgba(255,200,100,0.3);" data-ja="未設定" data-en="Not set">未設定</div>
+                </div>
+                <div style="flex:1;">
+                    <button class="btn" onclick="openSignificatorSelect()" style="font-size:13px;" data-ja="カード選択" data-en="Select Card">
+                        カード選択
+                    </button>
+                    <button class="btn" onclick="clearSignificator()" style="font-size:13px;background:rgba(220,53,69,0.3);border-color:#dc3545;" data-ja="解除" data-en="Clear">
+                        解除
+                    </button>
+                    <div style="font-size:11px;color:#888;margin-top:5px;" data-ja="スプレッドで「私」を示す基準札" data-en="Card representing 'yourself' in spreads">スプレッドで「私」を示す基準札</div>
+                </div>
+            </div>
+            
+            <div class="add-cards-section">
+                <label style="font-size:14px;" data-ja="枚数:" data-en="Cards:">枚数:</label>
+                <input type="number" id="card-count-input" min="1" max="150" value="10">
+                <button class="btn" onclick="setCardCount()" data-ja="設定" data-en="Set">設定</button>
+            </div>
+            
+            <div id="card-grid" class="card-grid"></div>
+        </div>
+
+        <!-- セット管理画面 -->
+        <div id="sets-screen" class="screen">
+            <div class="info-box">
+                <h3>📦 <span data-ja="セット管理" data-en="Set Management">セット管理</span></h3>
+                <p data-ja="複数のカードセットを切り替えて使用できます" data-en="Switch between multiple card sets">複数のカードセットを切り替えて使用できます</p>
+            </div>
+
+            <div class="deck-info">
+                <p><span data-ja="現在" data-en="Current">現在</span>: <strong id="current-set-name">デフォルト</strong></p>
+            </div>
+
+            <div style="margin-bottom:15px;">
+                <input type="text" id="new-set-name" class="set-input" data-ja-placeholder="新しいセット名" data-en-placeholder="New set name">
+                <button class="btn" onclick="createNewSet()" data-ja="作成" data-en="Create">作成</button>
+            </div>
+
+            <div id="sets-list" class="sets-grid"></div>
+        </div>
+
+        <!-- スプレッド選択画面 -->
+        <div id="spread-screen" class="screen">
+            <div class="deck-info">
+                <p><span data-ja="有効カード" data-en="Active Cards">有効カード</span>: <span id="spread-active-count">0</span><span data-ja="枚" data-en=""></span></p>
+            </div>
+
+            <div class="info-box" id="sig-toggle-box" style="display:none;">
+                <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+                    <input type="checkbox" id="use-sig-toggle" onchange="toggleSignificator()" style="width:20px;height:20px;">
+                    <span data-ja="シグニフィケーターを使用" data-en="Use Significator">シグニフィケーターを使用</span>
+                    <span id="sig-name-display" style="color:#64c8ff;font-size:12px;"></span>
+                </label>
+                <div style="font-size:11px;color:#888;margin-top:5px;" data-ja="固定配置系: 所定位置に固定 / グランタブロー: 出た位置をハイライト" data-en="Fixed spreads: Fixed position / Grand Tableau: Highlights position">
+                    固定配置系: 所定位置に固定 / グランタブロー: 出た位置をハイライト
+                </div>
+            </div>
+
+            <div class="info-box">
+                <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+                    <input type="checkbox" id="use-reversal-toggle" onchange="toggleReversal()" checked style="width:20px;height:20px;">
+                    <span data-ja="正逆を取る" data-en="Use Reversals">正逆を取る</span>
+                </label>
+                <div style="font-size:11px;color:#888;margin-top:5px;" data-ja="OFFにするとカードは常に正位置で出ます（オラクルカード向け）" data-en="Turn OFF to always draw cards upright (for oracle cards)">
+                    OFFにするとカードは常に正位置で出ます（オラクルカード向け）
+                </div>
+            </div>
+            
+            <div id="error-container"></div>
+            
+            <h2 style="margin:15px 0;font-size:1em;" data-ja="ベーシック" data-en="Basic">ベーシック</h2>
+            <div class="spread-selection">
+                <div class="spread-card" onclick="selectSpread('one', 1)">
+                    <h3 data-ja="ワンオラクル" data-en="One Card">ワンオラクル</h3>
+                    <p data-ja="1枚 / シンプル" data-en="1 card / Simple">1枚 / シンプル</p>
+                </div>
+                <div class="spread-card" onclick="selectSpread('simplecross', 2)">
+                    <h3 data-ja="シンプルクロス" data-en="Simple Cross">シンプルクロス</h3>
+                    <p data-ja="2枚 / 状況と障害" data-en="2 cards / Situation & Obstacle">2枚 / 状況と障害</p>
+                </div>
+                <div class="spread-card" onclick="selectSpread('choice', 3)">
+                    <h3 data-ja="二者択一" data-en="Two Choices">二者択一</h3>
+                    <p data-ja="3枚 / 選択肢の比較" data-en="3 cards / Compare options">3枚 / 選択肢の比較</p>
+                </div>
+                <div class="spread-card" onclick="selectSpread('three', 3)">
+                    <h3 data-ja="スリーカード" data-en="Three Card">スリーカード</h3>
+                    <p data-ja="3枚 / 過去現在未来" data-en="3 cards / Past Present Future">3枚 / 過去現在未来</p>
+                </div>
+            </div>
+            
+            <h2 style="margin:15px 0;font-size:1em;" data-ja="クロス系" data-en="Cross Spreads">クロス系</h2>
+            <div class="spread-selection">
+                <div class="spread-card" onclick="selectSpread('diamond', 4)">
+                    <h3 data-ja="ダイヤモンドクロス" data-en="Diamond Cross">ダイヤモンドクロス</h3>
+                    <p data-ja="4枚 / 自分・相手・結果・対策" data-en="4 cards / Self, Other, Result, Advice">4枚 / 自分・相手・結果・対策</p>
+                </div>
+                <div class="spread-card" onclick="selectSpread('greek', 5)">
+                    <h3 data-ja="ギリシャ十字" data-en="Greek Cross">ギリシャ十字</h3>
+                    <p data-ja="5枚 / 現状・傾向・障害・対策・結果" data-en="5 cards / Current, Trend, Block, Advice, Result">5枚 / 現状・傾向・障害・対策・結果</p>
+                </div>
+                <div class="spread-card" onclick="selectSpread('celtic', 10)">
+                    <h3 data-ja="ケルト十字" data-en="Celtic Cross">ケルト十字</h3>
+                    <p data-ja="10枚 / 詳細分析" data-en="10 cards / Detailed analysis">10枚 / 詳細分析</p>
+                </div>
+            </div>
+            
+            <h2 style="margin:15px 0;font-size:1em;" data-ja="ピラミッド・U字" data-en="Pyramid & Horseshoe">ピラミッド・U字</h2>
+            <div class="spread-selection">
+                <div class="spread-card" onclick="selectSpread('pyramid', 6)">
+                    <h3 data-ja="ピラミッド" data-en="Pyramid">ピラミッド</h3>
+                    <p data-ja="6枚 / 現状→解決→最終結果" data-en="6 cards / Current → Solution → Final">6枚 / 現状→解決→最終結果</p>
+                </div>
+                <div class="spread-card" onclick="selectSpread('horseshoe', 7)">
+                    <h3 data-ja="ホースシュー" data-en="Horseshoe">ホースシュー</h3>
+                    <p data-ja="7枚 / U字展開" data-en="7 cards / U-shape spread">7枚 / U字展開</p>
+                </div>
+                <div class="spread-card" onclick="selectSpread('hexagram', 7)">
+                    <h3 data-ja="ヘキサグラム" data-en="Hexagram">ヘキサグラム</h3>
+                    <p data-ja="7枚 / 六芒星" data-en="7 cards / Star of David">7枚 / 六芒星</p>
+                </div>
+            </div>
+            
+            <h2 style="margin:15px 0;font-size:1em;" data-ja="大展開" data-en="Grand Spreads">大展開</h2>
+            <div class="spread-selection">
+                <div class="spread-card" onclick="selectSpread('nine', 9)">
+                    <h3 data-ja="ナインカード" data-en="Nine Card">ナインカード</h3>
+                    <p data-ja="9枚 / 3×3" data-en="9 cards / 3×3 Grid">9枚 / 3×3</p>
+                </div>
+                <div class="spread-card" onclick="selectSpread('lifetree', 10)">
+                    <h3 data-ja="生命の樹" data-en="Tree of Life">生命の樹</h3>
+                    <p data-ja="10枚 / セフィロト" data-en="10 cards / Sephiroth">10枚 / セフィロト</p>
+                </div>
+                <div class="spread-card" onclick="selectSpread('horoscope', 12)">
+                    <h3 data-ja="ホロスコープ" data-en="Horoscope">ホロスコープ</h3>
+                    <p data-ja="12枚 / 12ハウス" data-en="12 cards / 12 Houses">12枚 / 12ハウス</p>
+                </div>
+                <div class="spread-card" onclick="selectSpread('grand', 36)">
+                    <h3 data-ja="グランタブロー" data-en="Grand Tableau">グランタブロー</h3>
+                    <p data-ja="36枚 / 大展開" data-en="36 cards / Full spread">36枚 / 大展開</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- リーディング画面 -->
+        <div id="reading-screen" class="screen">
+            <div class="controls">
+                <button class="btn" onclick="shuffleAndDraw()" data-ja="シャッフル" data-en="Shuffle">シャッフル</button>
+                <button class="btn" onclick="skipShuffle()" data-ja="スキップ" data-en="Skip">スキップ</button>
+                <button class="btn" onclick="resetReading()" data-ja="リセット" data-en="Reset">リセット</button>
+            </div>
+            
+            <div id="spread-display" class="spread-display">
+                <div id="spread-inner" class="spread-inner"></div>
+            </div>
+            
+            <!-- 補足カード表示エリア -->
+            <div id="supplement-area" style="display:none;margin-top:20px;padding:15px;background:rgba(255,200,100,0.1);border:2px solid rgba(255,200,100,0.5);border-radius:12px;">
+                <h4 style="color:#ffcc66;margin-bottom:10px;font-size:14px;" data-ja="補足カード" data-en="Supplement Cards">補足カード</h4>
+                <div id="supplement-cards" style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;"></div>
+            </div>
+            
+            <div id="result-info" class="result-info" style="display:none;"></div>
+        </div>
+
+        <!-- くじ引き画面 -->
+        <div id="lottery-screen" class="screen">
+            <div style="text-align:center;padding:20px;">
+                <h2 style="color:#64c8ff;margin-bottom:15px;" data-ja="🎲 くじ引き" data-en="🎲 Random Draw">🎲 くじ引き</h2>
+                <p style="color:#888;font-size:13px;margin-bottom:20px;" data-ja="カードをランダムに引きます。リセットするまで同じカードは出ません。" data-en="Draw cards randomly. Same card won't appear until reset.">カードをランダムに引きます。リセットするまで同じカードは出ません。</p>
+                
+                <div style="background:rgba(100,200,255,0.1);padding:15px;border-radius:10px;margin-bottom:20px;">
+                    <div style="margin-bottom:10px;">
+                        <span data-ja="引く枚数: " data-en="Draw count: ">引く枚数: </span>
+                        <select id="lottery-count" style="padding:8px 15px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.3);color:#fff;border-radius:6px;font-size:16px;">
+                        </select>
+                    </div>
+                    <div style="font-size:14px;color:#64c8ff;">
+                        <span data-ja="残り: " data-en="Remaining: ">残り: </span><span id="lottery-remaining">0</span><span data-ja="枚" data-en=" cards">枚</span>
+                    </div>
+                </div>
+                
+                <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:20px;">
+                    <button class="btn" onclick="drawLottery()" style="padding:15px 30px;font-size:16px;" data-ja="引く！" data-en="Draw!">引く！</button>
+                    <button class="btn" onclick="resetLottery()" style="padding:15px 20px;background:rgba(220,53,69,0.3);border-color:#dc3545;" data-ja="リセット" data-en="Reset">リセット</button>
+                </div>
+                
+                <!-- 引いたカード表示エリア -->
+                <div id="lottery-result" style="display:flex;flex-wrap:wrap;gap:15px;justify-content:center;"></div>
+            </div>
+        </div>
+
+        <!-- 儀式画面 -->
+        <div id="ritual-screen" class="screen">
+            <div class="ritual-container">
+                <div class="ritual-section">
+                    <h3 data-ja="1. 準備" data-en="1. Prepare">1. 準備</h3>
+                    <p data-ja="深呼吸を3回。心を落ち着けて質問に集中します。" data-en="Take 3 deep breaths. Focus your mind on your question.">深呼吸を3回。心を落ち着けて質問に集中します。</p>
+                    <button class="btn" onclick="startBreathing()" id="breathBtn" data-ja="深呼吸を始める" data-en="Start Breathing">深呼吸を始める</button>
+                    <div id="breathTimer" style="margin-top:12px;font-size:1.2em;color:#64c8ff;"></div>
+                </div>
+
+                <div class="ritual-section">
+                    <h3 data-ja="2. 問いを立てる" data-en="2. Set Your Question">2. 問いを立てる</h3>
+                    <div class="question-list">
+                        <p style="color:#888;font-size:12px;margin-bottom:8px;" data-ja="例:" data-en="Examples:">例:</p>
+                        <ul style="padding:0;">
+                            <li onclick="setQuestion(this.textContent)" data-ja="今知るべきことは何？" data-en="What do I need to know right now?">今知るべきことは何？</li>
+                            <li onclick="setQuestion(this.textContent)" data-ja="何が進歩を妨げている？" data-en="What is blocking my progress?">何が進歩を妨げている？</li>
+                            <li onclick="setQuestion(this.textContent)" data-ja="今日は何に集中すべき？" data-en="What should I focus on today?">今日は何に集中すべき？</li>
+                        </ul>
+                    </div>
+                    <textarea id="questionInput" data-ja-placeholder="問いを入力..." data-en-placeholder="Enter your question..."></textarea>
+                </div>
+
+                <div class="ritual-section">
+                    <h3 data-ja="3. スプレッドを選ぶ" data-en="3. Choose a Spread">3. スプレッドを選ぶ</h3>
+                    <button class="btn" onclick="goToSpread()" data-ja="展開画面へ" data-en="Go to Spreads">展開画面へ</button>
+                </div>
+
+                <div class="ritual-section">
+                    <h3 data-ja="4. 振り返り" data-en="4. Reflect">4. 振り返り</h3>
+                    <p data-ja="リーディングから得た気づきを書き留めます。" data-en="Write down the key insight from your reading.">リーディングから得た気づきを書き留めます。</p>
+                    <p style="font-size:11px;color:#888;margin-top:5px;" data-ja="※最新20件まで保存されます（古いものは自動削除）" data-en="※Up to 20 entries saved (older ones auto-deleted)">※最新20件まで保存されます（古いものは自動削除）</p>
+                    <textarea id="crystalNote" data-ja-placeholder="気づきを記録..." data-en-placeholder="Your insight..."></textarea>
+                    <button class="btn" onclick="saveCrystal()" style="margin-top:10px;" data-ja="保存" data-en="Save">保存</button>
+                    
+                    <div style="margin-top:20px;">
+                        <h4 style="color:#64c8ff;margin-bottom:10px;font-size:0.9em;" data-ja="過去の記録" data-en="Past Insights">過去の記録</h4>
+                        <div id="crystalList"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- モーダル -->
+    <div class="modal-overlay" id="imageModal" onclick="closeImageModal()">
+        <div class="modal-close">&times;</div>
+        <img class="modal-image" id="modalImage" src="">
+    </div>
+
+    <script>
+        // グローバル変数
+        let masterCards = [];
+        let cardSets = {};
+        let currentSetName = 'デフォルト';
+        let currentSpread = null;
+        let currentSpreadSize = 0;
+        let drawnCards = [];
+        let backCardImage = '';
+        let significatorId = null; // シグニフィケーター
+        let useSignificator = false; // シグニフィケーター使用フラグ
+        let useReversal = true; // 正逆を取るかどうか
+        let currentLang = 'ja'; // 言語設定
+        
+        // 言語切り替え
+        function changeLang(lang) {
+            currentLang = lang;
+            localStorage.setItem('oracleLang', lang);
+            
+            // data-ja, data-en属性を持つ要素を更新
+            document.querySelectorAll('[data-ja][data-en]').forEach(el => {
+                el.textContent = lang === 'ja' ? el.dataset.ja : el.dataset.en;
+            });
+            
+            // placeholderの切り替え
+            document.querySelectorAll('[data-ja-placeholder][data-en-placeholder]').forEach(el => {
+                el.placeholder = lang === 'ja' ? el.dataset.jaPlaceholder : el.dataset.enPlaceholder;
+            });
+            
+            // 動的生成されるUIも更新
+            renderCards();
+            updateStorageInfo();
+            updateSignificatorDisplay();
+        }
+        
+        // 言語に応じたテキスト取得
+        function getLang(key, ja, en) {
+            return currentLang === 'ja' ? ja : en;
+        }
+        
+        // ホーム画面に戻る
+        function goHome() {
+            const title = document.getElementById('titleScreen');
+            title.style.display = 'flex';
+            title.style.opacity = '0';
+            setTimeout(() => {
+                title.style.opacity = '1';
+            }, 50);
+        }
+        
+        // タイトル画面を閉じる
+        function hideTitle() {
+            const title = document.getElementById('titleScreen');
+            title.style.opacity = '0';
+            setTimeout(() => {
+                title.style.display = 'none';
+            }, 500);
+        }
+        
+        // 初期化
+        function init() {
+            // 言語設定を読み込み
+            const savedLang = localStorage.getItem('oracleLang');
+            if (savedLang) {
+                currentLang = savedLang;
+                document.getElementById('lang-select').value = savedLang;
+                changeLang(savedLang);
+            }
+            
+            const savedMaster = localStorage.getItem('oracleCards');
+            if (savedMaster) {
+                masterCards = JSON.parse(savedMaster);
+            } else {
+                for (let i = 0; i < 10; i++) {
+                    masterCards.push({
+                        id: i,
+                        name: `Card ${i + 1}`,
+                        description: '',
+                        imageData: ''
+                    });
+                }
+                saveMasterCards();
+            }
+
+            const savedSets = localStorage.getItem('oracleSets');
+            if (savedSets) {
+                cardSets = JSON.parse(savedSets);
+            } else {
+                cardSets = {'デフォルト': masterCards.map(c => c.id)};
+                saveSets();
+            }
+
+            const savedCurrentSet = localStorage.getItem('oracleCurrentSet');
+            if (savedCurrentSet && cardSets[savedCurrentSet]) {
+                currentSetName = savedCurrentSet;
+            }
+            
+            const savedBack = localStorage.getItem('oracleBackImage');
+            if (savedBack) {
+                backCardImage = savedBack;
+                updateBackPreview();
+            }
+            
+            const savedSig = localStorage.getItem('oracleSignificator');
+            if (savedSig !== null) {
+                significatorId = parseInt(savedSig);
+            }
+            
+            const savedReversal = localStorage.getItem('oracleUseReversal');
+            if (savedReversal !== null) {
+                useReversal = savedReversal === 'true';
+            }
+            
+            renderCards();
+            updateActiveCount();
+            renderSetsList();
+            updateStorageInfo();
+            updateSignificatorDisplay();
+        }
+
+        function saveMasterCards() {
+            try {
+                localStorage.setItem('oracleCards', JSON.stringify(masterCards));
+            } catch(e) {
+                alert('保存容量を超えました。画像サイズを小さくしてください。');
+            }
+        }
+
+        function saveSets() {
+            localStorage.setItem('oracleSets', JSON.stringify(cardSets));
+        }
+
+        function getCurrentCards() {
+            const cardIds = cardSets[currentSetName] || [];
+            return cardIds.map(id => masterCards.find(c => c.id === id)).filter(Boolean);
+        }
+
+        function updateStorageInfo() {
+            const storageInfo = document.getElementById('storage-info');
+            const storageWarning = document.getElementById('storage-warning');
+            if (!storageInfo || !storageWarning) return;
+            
+            let total = 0;
+            for (let key in localStorage) {
+                if (localStorage.hasOwnProperty(key)) {
+                    total += localStorage[key].length * 2;
+                }
+            }
+            const mb = (total / 1024 / 1024).toFixed(2);
+            const usageText = currentLang === 'ja' ? '使用量' : 'Storage';
+            storageInfo.textContent = `${usageText}: ${mb} MB`;
+            
+            if (total > 4 * 1024 * 1024) {
+                storageWarning.style.display = 'block';
+            } else {
+                storageWarning.style.display = 'none';
+            }
+        }
+
+        // シグニフィケーター関連
+        function updateSignificatorDisplay() {
+            const preview = document.getElementById('sig-preview');
+            const toggleBox = document.getElementById('sig-toggle-box');
+            const nameDisplay = document.getElementById('sig-name-display');
+            
+            // 要素がない場合は何もしない
+            if (!preview || !toggleBox || !nameDisplay) return;
+            
+            const notSetText = currentLang === 'ja' ? '未設定' : 'Not set';
+            
+            if (significatorId !== null) {
+                const card = masterCards.find(c => c.id === significatorId);
+                if (card) {
+                    if (card.imageData) {
+                        preview.innerHTML = `<img src="${card.imageData}">`;
+                    } else {
+                        preview.innerHTML = card.name;
+                    }
+                    toggleBox.style.display = 'block';
+                    nameDisplay.textContent = `(${card.name})`;
+                } else {
+                    significatorId = null;
+                    preview.innerHTML = notSetText;
+                    toggleBox.style.display = 'none';
+                }
+            } else {
+                preview.innerHTML = notSetText;
+                toggleBox.style.display = 'none';
+            }
+        }
+
+        function openSignificatorSelect() {
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);z-index:10000;overflow:auto;padding:20px;';
+            
+            const activeCards = getCurrentCards();
+            
+            let cardList = '';
+            activeCards.forEach(card => {
+                const selected = card.id === significatorId ? 'border-color:rgba(255,200,100,0.8);background:rgba(255,200,100,0.2);' : '';
+                const preview = card.imageData 
+                    ? `<img src="${card.imageData}" style="width:100%;height:100%;object-fit:cover;">`
+                    : card.name;
+                cardList += `
+                    <div onclick="selectSignificator(${card.id})" style="cursor:pointer;padding:10px;background:rgba(255,255,255,0.05);border:2px solid rgba(255,255,255,0.2);border-radius:8px;text-align:center;${selected}">
+                        <div style="width:60px;height:90px;margin:0 auto 8px;background:#2a2a4a;border-radius:4px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:10px;color:#888;">
+                            ${preview}
+                        </div>
+                        <div style="font-size:12px;">${card.name}</div>
+                    </div>
+                `;
+            });
+            
+            modal.innerHTML = `
+                <div style="max-width:600px;margin:0 auto;background:rgba(15,32,39,0.98);padding:20px;border-radius:12px;border:2px solid rgba(255,200,100,0.5);">
+                    <h2 style="color:#ffcc66;margin-bottom:15px;font-size:1.1em;">シグニフィケーターを選択</h2>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px;max-height:60vh;overflow-y:auto;">
+                        ${cardList}
+                    </div>
+                    <div style="margin-top:15px;text-align:center;">
+                        <button onclick="closeSignificatorModal()" class="btn" style="padding:12px 25px;">閉じる</button>
+                    </div>
+                </div>
+            `;
+            
+            modal.id = 'sig-modal';
+            document.body.appendChild(modal);
+        }
+
+        function selectSignificator(id) {
+            significatorId = id;
+            localStorage.setItem('oracleSignificator', id);
+            updateSignificatorDisplay();
+            closeSignificatorModal();
+        }
+
+        function clearSignificator() {
+            significatorId = null;
+            localStorage.removeItem('oracleSignificator');
+            useSignificator = false;
+            document.getElementById('use-sig-toggle').checked = false;
+            updateSignificatorDisplay();
+        }
+
+        function closeSignificatorModal() {
+            const modal = document.getElementById('sig-modal');
+            if (modal) modal.remove();
+        }
+
+        function toggleSignificator() {
+            useSignificator = document.getElementById('use-sig-toggle').checked;
+        }
+
+        function toggleReversal() {
+            useReversal = document.getElementById('use-reversal-toggle').checked;
+        }
+
+        // 画像をBase64に変換（リサイズ付き）
+        function imageToBase64(file, maxSize, callback) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    let w = img.width;
+                    let h = img.height;
+                    
+                    if (w > maxSize || h > maxSize) {
+                        if (w > h) {
+                            h = h * maxSize / w;
+                            w = maxSize;
+                        } else {
+                            w = w * maxSize / h;
+                            h = maxSize;
+                        }
+                    }
+                    
+                    canvas.width = w;
+                    canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+                    callback(canvas.toDataURL('image/jpeg', 0.7));
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        function selectBackImage(input) {
+            const file = input.files[0];
+            if (file) {
+                imageToBase64(file, 300, function(data) {
+                    backCardImage = data;
+                    localStorage.setItem('oracleBackImage', backCardImage);
+                    updateBackPreview();
+                    updateStorageInfo();
+                });
+            }
+        }
+        
+        function updateBackPreview() {
+            const preview = document.getElementById('back-preview');
+            if (!preview) return;
+            if (backCardImage) {
+                preview.innerHTML = `<img src="${backCardImage}">`;
+            } else {
+                preview.innerHTML = '🔮';
+            }
+        }
+        
+        function setCardCount() {
+            const count = parseInt(document.getElementById('card-count-input').value);
+            if (count < 1 || count > 150) {
+                alert('1〜150枚で設定してください');
+                return;
+            }
+            
+            const currentCount = masterCards.length;
+            if (count > currentCount) {
+                for (let i = currentCount; i < count; i++) {
+                    masterCards.push({
+                        id: i,
+                        name: `カード ${i + 1}`,
+                        description: '',
+                        imageData: ''
+                    });
+                }
+            } else if (count < currentCount) {
+                masterCards = masterCards.slice(0, count);
+                Object.keys(cardSets).forEach(setName => {
+                    cardSets[setName] = cardSets[setName].filter(id => id < count);
+                });
+            }
+            
+            saveMasterCards();
+            saveSets();
+            renderCards();
+            updateActiveCount();
+            updateStorageInfo();
+        }
+        
+        function renderCards() {
+            const grid = document.getElementById('card-grid');
+            grid.innerHTML = '';
+            
+            masterCards.forEach((card, index) => {
+                const item = document.createElement('div');
+                item.className = 'card-item';
+                
+                const noImageText = currentLang === 'ja' ? '画像なし' : 'No image';
+                const previewContent = card.imageData 
+                    ? `<img src="${card.imageData}">`
+                    : noImageText;
+                
+                const namePlaceholder = currentLang === 'ja' ? '名前' : 'Name';
+                const descPlaceholder = currentLang === 'ja' ? '説明' : 'Description';
+                const uploadBtnText = currentLang === 'ja' ? '画像選択' : 'Select Image';
+                
+                item.innerHTML = `
+                    <div class="card-number">No.${index + 1}</div>
+                    <div class="card-preview" id="preview-${index}">${previewContent}</div>
+                    <input type="text" placeholder="${namePlaceholder}" value="${card.name}" 
+                           onchange="updateCardName(${index}, this.value)">
+                    <textarea placeholder="${descPlaceholder}" onchange="updateCardDesc(${index}, this.value)">${card.description}</textarea>
+                    <input type="file" accept="image/*" style="display:none" 
+                           id="file-${index}" onchange="selectImageFile(${index}, this)">
+                    <button class="upload-btn" onclick="document.getElementById('file-${index}').click()">
+                        ${uploadBtnText}
+                    </button>
+                `;
+                grid.appendChild(item);
+            });
+        }
+        
+        function updateCardName(index, value) {
+            masterCards[index].name = value;
+            saveMasterCards();
+        }
+        
+        function updateCardDesc(index, value) {
+            masterCards[index].description = value;
+            saveMasterCards();
+        }
+        
+        function selectImageFile(index, input) {
+            const file = input.files[0];
+            if (file) {
+                imageToBase64(file, 400, function(data) {
+                    masterCards[index].imageData = data;
+                    saveMasterCards();
+                    
+                    const preview = document.getElementById(`preview-${index}`);
+                    preview.innerHTML = `<img src="${data}">`;
+                    updateStorageInfo();
+                });
+            }
+        }
+        
+        function updateActiveCount() {
+            const count = getCurrentCards().length;
+            document.getElementById('master-count').textContent = masterCards.length;
+            document.getElementById('active-count').textContent = count;
+            document.getElementById('spread-active-count').textContent = count;
+        }
+        
+        function showScreen(screen) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-tabs button').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(`${screen}-screen`).classList.add('active');
+            event.target.classList.add('active');
+            
+            if (screen === 'spread') {
+                updateActiveCount();
+            } else if (screen === 'sets') {
+                renderSetsList();
+            } else if (screen === 'ritual') {
+                loadCrystals();
+            } else if (screen === 'lottery') {
+                initLottery();
+            }
+        }
+        
+        // くじ引き機能
+        let lotteryPool = [];
+        
+        function initLottery() {
+            if (lotteryPool.length === 0) {
+                resetLottery();
+            }
+            updateLotteryUI();
+        }
+        
+        function resetLottery() {
+            lotteryPool = [...getCurrentCards()];
+            document.getElementById('lottery-result').innerHTML = '';
+            updateLotteryUI();
+        }
+        
+        function updateLotteryUI() {
+            const remaining = lotteryPool.length;
+            document.getElementById('lottery-remaining').textContent = remaining;
+            
+            // 引く枚数セレクト更新
+            const select = document.getElementById('lottery-count');
+            select.innerHTML = '';
+            const maxDraw = Math.min(remaining, 10);
+            for (let i = 1; i <= maxDraw; i++) {
+                const opt = document.createElement('option');
+                opt.value = i;
+                opt.textContent = i;
+                select.appendChild(opt);
+            }
+            if (maxDraw === 0) {
+                const opt = document.createElement('option');
+                opt.value = 0;
+                opt.textContent = '0';
+                select.appendChild(opt);
+            }
+        }
+        
+        function drawLottery() {
+            const count = parseInt(document.getElementById('lottery-count').value);
+            if (count <= 0 || lotteryPool.length < count) {
+                alert(currentLang === 'ja' ? 'カードが足りません' : 'Not enough cards');
+                return;
+            }
+            
+            const resultDiv = document.getElementById('lottery-result');
+            
+            for (let i = 0; i < count; i++) {
+                const randIdx = Math.floor(Math.random() * lotteryPool.length);
+                const card = lotteryPool.splice(randIdx, 1)[0];
+                
+                // カード表示（大きめ）
+                const cardDiv = document.createElement('div');
+                cardDiv.style.cssText = 'width:120px;text-align:center;animation:fadeIn 0.5s;';
+                
+                const cardInner = document.createElement('div');
+                cardInner.style.cssText = `
+                    width:120px;height:180px;
+                    border-radius:10px;
+                    overflow:hidden;
+                    border:3px solid rgba(100,200,255,0.8);
+                    box-shadow:0 0 20px rgba(100,200,255,0.5);
+                    cursor:pointer;
+                `;
+                
+                if (card.imageData) {
+                    cardInner.innerHTML = `<img src="${card.imageData}" style="width:100%;height:100%;object-fit:cover;">`;
+                } else {
+                    cardInner.innerHTML = `<div style="width:100%;height:100%;background:linear-gradient(135deg,#2a2a4a,#1a1a2e);display:flex;align-items:center;justify-content:center;font-size:14px;color:#64c8ff;padding:10px;text-align:center;">${card.name}</div>`;
+                }
+                
+                cardInner.onclick = () => showCardModal(card);
+                
+                const label = document.createElement('div');
+                label.style.cssText = 'font-size:12px;margin-top:8px;color:#fff;';
+                label.textContent = card.name;
+                
+                cardDiv.appendChild(cardInner);
+                cardDiv.appendChild(label);
+                resultDiv.appendChild(cardDiv);
+            }
+            
+            updateLotteryUI();
+        }
+
+        // セット管理
+        function createNewSet() {
+            const setName = document.getElementById('new-set-name').value.trim();
+            if (!setName) {
+                alert('セット名を入力');
+                return;
+            }
+            if (cardSets[setName]) {
+                alert('既に存在します');
+                return;
+            }
+
+            cardSets[setName] = [];
+            saveSets();
+            document.getElementById('new-set-name').value = '';
+            renderSetsList();
+        }
+
+        function switchSet(setName) {
+            if (!cardSets[setName]) return;
+            currentSetName = setName;
+            localStorage.setItem('oracleCurrentSet', currentSetName);
+            updateActiveCount();
+            renderSetsList();
+        }
+
+        function deleteSet(setName) {
+            if (setName === 'デフォルト') {
+                alert('デフォルトは削除不可');
+                return;
+            }
+            if (!confirm(`「${setName}」を削除?`)) return;
+            
+            delete cardSets[setName];
+            if (currentSetName === setName) {
+                switchSet('デフォルト');
+            }
+            saveSets();
+            renderSetsList();
+        }
+
+        function renderSetsList() {
+            const list = document.getElementById('sets-list');
+            list.innerHTML = '';
+            document.getElementById('current-set-name').textContent = currentSetName;
+            
+            const cardsText = currentLang === 'ja' ? '枚' : ' cards';
+            const activeText = currentLang === 'ja' ? '✓ 使用中' : '✓ Active';
+            const editText = currentLang === 'ja' ? '編集' : 'Edit';
+            const switchText = currentLang === 'ja' ? '切替' : 'Switch';
+            const deleteText = currentLang === 'ja' ? '削除' : 'Delete';
+            
+            Object.keys(cardSets).forEach(setName => {
+                const setCard = document.createElement('div');
+                setCard.className = 'spread-card';
+                if (setName === currentSetName) {
+                    setCard.style.borderColor = 'rgba(100,200,255,0.8)';
+                    setCard.style.background = 'rgba(100,200,255,0.2)';
+                }
+                
+                const cardCount = cardSets[setName].length;
+                
+                let html = `<h3>${setName}</h3><p>${cardCount}${cardsText}</p>`;
+                if (setName === currentSetName) {
+                    html += `<p style="color:#64c8ff;font-size:12px;">${activeText}</p>`;
+                    html += `<button class="btn" style="padding:8px 12px;font-size:12px;margin-top:8px;" onclick="editSetCards()">${editText}</button>`;
+                } else {
+                    html += `<button class="btn" style="padding:8px 12px;font-size:12px;margin-top:8px;" onclick="switchSet('${setName}')">${switchText}</button>`;
+                }
+                
+                if (setName !== 'デフォルト' && setName !== 'Default') {
+                    html += `<button class="btn" style="padding:8px 12px;font-size:12px;margin-top:8px;background:rgba(220,53,69,0.5);border-color:#dc3545;" onclick="deleteSet('${setName}')">${deleteText}</button>`;
+                }
+                
+                setCard.innerHTML = html;
+                list.appendChild(setCard);
+            });
+        }
+
+        function editSetCards() {
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);z-index:10000;overflow:auto;padding:20px;';
+            
+            const currentCardIds = cardSets[currentSetName] || [];
+            
+            let checkboxes = '';
+            masterCards.forEach(card => {
+                const checked = currentCardIds.includes(card.id) ? 'checked' : '';
+                checkboxes += `
+                    <label style="display:flex;align-items:center;padding:10px;background:rgba(255,255,255,0.05);margin:5px 0;border-radius:4px;">
+                        <input type="checkbox" value="${card.id}" ${checked} style="margin-right:10px;width:20px;height:20px;">
+                        <span style="font-size:14px;">No.${card.id + 1}: ${card.name}</span>
+                    </label>
+                `;
+            });
+            
+            modal.innerHTML = `
+                <div style="max-width:600px;margin:0 auto;background:rgba(15,32,39,0.98);padding:20px;border-radius:12px;border:2px solid rgba(100,200,255,0.5);">
+                    <h2 style="color:#64c8ff;margin-bottom:15px;font-size:1.1em;">「${currentSetName}」を編集</h2>
+                    <div style="margin-bottom:15px;">
+                        <button onclick="selectAllCards(true)" class="btn" style="padding:8px 15px;font-size:12px;margin:3px;">全選択</button>
+                        <button onclick="selectAllCards(false)" class="btn" style="padding:8px 15px;font-size:12px;margin:3px;">全解除</button>
+                    </div>
+                    <div id="card-checkboxes" style="max-height:50vh;overflow-y:auto;">${checkboxes}</div>
+                    <div style="margin-top:15px;text-align:center;">
+                        <button onclick="saveSetCards()" class="btn" style="padding:12px 25px;margin:5px;">保存</button>
+                        <button onclick="closeSetModal()" class="btn" style="padding:12px 25px;margin:5px;background:rgba(220,53,69,0.5);border-color:#dc3545;">閉じる</button>
+                    </div>
+                </div>
+            `;
+            
+            modal.id = 'set-modal';
+            document.body.appendChild(modal);
+        }
+
+        function selectAllCards(select) {
+            document.querySelectorAll('#card-checkboxes input').forEach(cb => cb.checked = select);
+        }
+
+        function saveSetCards() {
+            const checked = document.querySelectorAll('#card-checkboxes input:checked');
+            const ids = Array.from(checked).map(cb => parseInt(cb.value));
+            
+            if (ids.length < 1) {
+                alert('最低1枚選択');
+                return;
+            }
+            
+            cardSets[currentSetName] = ids;
+            saveSets();
+            updateActiveCount();
+            renderSetsList();
+            closeSetModal();
+        }
+
+        function closeSetModal() {
+            const modal = document.getElementById('set-modal');
+            if (modal) modal.remove();
+        }
+        
+        // スプレッド
+        function selectSpread(type, size) {
+            const activeCards = getCurrentCards();
+            const errorContainer = document.getElementById('error-container');
+            
+            if (activeCards.length < size) {
+                errorContainer.innerHTML = `<div class="error-message">${size}枚必要です（現在${activeCards.length}枚）</div>`;
+                return;
+            }
+            
+            errorContainer.innerHTML = '';
+            currentSpread = type;
+            currentSpreadSize = size;
+            
+            showScreen('reading');
+            document.querySelectorAll('.nav-tabs button').forEach(b => b.classList.remove('active'));
+            document.querySelector('.nav-tabs button:nth-child(4)').classList.add('active');
+            setupSpread(type, size);
+        }
+        
+        function setupSpread(type, size) {
+            const inner = document.getElementById('spread-inner');
+            inner.innerHTML = '';
+            document.getElementById('result-info').style.display = 'none';
+            
+            const positions = getSpreadPositions(type, size);
+            
+            positions.forEach((pos, i) => {
+                const slot = document.createElement('div');
+                slot.className = 'card-slot';
+                slot.style.left = pos.x + 'px';
+                slot.style.top = pos.y + 'px';
+                slot.id = `slot-${i}`;
+                slot.innerHTML = `<span>${pos.label || (i + 1)}</span>`;
+                inner.appendChild(slot);
+            });
+        }
+        
+        function getSpreadPositions(type, size) {
+            const positions = [];
+            const isMobile = window.innerWidth < 768;
+            // モバイルでは左に余白を確保
+            const offsetX = isMobile ? 50 : 0;
+            const cx = 250 + offsetX;
+            const cy = 200;
+            
+            switch(type) {
+                case 'one':
+                    positions.push({x: cx, y: cy, label: getLang('answer', '答', 'Answer')});
+                    break;
+                case 'simplecross':
+                    // シンプルクロス（2枚）- 状況が上、障害が重なる
+                    positions.push({x: cx, y: cy - 60, label: getLang('situation', '状況', 'Situation')});
+                    positions.push({x: cx, y: cy + 60, label: getLang('obstacle', '障害', 'Obstacle')});
+                    break;
+                case 'choice':
+                    // 二者択一（3枚）
+                    const choiceGap = isMobile ? 80 : 120;
+                    positions.push({x: cx - choiceGap, y: cy - 60, label: getLang('choice1', '選択①', 'Choice 1')});
+                    positions.push({x: cx + choiceGap, y: cy - 60, label: getLang('choice2', '選択②', 'Choice 2')});
+                    positions.push({x: cx, y: cy + 80, label: getLang('situation', '状況', 'Situation')});
+                    break;
+                case 'three':
+                    positions.push({x: cx - 120, y: cy, label: getLang('past', '過去', 'Past')});
+                    positions.push({x: cx, y: cy, label: getLang('present', '現在', 'Present')});
+                    positions.push({x: cx + 120, y: cy, label: getLang('future', '未来', 'Future')});
+                    break;
+                case 'diamond':
+                    // ダイヤモンドクロス（4枚）
+                    const dGap = isMobile ? 70 : 100;
+                    positions.push({x: cx, y: cy - dGap, label: getLang('result', '結果', 'Result')});
+                    positions.push({x: cx - dGap, y: cy, label: getLang('self', '自分', 'Self')});
+                    positions.push({x: cx + dGap, y: cy, label: getLang('other', '相手', 'Other')});
+                    positions.push({x: cx, y: cy + dGap, label: getLang('advice', '対策', 'Advice')});
+                    break;
+                case 'greek':
+                    // ギリシャ十字（5枚）
+                    const gkGap = isMobile ? 70 : 100;
+                    positions.push({x: cx, y: cy - gkGap, label: getLang('trend', '傾向', 'Trend')});
+                    positions.push({x: cx - gkGap, y: cy, label: getLang('current', '現状', 'Current')});
+                    positions.push({x: cx, y: cy, label: getLang('result', '結果', 'Result')});
+                    positions.push({x: cx + gkGap, y: cy, label: getLang('obstacle', '障害', 'Obstacle')});
+                    positions.push({x: cx, y: cy + gkGap, label: getLang('advice', '対策', 'Advice')});
+                    break;
+                case 'pyramid':
+                    // ピラミッド（6枚）
+                    const pyGap = isMobile ? 60 : 80;
+                    // 底辺（現状・原因・障害）
+                    positions.push({x: cx - pyGap, y: cy + pyGap, label: getLang('current', '現状', 'Current')});
+                    positions.push({x: cx, y: cy + pyGap, label: getLang('cause', '原因', 'Cause')});
+                    positions.push({x: cx + pyGap, y: cy + pyGap, label: getLang('obstacle', '障害', 'Obstacle')});
+                    // 中段（解決1・解決2）
+                    positions.push({x: cx - pyGap/2, y: cy, label: getLang('solution1', '解決①', 'Solution 1')});
+                    positions.push({x: cx + pyGap/2, y: cy, label: getLang('solution2', '解決②', 'Solution 2')});
+                    // 頂点（最終結果）
+                    positions.push({x: cx, y: cy - pyGap, label: getLang('final', '最終結果', 'Final')});
+                    break;
+                case 'horseshoe':
+                    // ホースシュー（7枚）- U字型
+                    const hsGap = isMobile ? 55 : 80;
+                    const hsV = isMobile ? 50 : 70;
+                    positions.push({x: cx - hsGap*2, y: cy - hsV*2, label: getLang('past', '過去', 'Past')});
+                    positions.push({x: cx - hsGap*1.5, y: cy - hsV, label: getLang('present', '現在', 'Present')});
+                    positions.push({x: cx - hsGap, y: cy, label: getLang('future', '未来', 'Future')});
+                    positions.push({x: cx, y: cy + hsV, label: getLang('advice', 'アドバイス', 'Advice')});
+                    positions.push({x: cx + hsGap, y: cy, label: getLang('others', '相手の気持ち', 'Others')});
+                    positions.push({x: cx + hsGap*1.5, y: cy - hsV, label: getLang('obstacle', '障害', 'Obstacle')});
+                    positions.push({x: cx + hsGap*2, y: cy - hsV*2, label: getLang('final', '最終結果', 'Final')});
+                    break;
+                case 'hexagram':
+                    // 六芒星配置（7枚）
+                    const hGap = isMobile ? 70 : 100;
+                    const hVGap = isMobile ? 60 : 80;
+                    positions.push({x: cx, y: cy - hVGap * 1.5, label: '①'});
+                    positions.push({x: cx - hGap, y: cy + hVGap * 0.5, label: '②'});
+                    positions.push({x: cx + hGap, y: cy + hVGap * 0.5, label: '③'});
+                    positions.push({x: cx - hGap, y: cy - hVGap * 0.5, label: '④'});
+                    positions.push({x: cx + hGap, y: cy - hVGap * 0.5, label: '⑤'});
+                    positions.push({x: cx, y: cy + hVGap * 1.5, label: '⑥'});
+                    positions.push({x: cx, y: cy, label: '⑦'});
+                    break;
+                case 'celtic':
+                    const cGap = isMobile ? 80 : 120;
+                    positions.push({x: cx, y: cy, label: '1'});
+                    positions.push({x: cx, y: cy, label: '2'});
+                    positions.push({x: cx, y: cy - 100, label: '3'});
+                    positions.push({x: cx, y: cy + 100, label: '4'});
+                    positions.push({x: cx - cGap, y: cy, label: '5'});
+                    positions.push({x: cx + cGap, y: cy, label: '6'});
+                    positions.push({x: cx + cGap + 80, y: cy + 120, label: '7'});
+                    positions.push({x: cx + cGap + 80, y: cy + 40, label: '8'});
+                    positions.push({x: cx + cGap + 80, y: cy - 40, label: '9'});
+                    positions.push({x: cx + cGap + 80, y: cy - 120, label: '10'});
+                    break;
+                case 'nine':
+                    const nineGap = isMobile ? 80 : 120;
+                    for (let r = 0; r < 3; r++) {
+                        for (let c = 0; c < 3; c++) {
+                            positions.push({x: cx - nineGap + c * nineGap, y: cy - 100 + r * 100, label: r * 3 + c + 1});
+                        }
+                    }
+                    break;
+                case 'lifetree':
+                    // 生命の樹（10枚）
+                    const ltGap = isMobile ? 50 : 70;
+                    const ltV = isMobile ? 45 : 60;
+                    positions.push({x: cx, y: cy - ltV*3, label: getLang('crown', '①理想', '①Crown')});
+                    positions.push({x: cx + ltGap, y: cy - ltV*2, label: getLang('wisdom', '②情熱', '②Passion')});
+                    positions.push({x: cx - ltGap, y: cy - ltV*2, label: getLang('understanding', '③理解', '③Understanding')});
+                    positions.push({x: cx + ltGap, y: cy - ltV, label: getLang('mercy', '④慈悲', '④Mercy')});
+                    positions.push({x: cx - ltGap, y: cy - ltV, label: getLang('severity', '⑤峻厳', '⑤Severity')});
+                    positions.push({x: cx, y: cy, label: getLang('beauty', '⑥達成', '⑥Achievement')});
+                    positions.push({x: cx + ltGap, y: cy + ltV, label: getLang('victory', '⑦勝利', '⑦Victory')});
+                    positions.push({x: cx - ltGap, y: cy + ltV, label: getLang('glory', '⑧栄光', '⑧Glory')});
+                    positions.push({x: cx, y: cy + ltV*2, label: getLang('foundation', '⑨基盤', '⑨Foundation')});
+                    positions.push({x: cx, y: cy + ltV*3, label: getLang('kingdom', '⑩結果', '⑩Result')});
+                    break;
+                case 'horoscope':
+                    // ホロスコープ（12枚）- 時計回り
+                    const horoRadius = isMobile ? 110 : 150;
+                    const horoLabels = currentLang === 'ja' 
+                        ? ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
+                        : ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th', '10th', '11th', '12th'];
+                    for (let i = 0; i < 12; i++) {
+                        const angle = (i * 30 - 90) * Math.PI / 180;
+                        positions.push({
+                            x: cx + Math.cos(angle) * horoRadius,
+                            y: cy + Math.sin(angle) * horoRadius,
+                            label: horoLabels[i]
+                        });
+                    }
+                    break;
+                case 'grand':
+                    const gCardW = isMobile ? 55 : 75;
+                    const gCardH = isMobile ? 85 : 115;
+                    const gStartX = isMobile ? 40 : 50;
+                    for (let r = 0; r < 4; r++) {
+                        for (let c = 0; c < 9; c++) {
+                            positions.push({x: gStartX + c * gCardW, y: 30 + r * gCardH, label: r * 9 + c + 1});
+                        }
+                    }
+                    break;
+            }
+            return positions;
+        }
+        
+        function shuffleAndDraw() {
+            // 補足カードをリセット
+            supplementCards = [];
+            const supArea = document.getElementById('supplement-area');
+            const supCards = document.getElementById('supplement-cards');
+            if (supArea) supArea.style.display = 'none';
+            if (supCards) supCards.innerHTML = '';
+            
+            const activeCards = getCurrentCards();
+            const sigCard = significatorId !== null ? masterCards.find(c => c.id === significatorId) : null;
+            const isFixedSig = useSignificator && sigCard && ['one', 'two', 'neutralize', 'circle'].includes(currentSpread);
+            const isShuffleSig = useSignificator && sigCard && currentSpread === 'grand';
+            
+            let shufflePool = activeCards;
+            if (isFixedSig) {
+                shufflePool = activeCards.filter(c => c.id !== significatorId);
+            }
+            
+            const requiredCount = isFixedSig ? currentSpreadSize - 1 : currentSpreadSize;
+            if (shufflePool.length < requiredCount) {
+                alert('カード不足');
+                return;
+            }
+            
+            const inner = document.getElementById('spread-inner');
+            inner.innerHTML = '';
+            inner.style.minHeight = '350px';
+            
+            // シャッフル用のコンテナ
+            const shuffleArea = document.createElement('div');
+            shuffleArea.id = 'shuffle-area';
+            shuffleArea.style.cssText = 'position:relative;width:100%;height:350px;touch-action:none;';
+            inner.appendChild(shuffleArea);
+            
+            // カードの山（リフルシャッフル）
+            const deckX = shuffleArea.offsetWidth / 2 || 150;
+            const deckY = 150;
+            
+            const shuffleCards = [];
+            const cardCount = Math.min(12, shufflePool.length);
+            
+            for (let i = 0; i < cardCount; i++) {
+                const card = document.createElement('div');
+                card.className = 'shuffle-card';
+                card.style.cssText = `
+                    position:absolute;
+                    width:60px;height:90px;
+                    background:linear-gradient(135deg,#667eea,#764ba2);
+                    border-radius:6px;
+                    box-shadow:0 2px 8px rgba(0,0,0,0.4);
+                    left:${deckX - 30}px;
+                    top:${deckY - 45 - i * 2}px;
+                    z-index:${20 + i};
+                    transition:all 0.3s ease;
+                    cursor:pointer;
+                    display:flex;align-items:center;justify-content:center;
+                `;
+                if (backCardImage) {
+                    card.innerHTML = `<img src="${backCardImage}" style="width:100%;height:100%;object-fit:cover;border-radius:6px;">`;
+                } else {
+                    card.innerHTML = '🔮';
+                    card.style.fontSize = '24px';
+                }
+                card.dataset.collected = 'false';
+                shuffleCards.push(card);
+                shuffleArea.appendChild(card);
+            }
+            
+            // リフルシャッフルアニメーション
+            setTimeout(() => {
+                shuffleCards.forEach((card, i) => {
+                    const delay = i * 50;
+                    setTimeout(() => {
+                        card.style.transform = 'translateY(-40px) rotateX(-20deg)';
+                        setTimeout(() => {
+                            card.style.transform = 'translateY(0) rotateX(0)';
+                        }, 150);
+                    }, delay);
+                });
+            }, 200);
+            
+            // 散らばるアニメーション
+            setTimeout(() => {
+                shuffleCards.forEach((card, i) => {
+                    const angle = (i / cardCount) * Math.PI * 2 + Math.random() * 0.5;
+                    const dist = 80 + Math.random() * 60;
+                    const x = deckX - 30 + Math.cos(angle) * dist;
+                    const y = deckY - 45 + Math.sin(angle) * dist;
+                    const rot = (Math.random() - 0.5) * 40;
+                    
+                    card.style.left = x + 'px';
+                    card.style.top = y + 'px';
+                    card.style.transform = `rotate(${rot}deg)`;
+                    card.style.zIndex = 10 + i;
+                });
+                
+                // 説明テキスト
+                const hint = document.createElement('div');
+                hint.id = 'collect-hint';
+                hint.style.cssText = 'text-align:center;color:#64c8ff;font-size:14px;margin-top:10px;position:absolute;bottom:10px;width:100%;';
+                hint.innerHTML = currentLang === 'ja' ? '↓ カードをタップして集めてください ↓' : '↓ Tap cards to collect ↓';
+                shuffleArea.appendChild(hint);
+                
+                // タップ/クリックでカードを集める
+                let collectedCount = 0;
+                shuffleCards.forEach((card, i) => {
+                    card.onclick = () => {
+                        if (card.dataset.collected === 'true') return;
+                        card.dataset.collected = 'true';
+                        collectedCount++;
+                        
+                        // 中央に戻す
+                        card.style.left = (deckX - 30) + 'px';
+                        card.style.top = (deckY - 45 - collectedCount * 2) + 'px';
+                        card.style.transform = 'rotate(0deg)';
+                        card.style.zIndex = 30 + collectedCount;
+                        
+                        // 全部集まったらカードを引く
+                        if (collectedCount >= cardCount) {
+                            setTimeout(() => finishShuffle(), 500);
+                        }
+                    };
+                });
+                
+                // まとめて集めるボタン
+                const collectAllBtn = document.createElement('button');
+                collectAllBtn.className = 'btn';
+                collectAllBtn.style.cssText = 'position:absolute;bottom:40px;left:50%;transform:translateX(-50%);padding:8px 20px;font-size:13px;';
+                collectAllBtn.textContent = currentLang === 'ja' ? 'まとめて集める' : 'Collect All';
+                collectAllBtn.onclick = () => {
+                    shuffleCards.forEach((card, i) => {
+                        if (card.dataset.collected === 'false') {
+                            setTimeout(() => {
+                                card.dataset.collected = 'true';
+                                collectedCount++;
+                                card.style.left = (deckX - 30) + 'px';
+                                card.style.top = (deckY - 45 - collectedCount * 2) + 'px';
+                                card.style.transform = 'rotate(0deg)';
+                                card.style.zIndex = 30 + collectedCount;
+                                
+                                if (collectedCount >= cardCount) {
+                                    setTimeout(() => finishShuffle(), 500);
+                                }
+                            }, i * 100);
+                        }
+                    });
+                };
+                shuffleArea.appendChild(collectAllBtn);
+                
+            }, 1500);
+            
+            // カードを引く処理
+            function finishShuffle() {
+                const shuffled = [...shufflePool].sort(() => Math.random() - 0.5);
+                
+                if (isFixedSig) {
+                    drawnCards = [];
+                    const sigPosition = getSignificatorPosition(currentSpread);
+                    let shuffleIndex = 0;
+                    
+                    for (let i = 0; i < currentSpreadSize; i++) {
+                        if (i === sigPosition) {
+                            drawnCards.push({...sigCard, isReversed: false, isSignificator: true});
+                        } else {
+                            drawnCards.push({
+                                ...shuffled[shuffleIndex],
+                                isReversed: useReversal ? Math.random() < 0.5 : false,
+                                isSignificator: false
+                            });
+                            shuffleIndex++;
+                        }
+                    }
+                } else {
+                    drawnCards = shuffled.slice(0, currentSpreadSize).map(card => ({
+                        ...card,
+                        isReversed: useReversal ? Math.random() < 0.5 : false,
+                        isSignificator: isShuffleSig && card.id === significatorId
+                    }));
+                }
+                
+                // フェードアウト
+                shuffleArea.style.transition = 'opacity 0.3s';
+                shuffleArea.style.opacity = '0';
+                
+                setTimeout(() => {
+                    shuffleArea.remove();
+                    inner.style.minHeight = '';
+                    setupSpread(currentSpread, currentSpreadSize);
+                    
+                    drawnCards.forEach((card, i) => {
+                        setTimeout(() => drawCard(i, card, false), i * 400);
+                    });
+                    
+                    setTimeout(showResults, drawnCards.length * 400 + 800);
+                }, 300);
+            }
+        }
+        
+        function getSignificatorPosition(spread) {
+            switch(spread) {
+                case 'one': return 0; // 実際は脇に置くが、表示上は0
+                case 'two': return 0; // 左
+                case 'neutralize': return -1; // 特殊処理（上部に配置）
+                case 'circle': return 8; // 中央
+                default: return 0;
+            }
+        }
+        
+        function skipShuffle() {
+            // 補足カードをリセット
+            supplementCards = [];
+            const supArea = document.getElementById('supplement-area');
+            const supCards = document.getElementById('supplement-cards');
+            if (supArea) supArea.style.display = 'none';
+            if (supCards) supCards.innerHTML = '';
+            
+            const activeCards = getCurrentCards();
+            const sigCard = significatorId !== null ? masterCards.find(c => c.id === significatorId) : null;
+            const isFixedSig = useSignificator && sigCard && ['one', 'two', 'neutralize', 'circle'].includes(currentSpread);
+            const isShuffleSig = useSignificator && sigCard && currentSpread === 'grand';
+            
+            let shufflePool = activeCards;
+            if (isFixedSig) {
+                shufflePool = activeCards.filter(c => c.id !== significatorId);
+            }
+            
+            const requiredCount = isFixedSig ? currentSpreadSize - 1 : currentSpreadSize;
+            if (shufflePool.length < requiredCount) {
+                alert('カード不足');
+                return;
+            }
+            
+            const shuffled = [...shufflePool].sort(() => Math.random() - 0.5);
+            
+            if (isFixedSig) {
+                drawnCards = [];
+                const sigPosition = getSignificatorPosition(currentSpread);
+                let shuffleIndex = 0;
+                
+                for (let i = 0; i < currentSpreadSize; i++) {
+                    if (i === sigPosition) {
+                        drawnCards.push({...sigCard, isReversed: false, isSignificator: true});
+                    } else {
+                        drawnCards.push({
+                            ...shuffled[shuffleIndex],
+                            isReversed: useReversal ? Math.random() < 0.5 : false,
+                            isSignificator: false
+                        });
+                        shuffleIndex++;
+                    }
+                }
+            } else {
+                drawnCards = shuffled.slice(0, currentSpreadSize).map(card => ({
+                    ...card,
+                    isReversed: useReversal ? Math.random() < 0.5 : false,
+                    isSignificator: isShuffleSig && card.id === significatorId
+                }));
+            }
+            
+            drawnCards.forEach((card, i) => drawCard(i, card, true));
+            showResults();
+        }
+        
+        function drawCard(index, card, instant) {
+            const slot = document.getElementById(`slot-${index}`);
+            if (!slot) return;
+            
+            slot.classList.add('filled');
+            if (card.isSignificator) {
+                slot.style.boxShadow = '0 0 15px rgba(255,200,100,0.8)';
+                slot.style.borderColor = 'rgba(255,200,100,0.8)';
+            }
+            slot.innerHTML = '';
+            
+            const cardInner = document.createElement('div');
+            cardInner.className = 'card-inner';
+            
+            const cardBack = document.createElement('div');
+            cardBack.className = 'card-face card-back';
+            if (backCardImage) {
+                cardBack.innerHTML = `<img src="${backCardImage}">`;
+            } else {
+                cardBack.innerHTML = '🔮';
+            }
+            
+            const cardFront = document.createElement('div');
+            cardFront.className = 'card-face card-front';
+            if (card.isReversed) cardFront.classList.add('reversed');
+            
+            if (card.imageData) {
+                const img = document.createElement('img');
+                img.src = card.imageData;
+                cardFront.appendChild(img);
+            } else {
+                cardFront.innerHTML = `<div class="card-text">${card.name}</div>`;
+            }
+            
+            cardFront.onclick = function(e) {
+                e.stopPropagation();
+                if (card.imageData) {
+                    openImageModal(card.imageData, card.isReversed);
+                }
+            };
+            
+            cardInner.appendChild(cardBack);
+            cardInner.appendChild(cardFront);
+            slot.appendChild(cardInner);
+            
+            if (instant) {
+                cardInner.classList.add('flipped');
+            } else {
+                setTimeout(() => cardInner.classList.add('flipped'), 200);
+            }
+        }
+        
+        function openImageModal(src, reversed) {
+            const modal = document.getElementById('imageModal');
+            const img = document.getElementById('modalImage');
+            img.src = src;
+            img.className = 'modal-image' + (reversed ? ' reversed' : '');
+            modal.classList.add('show');
+        }
+        
+        function closeImageModal() {
+            document.getElementById('imageModal').classList.remove('show');
+        }
+        
+        // 補足カード用
+        let supplementCards = [];
+        const MAX_SUPPLEMENT = 3;
+        
+        function showResults() {
+            const resultDiv = document.getElementById('result-info');
+            resultDiv.style.display = 'block';
+            
+            const resultTitle = currentLang === 'ja' ? '結果' : 'Results';
+            let html = `<h3>${resultTitle}</h3>`;
+            
+            // スプレッド別のガイド（削除してシンプルに）
+            if (currentSpread === 'grand' && useSignificator) {
+                const sigIndex = drawnCards.findIndex(c => c.isSignificator);
+                if (sigIndex !== -1) {
+                    const sigPosText = currentLang === 'ja' 
+                        ? `シグニフィケーター位置: ${sigIndex + 1}番` 
+                        : `Significator Position: #${sigIndex + 1}`;
+                    const sigDescText = currentLang === 'ja' 
+                        ? 'グランタブロー内での「私」の位置' 
+                        : 'Your position in the Grand Tableau';
+                    html += `<div style="background:rgba(255,200,100,0.1);padding:12px;border-radius:8px;margin-bottom:15px;font-size:13px;border:1px solid rgba(255,200,100,0.5);">
+                        <strong style="color:#ffcc66;">${sigPosText}</strong><br>
+                        ${sigDescText}
+                    </div>`;
+                }
+            }
+            
+            const uprightText = currentLang === 'ja' ? '正' : 'Up';
+            const reversedText = currentLang === 'ja' ? '逆' : 'Rev';
+            const noDescText = currentLang === 'ja' ? '説明なし' : 'No description';
+            const sigBadgeText = currentLang === 'ja' ? 'シグニフィケーター' : 'Significator';
+            
+            drawnCards.forEach((card, i) => {
+                const pos = card.isReversed ? reversedText : uprightText;
+                const positions = getSpreadPositions(currentSpread, currentSpreadSize);
+                const label = positions[i] ? positions[i].label : (i + 1);
+                const sigStyle = card.isSignificator ? 'border-left:3px solid rgba(255,200,100,0.8);' : '';
+                const sigBadge = card.isSignificator ? `<span style="background:rgba(255,200,100,0.3);padding:2px 6px;border-radius:4px;font-size:11px;margin-left:5px;">${sigBadgeText}</span>` : '';
+                html += `<div class="card-meaning" style="${sigStyle}"><strong>${label}: ${card.name} (${pos})${sigBadge}</strong><br>${card.description || noDescText}</div>`;
+            });
+            
+            // 補足カード表示
+            if (supplementCards.length > 0) {
+                const supTitle = currentLang === 'ja' ? '補足カード' : 'Supplement Cards';
+                html += `<h4 style="margin-top:20px;color:#ffcc66;">${supTitle}</h4>`;
+                supplementCards.forEach((card, i) => {
+                    const pos = card.isReversed ? reversedText : uprightText;
+                    const supLabel = currentLang === 'ja' ? `補足${i + 1}` : `Sup.${i + 1}`;
+                    html += `<div class="card-meaning" style="border-left:3px solid rgba(255,200,100,0.5);"><strong>${supLabel}: ${card.name} (${pos})</strong><br>${card.description || noDescText}</div>`;
+                });
+            }
+            
+            // 補足カードを引くボタン
+            const usedIds = [...drawnCards, ...supplementCards].map(c => c.id);
+            const remaining = getCurrentCards().filter(c => !usedIds.includes(c.id));
+            
+            if (supplementCards.length < MAX_SUPPLEMENT && remaining.length > 0) {
+                const btnText = currentLang === 'ja' 
+                    ? `補足カードを引く（残り${MAX_SUPPLEMENT - supplementCards.length}枚まで）`
+                    : `Draw Supplement (${MAX_SUPPLEMENT - supplementCards.length} left)`;
+                html += `<div style="margin-top:20px;text-align:center;">
+                    <button class="btn" onclick="drawSupplement()" style="background:rgba(255,200,100,0.3);border-color:rgba(255,200,100,0.8);">
+                        ${btnText}
+                    </button>
+                </div>`;
+            } else if (supplementCards.length >= MAX_SUPPLEMENT) {
+                const maxText = currentLang === 'ja' ? '補足カードは最大3枚まで' : 'Maximum 3 supplement cards';
+                html += `<div style="margin-top:15px;text-align:center;color:#888;font-size:12px;">${maxText}</div>`;
+            }
+            
+            resultDiv.innerHTML = html;
+        }
+        
+        function drawSupplement() {
+            const usedIds = [...drawnCards, ...supplementCards].map(c => c.id);
+            const remaining = getCurrentCards().filter(c => !usedIds.includes(c.id));
+            
+            if (remaining.length === 0) {
+                alert(currentLang === 'ja' ? '引けるカードがありません' : 'No cards available');
+                return;
+            }
+            
+            const randomCard = remaining[Math.floor(Math.random() * remaining.length)];
+            const newCard = {
+                ...randomCard,
+                isReversed: useReversal ? Math.random() < 0.5 : false
+            };
+            supplementCards.push(newCard);
+            
+            // 補足カード表示エリアを表示
+            const supArea = document.getElementById('supplement-area');
+            const supCards = document.getElementById('supplement-cards');
+            supArea.style.display = 'block';
+            
+            // カード要素を追加
+            const cardDiv = document.createElement('div');
+            cardDiv.style.cssText = 'width:70px;text-align:center;';
+            
+            const cardInner = document.createElement('div');
+            cardInner.style.cssText = `
+                width:70px;height:105px;
+                border-radius:6px;
+                overflow:hidden;
+                border:2px solid rgba(255,200,100,0.8);
+                box-shadow:0 0 10px rgba(255,200,100,0.5);
+                ${newCard.isReversed ? 'transform:rotate(180deg);' : ''}
+            `;
+            
+            if (newCard.imageData) {
+                cardInner.innerHTML = `<img src="${newCard.imageData}" style="width:100%;height:100%;object-fit:cover;">`;
+            } else {
+                cardInner.innerHTML = `<div style="width:100%;height:100%;background:#2a2a4a;display:flex;align-items:center;justify-content:center;font-size:10px;color:#888;">${newCard.name}</div>`;
+            }
+            
+            cardInner.onclick = () => showCardModal(newCard);
+            
+            const label = document.createElement('div');
+            label.style.cssText = 'font-size:10px;margin-top:5px;color:#ffcc66;';
+            const supLabel = currentLang === 'ja' ? '補足' : 'Sup.';
+            label.textContent = `${supLabel}${supplementCards.length}`;
+            
+            cardDiv.appendChild(cardInner);
+            cardDiv.appendChild(label);
+            supCards.appendChild(cardDiv);
+            
+            showResults();
+        }
+        
+        function resetReading() {
+            drawnCards = [];
+            supplementCards = []; // 補足カードもリセット
+            
+            // 補足カード表示エリアもクリア
+            const supArea = document.getElementById('supplement-area');
+            const supCards = document.getElementById('supplement-cards');
+            if (supArea) supArea.style.display = 'none';
+            if (supCards) supCards.innerHTML = '';
+            
+            if (currentSpread && currentSpreadSize) {
+                setupSpread(currentSpread, currentSpreadSize);
+            }
+        }
+        
+        // 儀式
+        let breathCount = 0;
+        
+        function startBreathing() {
+            breathCount = 0;
+            const display = document.getElementById('breathTimer');
+            const btn = document.getElementById('breathBtn');
+            btn.disabled = true;
+            
+            const inhaleText = currentLang === 'ja' ? '吸って...' : 'Inhale...';
+            const exhaleText = currentLang === 'ja' ? '吐いて...' : 'Exhale...';
+            const readyText = currentLang === 'ja' ? '準備完了 ✨' : 'Ready ✨';
+            const countText = currentLang === 'ja' ? '回目' : '';
+            
+            function cycle() {
+                if (breathCount >= 3) {
+                    display.textContent = readyText;
+                    btn.disabled = false;
+                    return;
+                }
+                breathCount++;
+                display.textContent = currentLang === 'ja' 
+                    ? `${breathCount}${countText}: ${inhaleText}` 
+                    : `#${breathCount}: ${inhaleText}`;
+                setTimeout(() => {
+                    display.textContent = currentLang === 'ja' 
+                        ? `${breathCount}${countText}: ${exhaleText}` 
+                        : `#${breathCount}: ${exhaleText}`;
+                    setTimeout(cycle, 4000);
+                }, 4000);
+            }
+            cycle();
+        }
+        
+        function setQuestion(text) {
+            document.getElementById('questionInput').value = text;
+        }
+        
+        function goToSpread() {
+            const q = document.getElementById('questionInput').value;
+            if (q) localStorage.setItem('oracleQuestion', q);
+            showScreen('spread');
+            document.querySelectorAll('.nav-tabs button').forEach(b => b.classList.remove('active'));
+            document.querySelector('.nav-tabs button:nth-child(3)').classList.add('active');
+        }
+        
+        function saveCrystal() {
+            const note = document.getElementById('crystalNote').value.trim();
+            if (!note) {
+                alert('言葉を入力');
+                return;
+            }
+            
+            const crystals = JSON.parse(localStorage.getItem('oracleCrystals') || '[]');
+            crystals.unshift({date: new Date().toLocaleDateString('ja-JP'), text: note});
+            if (crystals.length > 20) crystals.pop();
+            
+            localStorage.setItem('oracleCrystals', JSON.stringify(crystals));
+            document.getElementById('crystalNote').value = '';
+            loadCrystals();
+            alert('保存しました ✨');
+        }
+        
+        function loadCrystals() {
+            const crystals = JSON.parse(localStorage.getItem('oracleCrystals') || '[]');
+            const list = document.getElementById('crystalList');
+            
+            if (crystals.length === 0) {
+                const emptyText = currentLang === 'ja' ? 'まだありません' : 'None yet';
+                list.innerHTML = `<p style="color:#888;font-size:13px;">${emptyText}</p>`;
+                return;
+            }
+            
+            list.innerHTML = crystals.map(c => `
+                <div class="crystal-item">
+                    <div class="crystal-date">${c.date}</div>
+                    <div style="font-size:14px;line-height:1.5;">${c.text}</div>
+                </div>
+            `).join('');
+        }
+        
+        // タイトル画面から開始
+        function startApp() {
+            console.log('startApp called');
+            const title = document.getElementById('titleScreen');
+            if (title) {
+                title.style.transition = 'opacity 0.5s';
+                title.style.opacity = '0';
+                setTimeout(() => {
+                    title.classList.add('hidden');
+                }, 500);
+            }
+        }
+        
+        // 初期化（エラーがあってもtitleScreenは動くように）
+        try {
+            init();
+        } catch(e) {
+            console.error('init error:', e);
+        }
+        try {
+            loadCrystals();
+        } catch(e) {
+            console.error('loadCrystals error:', e);
+        }
+        
+        // タイトル画面ボタン（DOMContentLoaded後に設定）
+        document.addEventListener('DOMContentLoaded', function() {
+            var btn = document.getElementById('startBtn');
+            if (btn) {
+                btn.addEventListener('click', startApp);
+                btn.addEventListener('touchend', function(e) {
+                    e.preventDefault();
+                    startApp();
+                });
+            }
+        });
+        
+        // 即時実行版も念のため
+        (function() {
+            var btn = document.getElementById('startBtn');
+            if (btn) {
+                btn.onclick = startApp;
+            }
+        })();
+        
+        // エクスポート機能
+        function exportData() {
+            const data = {
+                version: 1,
+                exportDate: new Date().toISOString(),
+                masterCards: masterCards,
+                cardSets: cardSets,
+                currentSetName: currentSetName,
+                backCardImage: backCardImage,
+                significatorId: significatorId,
+                crystals: JSON.parse(localStorage.getItem('oracleCrystals') || '[]')
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'mayumayan-oracle-backup.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            alert('エクスポート完了！\nファイルをスマホに送ってインポートしてください');
+        }
+        
+        // インポート機能
+        function importData(input) {
+            const file = input.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    if (!data.masterCards || !data.cardSets) {
+                        alert('無効なファイル形式です');
+                        return;
+                    }
+                    
+                    if (!confirm('現在のデータを上書きしますか？')) {
+                        return;
+                    }
+                    
+                    masterCards = data.masterCards;
+                    cardSets = data.cardSets;
+                    currentSetName = data.currentSetName || 'デフォルト';
+                    backCardImage = data.backCardImage || '';
+                    significatorId = data.significatorId !== undefined ? data.significatorId : null;
+                    
+                    saveMasterCards();
+                    saveSets();
+                    localStorage.setItem('oracleCurrentSet', currentSetName);
+                    if (backCardImage) {
+                        localStorage.setItem('oracleBackImage', backCardImage);
+                    }
+                    if (significatorId !== null) {
+                        localStorage.setItem('oracleSignificator', significatorId);
+                    } else {
+                        localStorage.removeItem('oracleSignificator');
+                    }
+                    if (data.crystals) {
+                        localStorage.setItem('oracleCrystals', JSON.stringify(data.crystals));
+                    }
+                    
+                    renderCards();
+                    updateActiveCount();
+                    updateBackPreview();
+                    updateStorageInfo();
+                    updateSignificatorDisplay();
+                    
+                    alert('インポート完了！');
+                } catch(err) {
+                    alert('ファイルの読み込みに失敗しました: ' + err.message);
+                }
+            };
+            reader.readAsText(file);
+            input.value = '';
+        }
+    </script>
+</body>
+</html>
