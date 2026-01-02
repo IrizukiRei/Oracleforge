@@ -2731,24 +2731,25 @@
             document.getElementById('questionInput').value = text;
         }
         
-        // 深呼吸完了時の波紋アニメーション
+        // 深呼吸完了時の波紋アニメーション（背面）
         function showRippleEffect() {
             const ritualScreen = document.getElementById('ritual-screen');
             if (!ritualScreen) return;
             
-            // 波紋コンテナを作成
+            // 波紋コンテナを作成（背面に配置）
             const rippleContainer = document.createElement('div');
             rippleContainer.style.cssText = `
-                position: fixed;
+                position: absolute;
                 top: 0;
                 left: 0;
                 width: 100%;
                 height: 100%;
                 pointer-events: none;
-                z-index: 9999;
+                z-index: 0;
                 overflow: hidden;
             `;
-            document.body.appendChild(rippleContainer);
+            ritualScreen.style.position = 'relative';
+            ritualScreen.insertBefore(rippleContainer, ritualScreen.firstChild);
             
             // 複数の波紋を生成
             for (let i = 0; i < 3; i++) {
@@ -2756,24 +2757,24 @@
                     const ripple = document.createElement('div');
                     ripple.style.cssText = `
                         position: absolute;
-                        top: 50%;
+                        top: 30%;
                         left: 50%;
                         width: 50px;
                         height: 50px;
-                        border: 2px solid rgba(100, 200, 255, 0.8);
+                        border: 2px solid rgba(100, 200, 255, 0.6);
                         border-radius: 50%;
                         transform: translate(-50%, -50%) scale(0);
-                        animation: rippleExpand 2s ease-out forwards;
+                        animation: rippleExpand 2.5s ease-out forwards;
                     `;
                     rippleContainer.appendChild(ripple);
                     
                     // アニメーション終了後に削除
-                    setTimeout(() => ripple.remove(), 2000);
-                }, i * 300);
+                    setTimeout(() => ripple.remove(), 2500);
+                }, i * 400);
             }
             
-            // コンテナを3秒後に削除
-            setTimeout(() => rippleContainer.remove(), 3000);
+            // コンテナを4秒後に削除
+            setTimeout(() => rippleContainer.remove(), 4000);
         }
         
         function goToSpread() {
