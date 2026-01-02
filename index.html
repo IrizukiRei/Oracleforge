@@ -662,6 +662,7 @@
             align-items: center;
             justify-content: center;
             overflow: hidden;
+            transition: opacity 0.5s ease;
         }
 
         .title-screen.hidden {
@@ -1092,6 +1093,12 @@
 
         <!-- リーディング画面 -->
         <div id="reading-screen" class="screen">
+            <!-- 問い表示エリア -->
+            <div id="question-display" style="display:none;background:rgba(100,200,255,0.1);padding:12px;border-radius:8px;margin-bottom:15px;border:1px solid rgba(100,200,255,0.3);">
+                <div style="font-size:11px;color:#64c8ff;margin-bottom:5px;" data-ja="📝 問い" data-en="📝 Question">📝 問い</div>
+                <div id="question-text" style="font-size:14px;color:#fff;"></div>
+            </div>
+            
             <div class="controls">
                 <button class="btn" onclick="shuffleAndDraw()" data-ja="シャッフル" data-en="Shuffle">シャッフル</button>
                 <button class="btn" onclick="skipShuffle()" data-ja="スキップ" data-en="Skip">スキップ</button>
@@ -1232,6 +1239,7 @@
         function goHome() {
             const title = document.getElementById('titleScreen');
             title.style.display = 'flex';
+            title.style.pointerEvents = 'auto';
             title.style.opacity = '0';
             setTimeout(() => {
                 title.style.opacity = '1';
@@ -1242,6 +1250,7 @@
         function hideTitle() {
             const title = document.getElementById('titleScreen');
             title.style.opacity = '0';
+            title.style.pointerEvents = 'none';
             setTimeout(() => {
                 title.style.display = 'none';
             }, 500);
@@ -1501,16 +1510,17 @@
         function setCardCount() {
             const count = parseInt(document.getElementById('card-count-input').value);
             if (count < 1 || count > 150) {
-                alert('1〜150枚で設定してください');
+                alert(currentLang === 'ja' ? '1〜150枚で設定してください' : 'Please set between 1-150 cards');
                 return;
             }
             
             const currentCount = masterCards.length;
+            const cardPrefix = currentLang === 'ja' ? 'カード' : 'Card';
             if (count > currentCount) {
                 for (let i = currentCount; i < count; i++) {
                     masterCards.push({
                         id: i,
-                        name: `カード ${i + 1}`,
+                        name: `${cardPrefix} ${i + 1}`,
                         description: '',
                         imageData: ''
                     });
@@ -1608,6 +1618,22 @@
                 loadCrystals();
             } else if (screen === 'lottery') {
                 initLottery();
+            } else if (screen === 'reading') {
+                loadQuestion();
+            }
+        }
+        
+        // 問いを読み込んで表示
+        function loadQuestion() {
+            const question = localStorage.getItem('oracleQuestion');
+            const display = document.getElementById('question-display');
+            const text = document.getElementById('question-text');
+            
+            if (question && question.trim()) {
+                text.textContent = question;
+                display.style.display = 'block';
+            } else {
+                display.style.display = 'none';
             }
         }
         
@@ -1639,12 +1665,16 @@
                 const opt = document.createElement('option');
                 opt.value = i;
                 opt.textContent = i;
+                opt.style.color = '#000';
+                opt.style.background = '#fff';
                 select.appendChild(opt);
             }
             if (maxDraw === 0) {
                 const opt = document.createElement('option');
                 opt.value = 0;
                 opt.textContent = '0';
+                opt.style.color = '#000';
+                opt.style.background = '#fff';
                 select.appendChild(opt);
             }
         }
@@ -1949,13 +1979,13 @@
                     // 六芒星配置（7枚）
                     const hGap = isMobile ? 70 : 100;
                     const hVGap = isMobile ? 60 : 80;
-                    positions.push({x: cx, y: cy - hVGap * 1.5, label: '①'});
-                    positions.push({x: cx - hGap, y: cy + hVGap * 0.5, label: '②'});
-                    positions.push({x: cx + hGap, y: cy + hVGap * 0.5, label: '③'});
-                    positions.push({x: cx - hGap, y: cy - hVGap * 0.5, label: '④'});
-                    positions.push({x: cx + hGap, y: cy - hVGap * 0.5, label: '⑤'});
-                    positions.push({x: cx, y: cy + hVGap * 1.5, label: '⑥'});
-                    positions.push({x: cx, y: cy, label: '⑦'});
+                    positions.push({x: cx, y: cy - hVGap * 1.5, label: '1'});
+                    positions.push({x: cx - hGap, y: cy + hVGap * 0.5, label: '2'});
+                    positions.push({x: cx + hGap, y: cy + hVGap * 0.5, label: '3'});
+                    positions.push({x: cx - hGap, y: cy - hVGap * 0.5, label: '4'});
+                    positions.push({x: cx + hGap, y: cy - hVGap * 0.5, label: '5'});
+                    positions.push({x: cx, y: cy + hVGap * 1.5, label: '6'});
+                    positions.push({x: cx, y: cy, label: '7'});
                     break;
                 case 'celtic':
                     const cGap = isMobile ? 80 : 120;
@@ -1982,16 +2012,16 @@
                     // 生命の樹（10枚）
                     const ltGap = isMobile ? 50 : 70;
                     const ltV = isMobile ? 45 : 60;
-                    positions.push({x: cx, y: cy - ltV*3, label: getLang('crown', '①理想', '①Crown')});
-                    positions.push({x: cx + ltGap, y: cy - ltV*2, label: getLang('wisdom', '②情熱', '②Passion')});
-                    positions.push({x: cx - ltGap, y: cy - ltV*2, label: getLang('understanding', '③理解', '③Understanding')});
-                    positions.push({x: cx + ltGap, y: cy - ltV, label: getLang('mercy', '④慈悲', '④Mercy')});
-                    positions.push({x: cx - ltGap, y: cy - ltV, label: getLang('severity', '⑤峻厳', '⑤Severity')});
-                    positions.push({x: cx, y: cy, label: getLang('beauty', '⑥達成', '⑥Achievement')});
-                    positions.push({x: cx + ltGap, y: cy + ltV, label: getLang('victory', '⑦勝利', '⑦Victory')});
-                    positions.push({x: cx - ltGap, y: cy + ltV, label: getLang('glory', '⑧栄光', '⑧Glory')});
-                    positions.push({x: cx, y: cy + ltV*2, label: getLang('foundation', '⑨基盤', '⑨Foundation')});
-                    positions.push({x: cx, y: cy + ltV*3, label: getLang('kingdom', '⑩結果', '⑩Result')});
+                    positions.push({x: cx, y: cy - ltV*3, label: getLang('crown', '1.理想', '1.Crown')});
+                    positions.push({x: cx + ltGap, y: cy - ltV*2, label: getLang('wisdom', '2.情熱', '2.Passion')});
+                    positions.push({x: cx - ltGap, y: cy - ltV*2, label: getLang('understanding', '3.理解', '3.Understanding')});
+                    positions.push({x: cx + ltGap, y: cy - ltV, label: getLang('mercy', '4.慈悲', '4.Mercy')});
+                    positions.push({x: cx - ltGap, y: cy - ltV, label: getLang('severity', '5.峻厳', '5.Severity')});
+                    positions.push({x: cx, y: cy, label: getLang('beauty', '6.達成', '6.Achievement')});
+                    positions.push({x: cx + ltGap, y: cy + ltV, label: getLang('victory', '7.勝利', '7.Victory')});
+                    positions.push({x: cx - ltGap, y: cy + ltV, label: getLang('glory', '8.栄光', '8.Glory')});
+                    positions.push({x: cx, y: cy + ltV*2, label: getLang('foundation', '9.基盤', '9.Foundation')});
+                    positions.push({x: cx, y: cy + ltV*3, label: getLang('kingdom', '10.結果', '10.Result')});
                     break;
                 case 'horoscope':
                     // ホロスコープ（12枚）- 時計回り
