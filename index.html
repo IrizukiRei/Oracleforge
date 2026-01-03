@@ -2211,17 +2211,42 @@
                     }
                     break;
                 case 'grand':
-                    // 画面幅に合わせて確実に収まるよう計算
-                    // card-slotはtranslate(-50%, -50%)を使っているので、位置は中心点基準
+                    // 画面幅に合わせてカードサイズも動的に計算
                     const screenW = window.innerWidth;
-                    const gPadding = 10; // 左右パディング
-                    const gCardW = Math.floor((screenW - gPadding * 2) / 9);
-                    const gCardH = Math.floor(gCardW * 1.4);
-                    // 最初のカードの中心位置 = 左パディング + カード幅の半分
-                    const gStartX = gPadding + Math.floor(gCardW / 2);
-                    for (let r = 0; r < 4; r++) {
-                        for (let c = 0; c < 9; c++) {
-                            positions.push({x: gStartX + c * gCardW, y: 50 + r * gCardH, label: r * 9 + c + 1});
+                    const gCols = 9;
+                    const gRows = 4;
+                    const gPadding = 10;
+                    const gGap = 2; // カード間の隙間
+                    const gCardW = Math.floor((screenW - gPadding * 2 - gGap * (gCols - 1)) / gCols);
+                    const gCardH = Math.floor(gCardW * 1.5);
+                    
+                    // カードスロットのサイズを動的に設定
+                    const styleId = 'grand-tableau-style';
+                    let styleEl = document.getElementById(styleId);
+                    if (!styleEl) {
+                        styleEl = document.createElement('style');
+                        styleEl.id = styleId;
+                        document.head.appendChild(styleEl);
+                    }
+                    styleEl.textContent = `
+                        #spread-inner .card-slot {
+                            width: ${gCardW}px !important;
+                            height: ${gCardH}px !important;
+                            transform: none !important;
+                        }
+                        #spread-inner .card-slot .card-face img {
+                            width: ${gCardW - 4}px !important;
+                            height: ${gCardH - 4}px !important;
+                        }
+                    `;
+                    
+                    for (let r = 0; r < gRows; r++) {
+                        for (let c = 0; c < gCols; c++) {
+                            positions.push({
+                                x: gPadding + c * (gCardW + gGap),
+                                y: 10 + r * (gCardH + gGap),
+                                label: r * gCols + c + 1
+                            });
                         }
                     }
                     break;
