@@ -2211,12 +2211,17 @@
                     }
                     break;
                 case 'grand':
-                    const gCardW = isMobile ? 50 : 75;
-                    const gCardH = isMobile ? 80 : 115;
-                    const gStartX = isMobile ? 15 : 50;
+                    // 画面幅に合わせて確実に収まるよう計算
+                    // card-slotはtranslate(-50%, -50%)を使っているので、位置は中心点基準
+                    const screenW = window.innerWidth;
+                    const gPadding = 10; // 左右パディング
+                    const gCardW = Math.floor((screenW - gPadding * 2) / 9);
+                    const gCardH = Math.floor(gCardW * 1.4);
+                    // 最初のカードの中心位置 = 左パディング + カード幅の半分
+                    const gStartX = gPadding + Math.floor(gCardW / 2);
                     for (let r = 0; r < 4; r++) {
                         for (let c = 0; c < 9; c++) {
-                            positions.push({x: gStartX + c * gCardW, y: 30 + r * gCardH, label: r * 9 + c + 1});
+                            positions.push({x: gStartX + c * gCardW, y: 50 + r * gCardH, label: r * 9 + c + 1});
                         }
                     }
                     break;
