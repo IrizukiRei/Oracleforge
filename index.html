@@ -929,12 +929,7 @@
         <!-- カード編集画面 -->
         <div id="edit-screen" class="screen active">
             <div class="info-box" style="background:rgba(255,200,100,0.15);border-color:rgba(255,200,100,0.4);">
-                <p style="margin:0;" data-ja="🎴 タロット78枚のプリセットが「セット」タブにあります。すぐに占いを始められます！" data-en="🎴 A 78-card Tarot preset is available in the 'Sets' tab. Ready to read immediately!">🎴 タロット78枚のプリセットが「セット」タブにあります。すぐに占いを始められます！</p>
-            </div>
-            
-            <div class="info-box">
-                <h3>📱 <span data-ja="スマホ対応版" data-en="Mobile Ready">スマホ対応版</span></h3>
-                <p data-ja="画像はブラウザに保存されます。データは端末に残ります。" data-en="Images are saved in browser. Data stays on your device.">画像はブラウザに保存されます。データは端末に残ります。</p>
+                <p style="margin:0;" data-ja="🃏 ルノルマン38枚のプリセットが「セット」タブにあります。すぐに占いを始められます！" data-en="🃏 A 38-card Lenormand preset is available in the 'Sets' tab. Ready to read immediately!">🃏 ルノルマン38枚のプリセットが「セット」タブにあります。すぐに占いを始められます！</p>
             </div>
 
             <div class="info-box" style="background:rgba(255,200,100,0.1);border-color:rgba(255,200,100,0.3);">
@@ -972,8 +967,11 @@
 
             <div class="back-card-section">
                 <div>
-                    <div style="font-size:12px;margin-bottom:5px;" data-ja="シグニフィケーター" data-en="Significator">シグニフィケーター</div>
-                    <div class="back-preview" id="sig-preview" style="background:rgba(255,200,100,0.3);" data-ja="未設定" data-en="Not set">未設定</div>
+                    <div style="font-size:12px;margin-bottom:5px;" data-ja="シグニフィケーター（最大2枚）" data-en="Significators (up to 2)">シグニフィケーター（最大2枚）</div>
+                    <div style="display:flex;gap:10px;">
+                        <div class="back-preview" id="sig-preview-1" style="background:rgba(255,200,100,0.3);font-size:10px;" data-ja="未設定" data-en="Not set">未設定</div>
+                        <div class="back-preview" id="sig-preview-2" style="background:rgba(255,200,100,0.3);font-size:10px;" data-ja="未設定" data-en="Not set">未設定</div>
+                    </div>
                 </div>
                 <div style="flex:1;">
                     <button class="btn" onclick="openSignificatorSelect()" style="font-size:13px;" data-ja="カード選択" data-en="Select Card">
@@ -982,7 +980,7 @@
                     <button class="btn" onclick="clearSignificator()" style="font-size:13px;background:rgba(220,53,69,0.3);border-color:#dc3545;" data-ja="解除" data-en="Clear">
                         解除
                     </button>
-                    <div style="font-size:11px;color:#888;margin-top:5px;" data-ja="スプレッドで「私」を示す基準札" data-en="Card representing 'yourself' in spreads">スプレッドで「私」を示す基準札</div>
+                    <div style="font-size:11px;color:#888;margin-top:5px;" data-ja="グランタブローで「私」を示す基準札" data-en="Cards representing 'yourself' in Grand Tableau">グランタブローで「私」を示す基準札</div>
                 </div>
             </div>
             
@@ -1026,8 +1024,8 @@
                     <span data-ja="シグニフィケーターを使用" data-en="Use Significator">シグニフィケーターを使用</span>
                     <span id="sig-name-display" style="color:#64c8ff;font-size:12px;"></span>
                 </label>
-                <div style="font-size:11px;color:#888;margin-top:5px;" data-ja="固定配置系: 所定位置に固定 / グランタブロー: 出た位置をハイライト" data-en="Fixed spreads: Fixed position / Grand Tableau: Highlights position">
-                    固定配置系: 所定位置に固定 / グランタブロー: 出た位置をハイライト
+                <div style="font-size:11px;color:#888;margin-top:5px;" data-ja="グランタブローで使用: シグニフィケーターの出た位置をハイライト" data-en="For Grand Tableau: Highlights significator positions">
+                    グランタブローで使用: シグニフィケーターの出た位置をハイライト
                 </div>
             </div>
 
@@ -1229,105 +1227,62 @@
         let currentSpreadSize = 0;
         let drawnCards = [];
         let backCardImage = '';
-        let significatorId = null; // シグニフィケーター
         let useSignificator = false; // シグニフィケーター使用フラグ
         let useReversal = true; // 正逆を取るかどうか
         let currentLang = 'ja'; // 言語設定
         
-        // タロットプリセット（78枚）- 編集不可
-        const TAROT_PRESET = {
-            nameJa: 'タロット',
-            nameEn: 'Tarot',
+        // ルノルマンプリセット（36枚+追加淑女&紳士=38枚）- 編集不可
+        const LENORMAND_PRESET = {
+            nameJa: 'ルノルマン',
+            nameEn: 'Lenormand',
             isPreset: true,
             cards: [
-                // 大アルカナ (0-21)
-                {id: 0, nameJa: '0. 愚者', nameEn: '0. The Fool', desc: ''},
-                {id: 1, nameJa: '1. 魔術師', nameEn: '1. The Magician', desc: ''},
-                {id: 2, nameJa: '2. 女教皇', nameEn: '2. The High Priestess', desc: ''},
-                {id: 3, nameJa: '3. 女帝', nameEn: '3. The Empress', desc: ''},
-                {id: 4, nameJa: '4. 皇帝', nameEn: '4. The Emperor', desc: ''},
-                {id: 5, nameJa: '5. 教皇', nameEn: '5. The Hierophant', desc: ''},
-                {id: 6, nameJa: '6. 恋人', nameEn: '6. The Lovers', desc: ''},
-                {id: 7, nameJa: '7. 戦車', nameEn: '7. The Chariot', desc: ''},
-                {id: 8, nameJa: '8. 力', nameEn: '8. Strength', desc: ''},
-                {id: 9, nameJa: '9. 隠者', nameEn: '9. The Hermit', desc: ''},
-                {id: 10, nameJa: '10. 運命の輪', nameEn: '10. Wheel of Fortune', desc: ''},
-                {id: 11, nameJa: '11. 正義', nameEn: '11. Justice', desc: ''},
-                {id: 12, nameJa: '12. 吊るされた男', nameEn: '12. The Hanged Man', desc: ''},
-                {id: 13, nameJa: '13. 死神', nameEn: '13. Death', desc: ''},
-                {id: 14, nameJa: '14. 節制', nameEn: '14. Temperance', desc: ''},
-                {id: 15, nameJa: '15. 悪魔', nameEn: '15. The Devil', desc: ''},
-                {id: 16, nameJa: '16. 塔', nameEn: '16. The Tower', desc: ''},
-                {id: 17, nameJa: '17. 星', nameEn: '17. The Star', desc: ''},
-                {id: 18, nameJa: '18. 月', nameEn: '18. The Moon', desc: ''},
-                {id: 19, nameJa: '19. 太陽', nameEn: '19. The Sun', desc: ''},
-                {id: 20, nameJa: '20. 審判', nameEn: '20. Judgement', desc: ''},
-                {id: 21, nameJa: '21. 世界', nameEn: '21. The World', desc: ''},
-                // ワンド (22-35)
-                {id: 22, nameJa: 'ワンドのエース', nameEn: 'Ace of Wands', desc: ''},
-                {id: 23, nameJa: 'ワンドの2', nameEn: 'Two of Wands', desc: ''},
-                {id: 24, nameJa: 'ワンドの3', nameEn: 'Three of Wands', desc: ''},
-                {id: 25, nameJa: 'ワンドの4', nameEn: 'Four of Wands', desc: ''},
-                {id: 26, nameJa: 'ワンドの5', nameEn: 'Five of Wands', desc: ''},
-                {id: 27, nameJa: 'ワンドの6', nameEn: 'Six of Wands', desc: ''},
-                {id: 28, nameJa: 'ワンドの7', nameEn: 'Seven of Wands', desc: ''},
-                {id: 29, nameJa: 'ワンドの8', nameEn: 'Eight of Wands', desc: ''},
-                {id: 30, nameJa: 'ワンドの9', nameEn: 'Nine of Wands', desc: ''},
-                {id: 31, nameJa: 'ワンドの10', nameEn: 'Ten of Wands', desc: ''},
-                {id: 32, nameJa: 'ワンドのペイジ', nameEn: 'Page of Wands', desc: ''},
-                {id: 33, nameJa: 'ワンドのナイト', nameEn: 'Knight of Wands', desc: ''},
-                {id: 34, nameJa: 'ワンドのクイーン', nameEn: 'Queen of Wands', desc: ''},
-                {id: 35, nameJa: 'ワンドのキング', nameEn: 'King of Wands', desc: ''},
-                // カップ (36-49)
-                {id: 36, nameJa: 'カップのエース', nameEn: 'Ace of Cups', desc: ''},
-                {id: 37, nameJa: 'カップの2', nameEn: 'Two of Cups', desc: ''},
-                {id: 38, nameJa: 'カップの3', nameEn: 'Three of Cups', desc: ''},
-                {id: 39, nameJa: 'カップの4', nameEn: 'Four of Cups', desc: ''},
-                {id: 40, nameJa: 'カップの5', nameEn: 'Five of Cups', desc: ''},
-                {id: 41, nameJa: 'カップの6', nameEn: 'Six of Cups', desc: ''},
-                {id: 42, nameJa: 'カップの7', nameEn: 'Seven of Cups', desc: ''},
-                {id: 43, nameJa: 'カップの8', nameEn: 'Eight of Cups', desc: ''},
-                {id: 44, nameJa: 'カップの9', nameEn: 'Nine of Cups', desc: ''},
-                {id: 45, nameJa: 'カップの10', nameEn: 'Ten of Cups', desc: ''},
-                {id: 46, nameJa: 'カップのペイジ', nameEn: 'Page of Cups', desc: ''},
-                {id: 47, nameJa: 'カップのナイト', nameEn: 'Knight of Cups', desc: ''},
-                {id: 48, nameJa: 'カップのクイーン', nameEn: 'Queen of Cups', desc: ''},
-                {id: 49, nameJa: 'カップのキング', nameEn: 'King of Cups', desc: ''},
-                // ソード (50-63)
-                {id: 50, nameJa: 'ソードのエース', nameEn: 'Ace of Swords', desc: ''},
-                {id: 51, nameJa: 'ソードの2', nameEn: 'Two of Swords', desc: ''},
-                {id: 52, nameJa: 'ソードの3', nameEn: 'Three of Swords', desc: ''},
-                {id: 53, nameJa: 'ソードの4', nameEn: 'Four of Swords', desc: ''},
-                {id: 54, nameJa: 'ソードの5', nameEn: 'Five of Swords', desc: ''},
-                {id: 55, nameJa: 'ソードの6', nameEn: 'Six of Swords', desc: ''},
-                {id: 56, nameJa: 'ソードの7', nameEn: 'Seven of Swords', desc: ''},
-                {id: 57, nameJa: 'ソードの8', nameEn: 'Eight of Swords', desc: ''},
-                {id: 58, nameJa: 'ソードの9', nameEn: 'Nine of Swords', desc: ''},
-                {id: 59, nameJa: 'ソードの10', nameEn: 'Ten of Swords', desc: ''},
-                {id: 60, nameJa: 'ソードのペイジ', nameEn: 'Page of Swords', desc: ''},
-                {id: 61, nameJa: 'ソードのナイト', nameEn: 'Knight of Swords', desc: ''},
-                {id: 62, nameJa: 'ソードのクイーン', nameEn: 'Queen of Swords', desc: ''},
-                {id: 63, nameJa: 'ソードのキング', nameEn: 'King of Swords', desc: ''},
-                // ペンタクル (64-77)
-                {id: 64, nameJa: 'ペンタクルのエース', nameEn: 'Ace of Pentacles', desc: ''},
-                {id: 65, nameJa: 'ペンタクルの2', nameEn: 'Two of Pentacles', desc: ''},
-                {id: 66, nameJa: 'ペンタクルの3', nameEn: 'Three of Pentacles', desc: ''},
-                {id: 67, nameJa: 'ペンタクルの4', nameEn: 'Four of Pentacles', desc: ''},
-                {id: 68, nameJa: 'ペンタクルの5', nameEn: 'Five of Pentacles', desc: ''},
-                {id: 69, nameJa: 'ペンタクルの6', nameEn: 'Six of Pentacles', desc: ''},
-                {id: 70, nameJa: 'ペンタクルの7', nameEn: 'Seven of Pentacles', desc: ''},
-                {id: 71, nameJa: 'ペンタクルの8', nameEn: 'Eight of Pentacles', desc: ''},
-                {id: 72, nameJa: 'ペンタクルの9', nameEn: 'Nine of Pentacles', desc: ''},
-                {id: 73, nameJa: 'ペンタクルの10', nameEn: 'Ten of Pentacles', desc: ''},
-                {id: 74, nameJa: 'ペンタクルのペイジ', nameEn: 'Page of Pentacles', desc: ''},
-                {id: 75, nameJa: 'ペンタクルのナイト', nameEn: 'Knight of Pentacles', desc: ''},
-                {id: 76, nameJa: 'ペンタクルのクイーン', nameEn: 'Queen of Pentacles', desc: ''},
-                {id: 77, nameJa: 'ペンタクルのキング', nameEn: 'King of Pentacles', desc: ''}
+                {id: 0, nameJa: '1. 騎士', nameEn: '1. Rider', desc: ''},
+                {id: 1, nameJa: '2. クローバー', nameEn: '2. Clover', desc: ''},
+                {id: 2, nameJa: '3. 船', nameEn: '3. Ship', desc: ''},
+                {id: 3, nameJa: '4. 家', nameEn: '4. House', desc: ''},
+                {id: 4, nameJa: '5. 木', nameEn: '5. Tree', desc: ''},
+                {id: 5, nameJa: '6. 雲', nameEn: '6. Clouds', desc: ''},
+                {id: 6, nameJa: '7. 蛇', nameEn: '7. Snake', desc: ''},
+                {id: 7, nameJa: '8. 棺', nameEn: '8. Coffin', desc: ''},
+                {id: 8, nameJa: '9. 花束', nameEn: '9. Bouquet', desc: ''},
+                {id: 9, nameJa: '10. 鎌', nameEn: '10. Scythe', desc: ''},
+                {id: 10, nameJa: '11. 鞭', nameEn: '11. Whip', desc: ''},
+                {id: 11, nameJa: '12. 鳥', nameEn: '12. Birds', desc: ''},
+                {id: 12, nameJa: '13. 子供', nameEn: '13. Child', desc: ''},
+                {id: 13, nameJa: '14. 狐', nameEn: '14. Fox', desc: ''},
+                {id: 14, nameJa: '15. 熊', nameEn: '15. Bear', desc: ''},
+                {id: 15, nameJa: '16. 星', nameEn: '16. Stars', desc: ''},
+                {id: 16, nameJa: '17. コウノトリ', nameEn: '17. Stork', desc: ''},
+                {id: 17, nameJa: '18. 犬', nameEn: '18. Dog', desc: ''},
+                {id: 18, nameJa: '19. 塔', nameEn: '19. Tower', desc: ''},
+                {id: 19, nameJa: '20. 庭', nameEn: '20. Garden', desc: ''},
+                {id: 20, nameJa: '21. 山', nameEn: '21. Mountain', desc: ''},
+                {id: 21, nameJa: '22. 道', nameEn: '22. Crossroad', desc: ''},
+                {id: 22, nameJa: '23. 鼠', nameEn: '23. Mice', desc: ''},
+                {id: 23, nameJa: '24. ハート', nameEn: '24. Heart', desc: ''},
+                {id: 24, nameJa: '25. 指輪', nameEn: '25. Ring', desc: ''},
+                {id: 25, nameJa: '26. 本', nameEn: '26. Book', desc: ''},
+                {id: 26, nameJa: '27. 手紙', nameEn: '27. Letter', desc: ''},
+                {id: 27, nameJa: '28. 紳士', nameEn: '28. Man', desc: ''},
+                {id: 28, nameJa: '29. 淑女', nameEn: '29. Woman', desc: ''},
+                {id: 29, nameJa: '30. 百合', nameEn: '30. Lily', desc: ''},
+                {id: 30, nameJa: '31. 太陽', nameEn: '31. Sun', desc: ''},
+                {id: 31, nameJa: '32. 月', nameEn: '32. Moon', desc: ''},
+                {id: 32, nameJa: '33. 鍵', nameEn: '33. Key', desc: ''},
+                {id: 33, nameJa: '34. 魚', nameEn: '34. Fish', desc: ''},
+                {id: 34, nameJa: '35. 錨', nameEn: '35. Anchor', desc: ''},
+                {id: 35, nameJa: '36. 十字架', nameEn: '36. Cross', desc: ''},
+                {id: 36, nameJa: '追加・紳士', nameEn: 'Extra Man', desc: ''},
+                {id: 37, nameJa: '追加・淑女', nameEn: 'Extra Woman', desc: ''}
             ]
         };
         
         // プリセット使用中かどうか
         let isUsingPreset = false;
+        
+        // シグニフィケーター（2枚対応）
+        let significatorIds = []; // 配列に変更
         
         // 言語切り替え
         function changeLang(lang) {
@@ -1383,7 +1338,7 @@
             const savedPreset = localStorage.getItem('oracleIsPreset');
             if (savedPreset === 'true') {
                 isUsingPreset = true;
-                currentSetName = currentLang === 'ja' ? 'タロット' : 'Tarot';
+                currentSetName = currentLang === 'ja' ? 'ルノルマン' : 'Lenormand';
             }
             
             const savedMaster = localStorage.getItem('oracleCards');
@@ -1420,9 +1375,13 @@
                 updateBackPreview();
             }
             
-            const savedSig = localStorage.getItem('oracleSignificator');
-            if (savedSig !== null) {
-                significatorId = parseInt(savedSig);
+            const savedSig = localStorage.getItem('oracleSignificators');
+            if (savedSig) {
+                try {
+                    significatorIds = JSON.parse(savedSig);
+                } catch(e) {
+                    significatorIds = [];
+                }
             }
             
             const savedReversal = localStorage.getItem('oracleUseReversal');
@@ -1471,35 +1430,58 @@
             }
         }
 
-        // シグニフィケーター関連
+        // シグニフィケーター関連（2枚対応）
         function updateSignificatorDisplay() {
-            const preview = document.getElementById('sig-preview');
+            const preview1 = document.getElementById('sig-preview-1');
+            const preview2 = document.getElementById('sig-preview-2');
             const toggleBox = document.getElementById('sig-toggle-box');
             const nameDisplay = document.getElementById('sig-name-display');
             
-            // 要素がない場合は何もしない
-            if (!preview || !toggleBox || !nameDisplay) return;
+            if (!preview1 || !preview2) return;
             
             const notSetText = currentLang === 'ja' ? '未設定' : 'Not set';
+            const activeCards = getCurrentCards();
             
-            if (significatorId !== null) {
-                const card = masterCards.find(c => c.id === significatorId);
+            // プレビュー1
+            if (significatorIds.length > 0) {
+                const card = activeCards.find(c => c.id === significatorIds[0]);
                 if (card) {
-                    if (card.imageData) {
-                        preview.innerHTML = `<img src="${card.imageData}">`;
-                    } else {
-                        preview.innerHTML = card.name;
-                    }
-                    toggleBox.style.display = 'block';
-                    nameDisplay.textContent = `(${card.name})`;
+                    preview1.innerHTML = card.imageData 
+                        ? `<img src="${card.imageData}" style="width:100%;height:100%;object-fit:cover;">`
+                        : card.name;
                 } else {
-                    significatorId = null;
-                    preview.innerHTML = notSetText;
-                    toggleBox.style.display = 'none';
+                    preview1.innerHTML = notSetText;
                 }
             } else {
-                preview.innerHTML = notSetText;
-                toggleBox.style.display = 'none';
+                preview1.innerHTML = notSetText;
+            }
+            
+            // プレビュー2
+            if (significatorIds.length > 1) {
+                const card = activeCards.find(c => c.id === significatorIds[1]);
+                if (card) {
+                    preview2.innerHTML = card.imageData 
+                        ? `<img src="${card.imageData}" style="width:100%;height:100%;object-fit:cover;">`
+                        : card.name;
+                } else {
+                    preview2.innerHTML = notSetText;
+                }
+            } else {
+                preview2.innerHTML = notSetText;
+            }
+            
+            // トグルボックスの表示（グランタブローのみ）
+            if (toggleBox) {
+                toggleBox.style.display = significatorIds.length > 0 ? 'block' : 'none';
+            }
+            
+            // 名前表示
+            if (nameDisplay) {
+                const names = significatorIds.map(id => {
+                    const card = activeCards.find(c => c.id === id);
+                    return card ? card.name : '';
+                }).filter(n => n);
+                nameDisplay.textContent = names.length > 0 ? `(${names.join(', ')})` : '';
             }
         }
 
@@ -1508,15 +1490,20 @@
             modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);z-index:10000;overflow:auto;padding:20px;';
             
             const activeCards = getCurrentCards();
+            const selectText = currentLang === 'ja' ? 'シグニフィケーターを選択（最大2枚）' : 'Select Significators (up to 2)';
+            const closeText = currentLang === 'ja' ? '決定' : 'Done';
             
             let cardList = '';
             activeCards.forEach(card => {
-                const selected = card.id === significatorId ? 'border-color:rgba(255,200,100,0.8);background:rgba(255,200,100,0.2);' : '';
+                const isSelected = significatorIds.includes(card.id);
+                const selected = isSelected ? 'border-color:rgba(255,200,100,0.8);background:rgba(255,200,100,0.2);' : '';
+                const checkMark = isSelected ? '<div style="position:absolute;top:5px;right:5px;color:#ffcc66;font-size:18px;">✓</div>' : '';
                 const preview = card.imageData 
                     ? `<img src="${card.imageData}" style="width:100%;height:100%;object-fit:cover;">`
                     : card.name;
                 cardList += `
-                    <div onclick="selectSignificator(${card.id})" style="cursor:pointer;padding:10px;background:rgba(255,255,255,0.05);border:2px solid rgba(255,255,255,0.2);border-radius:8px;text-align:center;${selected}">
+                    <div onclick="toggleSignificatorCard(${card.id})" style="cursor:pointer;padding:10px;background:rgba(255,255,255,0.05);border:2px solid rgba(255,255,255,0.2);border-radius:8px;text-align:center;position:relative;${selected}">
+                        ${checkMark}
                         <div style="width:60px;height:90px;margin:0 auto 8px;background:#2a2a4a;border-radius:4px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:10px;color:#888;">
                             ${preview}
                         </div>
@@ -1527,12 +1514,12 @@
             
             modal.innerHTML = `
                 <div style="max-width:600px;margin:0 auto;background:rgba(15,32,39,0.98);padding:20px;border-radius:12px;border:2px solid rgba(255,200,100,0.5);">
-                    <h2 style="color:#ffcc66;margin-bottom:15px;font-size:1.1em;">シグニフィケーターを選択</h2>
+                    <h2 style="color:#ffcc66;margin-bottom:15px;font-size:1.1em;">${selectText}</h2>
                     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px;max-height:60vh;overflow-y:auto;">
                         ${cardList}
                     </div>
                     <div style="margin-top:15px;text-align:center;">
-                        <button onclick="closeSignificatorModal()" class="btn" style="padding:12px 25px;">閉じる</button>
+                        <button onclick="closeSignificatorModal()" class="btn" style="padding:12px 25px;">${closeText}</button>
                     </div>
                 </div>
             `;
@@ -1541,18 +1528,34 @@
             document.body.appendChild(modal);
         }
 
-        function selectSignificator(id) {
-            significatorId = id;
-            localStorage.setItem('oracleSignificator', id);
-            updateSignificatorDisplay();
+        function toggleSignificatorCard(id) {
+            const index = significatorIds.indexOf(id);
+            if (index > -1) {
+                // 既に選択されてたら解除
+                significatorIds.splice(index, 1);
+            } else {
+                // 選択されてなかったら追加（最大2枚）
+                if (significatorIds.length < 2) {
+                    significatorIds.push(id);
+                } else {
+                    // 2枚選択済みなら、最初のを外して新しいのを追加
+                    significatorIds.shift();
+                    significatorIds.push(id);
+                }
+            }
+            localStorage.setItem('oracleSignificators', JSON.stringify(significatorIds));
+            // モーダルを更新
             closeSignificatorModal();
+            openSignificatorSelect();
+            updateSignificatorDisplay();
         }
 
         function clearSignificator() {
-            significatorId = null;
-            localStorage.removeItem('oracleSignificator');
+            significatorIds = [];
+            localStorage.removeItem('oracleSignificators');
             useSignificator = false;
-            document.getElementById('use-sig-toggle').checked = false;
+            const toggle = document.getElementById('use-sig-toggle');
+            if (toggle) toggle.checked = false;
             updateSignificatorDisplay();
         }
 
@@ -1897,23 +1900,23 @@
             const deleteText = currentLang === 'ja' ? '削除' : 'Delete';
             const presetText = currentLang === 'ja' ? 'プリセット' : 'Preset';
             
-            // タロットプリセットを最初に表示
-            const tarotCard = document.createElement('div');
-            tarotCard.className = 'spread-card';
-            if (isUsingPreset && currentSetName === (currentLang === 'ja' ? 'タロット' : 'Tarot')) {
-                tarotCard.style.borderColor = 'rgba(255,200,100,0.8)';
-                tarotCard.style.background = 'rgba(255,200,100,0.2)';
+            // ルノルマンプリセットを最初に表示
+            const presetCard = document.createElement('div');
+            presetCard.className = 'spread-card';
+            if (isUsingPreset && currentSetName === (currentLang === 'ja' ? 'ルノルマン' : 'Lenormand')) {
+                presetCard.style.borderColor = 'rgba(255,200,100,0.8)';
+                presetCard.style.background = 'rgba(255,200,100,0.2)';
             }
-            const tarotName = currentLang === 'ja' ? TAROT_PRESET.nameJa : TAROT_PRESET.nameEn;
-            let tarotHtml = `<h3>${tarotName}</h3><p>78${cardsText}</p>`;
-            tarotHtml += `<p style="color:#ffcc66;font-size:11px;">${presetText}</p>`;
+            const presetName = currentLang === 'ja' ? LENORMAND_PRESET.nameJa : LENORMAND_PRESET.nameEn;
+            let presetHtml = `<h3>${presetName}</h3><p>38${cardsText}</p>`;
+            presetHtml += `<p style="color:#ffcc66;font-size:11px;">${presetText}</p>`;
             if (isUsingPreset) {
-                tarotHtml += `<p style="color:#64c8ff;font-size:12px;">${activeText}</p>`;
+                presetHtml += `<p style="color:#64c8ff;font-size:12px;">${activeText}</p>`;
             } else {
-                tarotHtml += `<button class="btn" style="padding:8px 12px;font-size:12px;margin-top:8px;background:rgba(255,200,100,0.3);border-color:rgba(255,200,100,0.6);" onclick="switchToTarotPreset()">${switchText}</button>`;
+                presetHtml += `<button class="btn" style="padding:8px 12px;font-size:12px;margin-top:8px;background:rgba(255,200,100,0.3);border-color:rgba(255,200,100,0.6);" onclick="switchToLenormandPreset()">${switchText}</button>`;
             }
-            tarotCard.innerHTML = tarotHtml;
-            list.appendChild(tarotCard);
+            presetCard.innerHTML = presetHtml;
+            list.appendChild(presetCard);
             
             // ユーザーのカスタムセット
             Object.keys(cardSets).forEach(setName => {
@@ -1949,18 +1952,18 @@
         }
         
         // タロットプリセットに切り替え
-        function switchToTarotPreset() {
+        function switchToLenormandPreset() {
             isUsingPreset = true;
-            currentSetName = currentLang === 'ja' ? 'タロット' : 'Tarot';
+            currentSetName = currentLang === 'ja' ? 'ルノルマン' : 'Lenormand';
             localStorage.setItem('oracleIsPreset', 'true');
             renderSetsList();
             updateActiveCount();
             resetLottery();
         }
         
-        // タロットプリセットのカードを取得
-        function getTarotCards() {
-            return TAROT_PRESET.cards.map(c => ({
+        // ルノルマンプリセットのカードを取得
+        function getLenormandCards() {
+            return LENORMAND_PRESET.cards.map(c => ({
                 id: c.id,
                 name: currentLang === 'ja' ? c.nameJa : c.nameEn,
                 description: c.desc,
@@ -1971,7 +1974,7 @@
         // 現在のアクティブカードを取得（プリセット対応）
         function getCurrentCards() {
             if (isUsingPreset) {
-                return getTarotCards();
+                return getLenormandCards();
             }
             const activeIds = cardSets[currentSetName] || [];
             return masterCards.filter(c => activeIds.includes(c.id));
@@ -2215,12 +2218,12 @@
                     const screenW = window.innerWidth;
                     const gCols = 9;
                     const gRows = 4;
-                    const gPadding = 10;
+                    const gPadding = 5;
                     const gGap = 2; // カード間の隙間
                     const gCardW = Math.floor((screenW - gPadding * 2 - gGap * (gCols - 1)) / gCols);
                     const gCardH = Math.floor(gCardW * 1.5);
                     
-                    // カードスロットのサイズを動的に設定
+                    // spread-innerのmin-widthとカードサイズを動的に設定
                     const styleId = 'grand-tableau-style';
                     let styleEl = document.getElementById(styleId);
                     if (!styleEl) {
@@ -2229,6 +2232,10 @@
                         document.head.appendChild(styleEl);
                     }
                     styleEl.textContent = `
+                        #spread-inner {
+                            min-width: auto !important;
+                            width: 100% !important;
+                        }
                         #spread-inner .card-slot {
                             width: ${gCardW}px !important;
                             height: ${gCardH}px !important;
@@ -2263,16 +2270,12 @@
             if (supCards) supCards.innerHTML = '';
             
             const activeCards = getCurrentCards();
-            const sigCard = significatorId !== null ? masterCards.find(c => c.id === significatorId) : null;
-            const isFixedSig = useSignificator && sigCard && ['one', 'two', 'neutralize', 'circle'].includes(currentSpread);
-            const isShuffleSig = useSignificator && sigCard && currentSpread === 'grand';
+            // シグニフィケーターはグランタブローのみで使用
+            const isShuffleSig = useSignificator && significatorIds.length > 0 && currentSpread === 'grand';
             
             let shufflePool = activeCards;
-            if (isFixedSig) {
-                shufflePool = activeCards.filter(c => c.id !== significatorId);
-            }
             
-            const requiredCount = isFixedSig ? currentSpreadSize - 1 : currentSpreadSize;
+            const requiredCount = currentSpreadSize;
             if (shufflePool.length < requiredCount) {
                 alert('カード不足');
                 return;
@@ -2409,30 +2412,11 @@
             function finishShuffle() {
                 const shuffled = [...shufflePool].sort(() => Math.random() - 0.5);
                 
-                if (isFixedSig) {
-                    drawnCards = [];
-                    const sigPosition = getSignificatorPosition(currentSpread);
-                    let shuffleIndex = 0;
-                    
-                    for (let i = 0; i < currentSpreadSize; i++) {
-                        if (i === sigPosition) {
-                            drawnCards.push({...sigCard, isReversed: false, isSignificator: true});
-                        } else {
-                            drawnCards.push({
-                                ...shuffled[shuffleIndex],
-                                isReversed: useReversal ? Math.random() < 0.5 : false,
-                                isSignificator: false
-                            });
-                            shuffleIndex++;
-                        }
-                    }
-                } else {
-                    drawnCards = shuffled.slice(0, currentSpreadSize).map(card => ({
-                        ...card,
-                        isReversed: useReversal ? Math.random() < 0.5 : false,
-                        isSignificator: isShuffleSig && card.id === significatorId
-                    }));
-                }
+                drawnCards = shuffled.slice(0, currentSpreadSize).map(card => ({
+                    ...card,
+                    isReversed: useReversal ? Math.random() < 0.5 : false,
+                    isSignificator: isShuffleSig && significatorIds.includes(card.id)
+                }));
                 
                 // フェードアウト
                 shuffleArea.style.transition = 'opacity 0.3s';
@@ -2471,16 +2455,12 @@
             if (supCards) supCards.innerHTML = '';
             
             const activeCards = getCurrentCards();
-            const sigCard = significatorId !== null ? masterCards.find(c => c.id === significatorId) : null;
-            const isFixedSig = useSignificator && sigCard && ['one', 'two', 'neutralize', 'circle'].includes(currentSpread);
-            const isShuffleSig = useSignificator && sigCard && currentSpread === 'grand';
+            // シグニフィケーターはグランタブローのみで使用
+            const isShuffleSig = useSignificator && significatorIds.length > 0 && currentSpread === 'grand';
             
             let shufflePool = activeCards;
-            if (isFixedSig) {
-                shufflePool = activeCards.filter(c => c.id !== significatorId);
-            }
             
-            const requiredCount = isFixedSig ? currentSpreadSize - 1 : currentSpreadSize;
+            const requiredCount = currentSpreadSize;
             if (shufflePool.length < requiredCount) {
                 alert('カード不足');
                 return;
@@ -2488,30 +2468,11 @@
             
             const shuffled = [...shufflePool].sort(() => Math.random() - 0.5);
             
-            if (isFixedSig) {
-                drawnCards = [];
-                const sigPosition = getSignificatorPosition(currentSpread);
-                let shuffleIndex = 0;
-                
-                for (let i = 0; i < currentSpreadSize; i++) {
-                    if (i === sigPosition) {
-                        drawnCards.push({...sigCard, isReversed: false, isSignificator: true});
-                    } else {
-                        drawnCards.push({
-                            ...shuffled[shuffleIndex],
-                            isReversed: useReversal ? Math.random() < 0.5 : false,
-                            isSignificator: false
-                        });
-                        shuffleIndex++;
-                    }
-                }
-            } else {
-                drawnCards = shuffled.slice(0, currentSpreadSize).map(card => ({
-                    ...card,
-                    isReversed: useReversal ? Math.random() < 0.5 : false,
-                    isSignificator: isShuffleSig && card.id === significatorId
-                }));
-            }
+            drawnCards = shuffled.slice(0, currentSpreadSize).map(card => ({
+                ...card,
+                isReversed: useReversal ? Math.random() < 0.5 : false,
+                isSignificator: isShuffleSig && significatorIds.includes(card.id)
+            }));
             
             drawnCards.forEach((card, i) => drawCard(i, card, true));
             showResults();
@@ -2592,13 +2553,16 @@
             const resultTitle = currentLang === 'ja' ? '結果' : 'Results';
             let html = `<h3>${resultTitle}</h3>`;
             
-            // スプレッド別のガイド（削除してシンプルに）
+            // スプレッド別のガイド（グランタブローのみ）
             if (currentSpread === 'grand' && useSignificator) {
-                const sigIndex = drawnCards.findIndex(c => c.isSignificator);
-                if (sigIndex !== -1) {
+                const sigIndices = [];
+                drawnCards.forEach((c, i) => {
+                    if (c.isSignificator) sigIndices.push(i + 1);
+                });
+                if (sigIndices.length > 0) {
                     const sigPosText = currentLang === 'ja' 
-                        ? `シグニフィケーター位置: ${sigIndex + 1}番` 
-                        : `Significator Position: #${sigIndex + 1}`;
+                        ? `シグニフィケーター位置: ${sigIndices.join('番, ')}番` 
+                        : `Significator Position: #${sigIndices.join(', #')}`;
                     const sigDescText = currentLang === 'ja' 
                         ? 'グランタブロー内での「私」の位置' 
                         : 'Your position in the Grand Tableau';
@@ -2912,7 +2876,7 @@
                 cardSets: cardSets,
                 currentSetName: currentSetName,
                 backCardImage: backCardImage,
-                significatorId: significatorId,
+                significatorIds: significatorIds,
                 crystals: JSON.parse(localStorage.getItem('oracleCrystals') || '[]')
             };
             
@@ -2952,7 +2916,14 @@
                     cardSets = data.cardSets;
                     currentSetName = data.currentSetName || 'デフォルト';
                     backCardImage = data.backCardImage || '';
-                    significatorId = data.significatorId !== undefined ? data.significatorId : null;
+                    // 旧形式(単数)と新形式(配列)の両方に対応
+                    if (data.significatorIds) {
+                        significatorIds = data.significatorIds;
+                    } else if (data.significatorId !== undefined && data.significatorId !== null) {
+                        significatorIds = [data.significatorId];
+                    } else {
+                        significatorIds = [];
+                    }
                     
                     saveMasterCards();
                     saveSets();
@@ -2960,10 +2931,10 @@
                     if (backCardImage) {
                         localStorage.setItem('oracleBackImage', backCardImage);
                     }
-                    if (significatorId !== null) {
-                        localStorage.setItem('oracleSignificator', significatorId);
+                    if (significatorIds.length > 0) {
+                        localStorage.setItem('oracleSignificators', JSON.stringify(significatorIds));
                     } else {
-                        localStorage.removeItem('oracleSignificator');
+                        localStorage.removeItem('oracleSignificators');
                     }
                     if (data.crystals) {
                         localStorage.setItem('oracleCrystals', JSON.stringify(data.crystals));
