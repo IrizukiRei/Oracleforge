@@ -929,7 +929,7 @@
         <!-- カード編集画面 -->
         <div id="edit-screen" class="screen active">
             <div class="info-box" style="background:rgba(255,200,100,0.15);border-color:rgba(255,200,100,0.4);">
-                <p style="margin:0;" data-ja="🃏 ルノルマン38枚のプリセットが「セット」タブにあります。すぐに占いを始められます！" data-en="🃏 A 38-card Lenormand preset is available in the 'Sets' tab. Ready to read immediately!">🃏 ルノルマン38枚のプリセットが「セット」タブにあります。すぐに占いを始められます！</p>
+                <p style="margin:0;" data-ja="🃏 ルノルマン39枚のプリセットが「セット」タブにあります。すぐに占いを始められます！" data-en="🃏 A 39-card Lenormand preset is available in the 'Sets' tab. Ready to read immediately!">🃏 ルノルマン39枚のプリセットが「セット」タブにあります。すぐに占いを始められます！</p>
             </div>
 
             <div class="info-box" style="background:rgba(255,200,100,0.1);border-color:rgba(255,200,100,0.3);">
@@ -1231,7 +1231,7 @@
         let useReversal = true; // 正逆を取るかどうか
         let currentLang = 'ja'; // 言語設定
         
-        // ルノルマンプリセット（36枚+追加淑女&紳士=38枚）- 編集不可
+        // ルノルマンプリセット（36枚+追加淑女&紳士&Person=39枚）- 編集不可
         const LENORMAND_PRESET = {
             nameJa: 'ルノルマン',
             nameEn: 'Lenormand',
@@ -1259,13 +1259,13 @@
                 {id: 19, nameJa: '20. 庭', nameEn: '20. Garden', desc: ''},
                 {id: 20, nameJa: '21. 山', nameEn: '21. Mountain', desc: ''},
                 {id: 21, nameJa: '22. 道', nameEn: '22. Crossroad', desc: ''},
-                {id: 22, nameJa: '23. 鼠', nameEn: '23. Mice', desc: ''},
+                {id: 22, nameJa: '23. 鼠', nameEn: '23. Mouse', desc: ''},
                 {id: 23, nameJa: '24. ハート', nameEn: '24. Heart', desc: ''},
                 {id: 24, nameJa: '25. 指輪', nameEn: '25. Ring', desc: ''},
                 {id: 25, nameJa: '26. 本', nameEn: '26. Book', desc: ''},
                 {id: 26, nameJa: '27. 手紙', nameEn: '27. Letter', desc: ''},
-                {id: 27, nameJa: '28. 紳士', nameEn: '28. Man', desc: ''},
-                {id: 28, nameJa: '29. 淑女', nameEn: '29. Woman', desc: ''},
+                {id: 27, nameJa: '28. 紳士', nameEn: '28. Gentleman', desc: ''},
+                {id: 28, nameJa: '29. 淑女', nameEn: '29. Lady', desc: ''},
                 {id: 29, nameJa: '30. 百合', nameEn: '30. Lily', desc: ''},
                 {id: 30, nameJa: '31. 太陽', nameEn: '31. Sun', desc: ''},
                 {id: 31, nameJa: '32. 月', nameEn: '32. Moon', desc: ''},
@@ -1273,8 +1273,9 @@
                 {id: 33, nameJa: '34. 魚', nameEn: '34. Fish', desc: ''},
                 {id: 34, nameJa: '35. 錨', nameEn: '35. Anchor', desc: ''},
                 {id: 35, nameJa: '36. 十字架', nameEn: '36. Cross', desc: ''},
-                {id: 36, nameJa: '追加・紳士', nameEn: 'Extra Man', desc: ''},
-                {id: 37, nameJa: '追加・淑女', nameEn: 'Extra Woman', desc: ''}
+                {id: 36, nameJa: '追加・紳士', nameEn: 'Extra Gentleman', desc: ''},
+                {id: 37, nameJa: '追加・淑女', nameEn: 'Extra Lady', desc: ''},
+                {id: 38, nameJa: '00. 人物', nameEn: '00. Person', desc: ''}
             ]
         };
         
@@ -1908,7 +1909,7 @@
                 presetCard.style.background = 'rgba(255,200,100,0.2)';
             }
             const presetName = currentLang === 'ja' ? LENORMAND_PRESET.nameJa : LENORMAND_PRESET.nameEn;
-            let presetHtml = `<h3>${presetName}</h3><p>38${cardsText}</p>`;
+            let presetHtml = `<h3>${presetName}</h3><p>39${cardsText}</p>`;
             presetHtml += `<p style="color:#ffcc66;font-size:11px;">${presetText}</p>`;
             if (isUsingPreset) {
                 presetHtml += `<p style="color:#64c8ff;font-size:12px;">${activeText}</p>`;
