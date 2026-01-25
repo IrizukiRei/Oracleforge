@@ -1638,7 +1638,7 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             return {ja: '', en: ''};
         }
 
-        function getDescriptionForLang(desc, cardId = null) {
+        function getDescriptionForLang(desc, cardId = null, allowLenormandFallback = false) {
             const normalized = normalizeDescription(desc);
             if (currentLang === 'ja') {
                 return normalized.ja || normalized.en || '';
@@ -1647,17 +1647,9 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
 
             // Lenormand英語説明のフォールバックは「ルノルマン表示の時だけ」使う。
             // そうせんと、君のオリジナルデッキ(同じid帯)までルノルマン説明が侵食する。
-            const allowLenormandFallback = (isUsingPreset === true) || (cardFilterState && cardFilterState.setFilter === 'lenormand');
-            const lenormandFallback = (allowLenormandFallback && key !== null) ? (lenormandDescEn[key] || '') : '';
-
-            return normalized.en || lenormandFallback || normalized.ja || '';
-        }
-            const key = cardId !== null ? String(cardId) : null;
-
-            // Lenormand英語説明のフォールバックは「ルノルマン表示の時だけ」使う。
-            // そうせんと、君のオリジナルデッキ(同じid帯)までルノルマン説明が侵食する。
-            const allowLenormandFallback = (isUsingPreset === true) || (cardFilterState && cardFilterState.setFilter === 'lenormand');
-            const lenormandFallback = (allowLenormandFallback && key !== null) ? (lenormandDescEn[key] || '') : '';
+            const lenormandFallback = (allowLenormandFallback && key !== null)
+                ? (lenormandDescEn[key] || '')
+                : '';
 
             return normalized.en || lenormandFallback || normalized.ja || '';
         }
@@ -1720,22 +1712,27 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             localStorage.setItem('oracleLenormandOptional', JSON.stringify(lenormandOptional));
         }
 
-        function isLenormandOptionalCard(cardId) {
-            return cardId === 36 || cardId === 37 || cardId === 38;
-        }
-
-        function isLenormandCardEnabled(cardId) {
-            if (!isLenormandOptionalCard(cardId)) {
+        function isLenormandOptionalCard(cardId, cardName = '') {
+            const id = Number(cardId);
+            if (id === 36 || id === 37 || id === 38) {
                 return true;
             }
-            if (cardId === 36) return lenormandOptional.extraGentleman;
-            if (cardId === 37) return lenormandOptional.extraLady;
-            if (cardId === 38) return lenormandOptional.person;
+            return /person|人物/i.test(cardName);
+        }
+
+        function isLenormandCardEnabled(cardId, cardName = '') {
+            if (!isLenormandOptionalCard(cardId, cardName)) {
+                return true;
+            }
+            const id = Number(cardId);
+            if (id === 36) return !!lenormandOptional.extraGentleman;
+            if (id === 37) return !!lenormandOptional.extraLady;
+            if (id === 38 || /person|人物/i.test(cardName)) return !!lenormandOptional.person;
             return true;
         }
 
         function getLenormandActiveCards() {
-            return getLenormandCards().filter(card => isLenormandCardEnabled(card.id));
+            return getLenormandCards().filter(card => isLenormandCardEnabled(card.id, card.name));
         }
 
         function syncSignificatorsWithActiveCards() {
@@ -2363,7 +2360,7 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                     <div class="card-number">No.${numberLabel}</div>
                     <div class="card-preview">${previewContent}</div>
                     <div class="preset-name">${card.name}</div>
-                    <div class="preset-desc">${getDescriptionForLang(card.description, card.id) || noDescText}</div>
+                    <div class="preset-desc">${getDescriptionForLang(card.description, card.id, true) || noDescText}</div>
                 `;
                 grid.appendChild(item);
             });
@@ -3376,7 +3373,7 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                 const sigStyle = card.isSignificator ? 'border-left:3px solid rgba(255,200,100,0.8);' : '';
                 const sigBadge = card.isSignificator ? `<span style="background:rgba(255,200,100,0.3);padding:2px 6px;border-radius:4px;font-size:11px;margin-left:5px;">${sigBadgeText}</span>` : '';
                 const descText = isUsingPreset
-                    ? getDescriptionForLang(card.description, card.id)
+                    ? getDescriptionForLang(card.description, card.id, true)
                     : getDescriptionForLang(card.description);
                 html += `<div class="card-meaning" style="${sigStyle}"><strong>${label}: ${card.name} (${pos})${sigBadge}</strong><br>${descText || noDescText}</div>`;
             });
@@ -3389,7 +3386,7 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                     const pos = card.isReversed ? reversedText : uprightText;
                     const supLabel = currentLang === 'ja' ? `補足${i + 1}` : `Sup.${i + 1}`;
                     const supDescText = isUsingPreset
-                        ? getDescriptionForLang(card.description, card.id)
+                        ? getDescriptionForLang(card.description, card.id, true)
                         : getDescriptionForLang(card.description);
                     html += `<div class="card-meaning" style="border-left:3px solid rgba(255,200,100,0.5);"><strong>${supLabel}: ${card.name} (${pos})</strong><br>${supDescText || noDescText}</div>`;
                 });
