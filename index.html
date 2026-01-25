@@ -1039,10 +1039,11 @@
         <div class="floating-crystal" style="top:40%;left:85%;animation-delay:1.5s;width:12px;height:12px;"></div>
         
         <!-- 言語選択 -->
-        <div style="position:absolute;top:20px;right:20px;">
+        <div style="position:absolute;top:20px;right:20px;display:flex;align-items:center;gap:8px;">
+            <label id="lang-label" for="lang-select" style="font-size:12px;color:#fff;"></label>
             <select id="lang-select" onchange="changeLang(this.value)" style="padding:8px 12px;background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.4);color:#fff;border-radius:6px;font-size:14px;">
-                <option value="ja" style="color:#000;">日本語</option>
-                <option value="en" style="color:#000;">English</option>
+                <option value="ja" style="color:#000;"></option>
+                <option value="en" style="color:#000;"></option>
             </select>
         </div>
         
@@ -1476,7 +1477,19 @@
             35: '',
             36: '',
             37: '',
-            38: ''
+            38: 'Person/Neutral Significator/Querent/Identity/Presence'
+        };
+        const I18N = {
+            ja: {
+                languageLabel: '言語',
+                langName_ja: '日本語',
+                langName_en: 'English'
+            },
+            en: {
+                languageLabel: 'Language',
+                langName_ja: 'Japanese',
+                langName_en: 'English'
+            }
         };
         let lenormandDescEn = {...LENORMAND_DESC_EN};
         let useSignificator = false; // シグニフィケーター使用フラグ
@@ -1577,11 +1590,29 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             applyCardDensity();
             updateStorageInfo();
             updateSignificatorDisplay();
+            renderLanguageUI();
         }
         
         // 言語に応じたテキスト取得
         function getLang(key, ja, en) {
             return currentLang === 'ja' ? ja : en;
+        }
+
+        function t(key) {
+            const lang = currentLang === 'en' ? 'en' : 'ja';
+            return (I18N[lang] && I18N[lang][key]) || I18N.ja[key] || key;
+        }
+
+        function renderLanguageUI() {
+            const label = document.getElementById('lang-label');
+            const select = document.getElementById('lang-select');
+            if (!label || !select) return;
+            label.textContent = t('languageLabel');
+            const optionJa = select.querySelector('option[value="ja"]');
+            const optionEn = select.querySelector('option[value="en"]');
+            if (optionJa) optionJa.textContent = t('langName_ja');
+            if (optionEn) optionEn.textContent = t('langName_en');
+            select.value = currentLang === 'en' ? 'en' : 'ja';
         }
 
         function getCardNumberLabel(card, fallbackNumber) {
@@ -1895,6 +1926,7 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                 document.getElementById('lang-select').value = savedLang;
                 changeLang(savedLang);
             }
+            renderLanguageUI();
 
             loadLenormandOptional();
             updateLenormandOptionUI();
@@ -2648,17 +2680,19 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
         // ルノルマンプリセットのカードを取得
         // ルノルマンプリセットのカードを取得（埋め込みデータ優先）
         function getLenormandCards() {
+            const presetMap = new Map(LENORMAND_PRESET.cards.map(card => [String(card.id), card]));
             // 埋め込みカードデータが存在すれば優先使用
             if (window.__LENORMAND_EMBEDDED_CARDS__ && window.__LENORMAND_EMBEDDED_CARDS__.length > 0) {
                 return window.__LENORMAND_EMBEDDED_CARDS__.map(c => {
                     const desc = normalizeDescription(c.description);
                     desc.en = lenormandDescEn[c.id] ?? desc.en;
-                    const preset = LENORMAND_PRESET.cards.find(card => card.id === c.id);
+                    const preset = presetMap.get(String(c.id));
+                    const fallbackPersonName = c.id === 38 || c.name?.includes('人物') ? '00. Person' : c.name;
                     return {
                         id: c.id,
                         name: currentLang === 'ja'
                             ? (preset?.nameJa ?? c.name)
-                            : (preset?.nameEn ?? c.name),
+                            : (preset?.nameEn ?? fallbackPersonName),
                         description: desc,
                         imageData: c.imageData
                     };
