@@ -1666,6 +1666,35 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             }));
         }
 
+        function cleanupLenormandFallbackFromCustomCards() {
+            const presetNameSet = new Set(
+                LENORMAND_PRESET.cards.flatMap(card => [card.nameJa, card.nameEn])
+            );
+            let updated = false;
+            masterCards = masterCards.map(card => {
+                const normalized = normalizeDescription(card.description);
+                const key = String(card.id);
+                const fallback = lenormandDescEn[key];
+                if (fallback && normalized.en === fallback && !presetNameSet.has(card.name)) {
+                    updated = true;
+                    return {
+                        ...card,
+                        description: {
+                            ...normalized,
+                            en: ''
+                        }
+                    };
+                }
+                return {
+                    ...card,
+                    description: normalized
+                };
+            });
+            if (updated) {
+                saveMasterCards();
+            }
+        }
+
         async function loadLenormandDescEn() {
             try {
                 const response = await fetch('lenormand-desc-en.json', {cache: 'no-store'});
@@ -1694,7 +1723,11 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             const saved = localStorage.getItem('oracleLenormandOptional');
             if (saved) {
                 try {
-                    lenormandOptional = {...LENORMAND_OPTIONAL_DEFAULT, ...JSON.parse(saved)};
+                    const parsed = JSON.parse(saved);
+                    lenormandOptional = normalizeLenormandOptional({
+                        ...LENORMAND_OPTIONAL_DEFAULT,
+                        ...parsed
+                    });
                 } catch (error) {
                     lenormandOptional = {...LENORMAND_OPTIONAL_DEFAULT};
                 }
@@ -1705,6 +1738,21 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
 
         function saveLenormandOptional() {
             localStorage.setItem('oracleLenormandOptional', JSON.stringify(lenormandOptional));
+        }
+
+        function normalizeLenormandOptional(options) {
+            const normalizeFlag = (value, fallback) => {
+                if (value === undefined || value === null) return fallback;
+                if (typeof value === 'string') {
+                    return value.toLowerCase() === 'true';
+                }
+                return Boolean(value);
+            };
+            return {
+                extraGentleman: normalizeFlag(options.extraGentleman, LENORMAND_OPTIONAL_DEFAULT.extraGentleman),
+                extraLady: normalizeFlag(options.extraLady, LENORMAND_OPTIONAL_DEFAULT.extraLady),
+                person: normalizeFlag(options.person, LENORMAND_OPTIONAL_DEFAULT.person)
+            };
         }
 
         function isLenormandOptionalCard(cardId) {
@@ -1737,7 +1785,7 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
         }
 
         function setLenormandOption(key, value) {
-            lenormandOptional[key] = value;
+            lenormandOptional[key] = Boolean(value);
             saveLenormandOptional();
             renderLenormandGrid();
             renderSetsList();
@@ -1978,6 +2026,7 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                 saveMasterCards();
             }
             normalizeMasterCards();
+            cleanupLenormandFallbackFromCustomCards();
 
             const savedSets = localStorage.getItem('oracleSets');
             if (savedSets) {
