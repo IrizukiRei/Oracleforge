@@ -1675,6 +1675,7 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                 const data = await response.json();
                 lenormandDescEn = {...LENORMAND_DESC_EN, ...data};
                 renderLenormandGrid();
+                renderCards();
                 renderSetsList();
                 updateSignificatorDisplay();
             } catch (error) {
@@ -2362,6 +2363,10 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             const filtered = masterCards
                 .map((card, index) => ({card, index}))
                 .filter(({card}) => {
+                    const isLenormandSet = currentSetName === LENORMAND_PRESET.nameJa || currentSetName === LENORMAND_PRESET.nameEn;
+                    if ((isUsingPreset || isLenormandSet) && isLenormandOptionalCard(card.id) && !isLenormandCardEnabled(card.id)) {
+                        return false;
+                    }
                     if (activeSetIds && !activeSetIds.includes(card.id)) {
                         return false;
                     }
@@ -2393,7 +2398,7 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                     <div class="card-preview" id="preview-${index}">${previewContent}</div>
                     <input type="text" placeholder="${namePlaceholder}" value="${card.name}" 
                            onchange="updateCardName(${index}, this.value)">
-                    <textarea placeholder="${descPlaceholder}" onchange="updateCardDesc(${index}, this.value)">${getDescriptionForLang(card.description)}</textarea>
+                    <textarea placeholder="${descPlaceholder}" onchange="updateCardDesc(${index}, this.value)">${getDescriptionForLang(card.description, card.id)}</textarea>
                     <input type="file" accept="image/*" style="display:none" 
                            id="file-${index}" onchange="selectImageFile(${index}, this)">
                     <button class="upload-btn" onclick="document.getElementById('file-${index}').click()">
