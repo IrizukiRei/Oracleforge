@@ -2393,7 +2393,7 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                     <div class="card-preview" id="preview-${index}">${previewContent}</div>
                     <input type="text" placeholder="${namePlaceholder}" value="${card.name}" 
                            onchange="updateCardName(${index}, this.value)">
-                    <textarea placeholder="${descPlaceholder}" onchange="updateCardDesc(${index}, this.value)">${getDescriptionForLang(card.description)}</textarea>
+                    <textarea placeholder="${descPlaceholder}" onchange="updateCardDesc(${index}, this.value)">${getDescriptionForLang(card.description, card.id)}</textarea>
                     <input type="file" accept="image/*" style="display:none" 
                            id="file-${index}" onchange="selectImageFile(${index}, this)">
                     <button class="upload-btn" onclick="document.getElementById('file-${index}').click()">
