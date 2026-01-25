@@ -923,106 +923,6 @@
             color: #888;
             margin-top: 10px;
         }
-
-        .card-tools {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .card-tool {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            min-width: 160px;
-            font-size: 12px;
-        }
-
-        .card-tool select,
-        .card-tool input[type="text"] {
-            padding: 8px 10px;
-            border-radius: 6px;
-            border: 1px solid rgba(255,255,255,0.3);
-            background: rgba(0,0,0,0.3);
-            color: #fff;
-            font-size: 13px;
-        }
-
-        .card-tool.checkbox {
-            flex-direction: row;
-            align-items: center;
-            gap: 8px;
-            min-width: auto;
-        }
-
-        .card-density {
-            display: flex;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 12px;
-            font-size: 12px;
-        }
-
-        .density-btn {
-            padding: 8px 12px;
-            font-size: 12px;
-        }
-
-        .density-btn.active {
-            background: rgba(100,200,255,0.4);
-            border-color: rgba(100,200,255,0.9);
-        }
-
-        .card-grid.compact {
-            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-        }
-
-        .card-grid.compact .card-item {
-            padding: 6px;
-        }
-
-        .card-grid.compact .card-preview {
-            margin-bottom: 0;
-        }
-
-        .card-grid.compact .card-number,
-        .card-grid.compact .preset-name,
-        .card-grid.compact .preset-desc,
-        .card-grid.compact input,
-        .card-grid.compact textarea,
-        .card-grid.compact .upload-btn {
-            display: none;
-        }
-
-        .archive-toggle {
-            margin-top: 6px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 11px;
-            color: #ccc;
-        }
-
-        .archive-toggle button {
-            padding: 6px 10px;
-            font-size: 11px;
-        }
-
-        .lenormand-options {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-top: 10px;
-            font-size: 13px;
-        }
-
-        .lenormand-options label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
     </style>
     <script src="lenormand-embedded.js"></script>
 </head>
@@ -1135,60 +1035,6 @@
                 <label style="font-size:14px;" data-ja="枚数:" data-en="Cards:">枚数:</label>
                 <input type="number" id="card-count-input" min="1" max="150" value="10">
                 <button class="btn" onclick="setCardCount()" data-ja="設定" data-en="Set">設定</button>
-            </div>
-
-            <div class="info-box">
-                <h3>🗂 <span data-ja="カード整理" data-en="Card Organizer">カード整理</span></h3>
-                <input type="text" id="card-search" class="set-input" data-ja-placeholder="カード名・説明を検索" data-en-placeholder="Search name or description">
-                <div class="card-tools">
-                    <div class="card-tool">
-                        <label data-ja="セット" data-en="Set">セット</label>
-                        <select id="card-filter-set"></select>
-                    </div>
-                    <div class="card-tool">
-                        <label data-ja="画像" data-en="Image">画像</label>
-                        <select id="card-filter-image">
-                            <option value="all" data-ja="すべて" data-en="All">すべて</option>
-                            <option value="with" data-ja="あり" data-en="With image">あり</option>
-                            <option value="without" data-ja="なし" data-en="No image">なし</option>
-                        </select>
-                    </div>
-                    <div class="card-tool">
-                        <label data-ja="説明" data-en="Description">説明</label>
-                        <select id="card-filter-desc">
-                            <option value="all" data-ja="すべて" data-en="All">すべて</option>
-                            <option value="with" data-ja="あり" data-en="With description">あり</option>
-                            <option value="without" data-ja="なし" data-en="No description">なし</option>
-                        </select>
-                    </div>
-                    <label class="card-tool checkbox">
-                        <input type="checkbox" id="card-show-archived">
-                        <span data-ja="アーカイブを表示" data-en="Show archived">アーカイブを表示</span>
-                    </label>
-                </div>
-                <div class="card-density">
-                    <span data-ja="表示密度" data-en="Density">表示密度</span>
-                    <button type="button" class="btn density-btn" id="density-large" data-ja="大きい" data-en="Large">大きい</button>
-                    <button type="button" class="btn density-btn" id="density-compact" data-ja="小さい" data-en="Compact">小さい</button>
-                </div>
-            </div>
-
-            <div class="info-box">
-                <h3>🂡 <span data-ja="ルノルマン設定" data-en="Lenormand Options">ルノルマン設定</span></h3>
-                <div class="lenormand-options">
-                    <label>
-                        <input type="checkbox" id="lenormand-extra-gentleman">
-                        <span data-ja="追加・紳士を使う" data-en="Use Extra Gentleman">追加・紳士を使う</span>
-                    </label>
-                    <label>
-                        <input type="checkbox" id="lenormand-extra-lady">
-                        <span data-ja="追加・淑女を使う" data-en="Use Extra Lady">追加・淑女を使う</span>
-                    </label>
-                    <label>
-                        <input type="checkbox" id="lenormand-person">
-                        <span data-ja="00.Personを使う" data-en="Use 00.Person">00.Personを使う</span>
-                    </label>
-                </div>
             </div>
 
             <div class="info-box" style="background:rgba(255,200,100,0.12);border-color:rgba(255,200,100,0.35);">
@@ -1476,27 +1322,12 @@
             35: '',
             36: '',
             37: '',
-            38: '',
-            39: ''
+            38: ''
         };
         let lenormandDescEn = {...LENORMAND_DESC_EN};
         let useSignificator = false; // シグニフィケーター使用フラグ
         let useReversal = true; // 正逆を取るかどうか
         let currentLang = 'ja'; // 言語設定
-        const LENORMAND_OPTIONAL_DEFAULT = {
-            extraGentleman: true,
-            extraLady: true,
-            person: false
-        };
-        let lenormandOptional = {...LENORMAND_OPTIONAL_DEFAULT};
-        const cardFilterState = {
-            searchText: '',
-            setFilter: 'all',
-            imageFilter: 'all',
-            descFilter: 'all',
-            showArchived: false,
-            density: 'large'
-        };
         
         // ルノルマンプリセット（36枚+追加淑女&紳士&Person=39枚）- 編集不可
         const LENORMAND_PRESET = {
@@ -1574,8 +1405,6 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             renderCards();
             renderLenormandGrid();
             renderSetsList();
-            renderCardFilterSetOptions();
-            applyCardDensity();
             updateStorageInfo();
             updateSignificatorDisplay();
         }
@@ -1583,6 +1412,15 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
         // 言語に応じたテキスト取得
         function getLang(key, ja, en) {
             return currentLang === 'ja' ? ja : en;
+        }
+
+        function getCardNumberLabel(card, fallbackNumber) {
+            const name = card?.name ?? '';
+            const match = name.match(/^\s*(\d+)\s*(?:[.\-:]\s*)?/);
+            if (match) {
+                return match[1];
+            }
+            return fallbackNumber;
         }
 
         function normalizeDescription(desc) {
@@ -1618,25 +1456,12 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
         function normalizeMasterCards() {
             masterCards = masterCards.map(card => ({
                 ...card,
-                description: normalizeDescription(card.description),
-                archived: card.archived ?? false
+                description: normalizeDescription(card.description)
             }));
         }
 
-        async function loadLenormandDescEn() {
-            try {
-                const response = await fetch('lenormand-desc-en.json', {cache: 'no-store'});
-                if (!response.ok) {
-                    throw new Error('Failed to load lenormand-desc-en.json');
-                }
-                const data = await response.json();
-                lenormandDescEn = {...LENORMAND_DESC_EN, ...data};
-                renderLenormandGrid();
-                renderSetsList();
-                updateSignificatorDisplay();
-            } catch (error) {
-                lenormandDescEn = {...LENORMAND_DESC_EN};
-            }
+        function loadLenormandDescEn() {
+            lenormandDescEn = {...LENORMAND_DESC_EN};
         }
 
         function resolveBackImage() {
@@ -1644,237 +1469,6 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                 return LENORMAND_BACK_IMAGE;
             }
             return backCardImage || DEFAULT_BACK_IMAGE;
-        }
-
-        function loadLenormandOptional() {
-            const saved = localStorage.getItem('oracleLenormandOptional');
-            if (saved) {
-                try {
-                    lenormandOptional = {...LENORMAND_OPTIONAL_DEFAULT, ...JSON.parse(saved)};
-                } catch (error) {
-                    lenormandOptional = {...LENORMAND_OPTIONAL_DEFAULT};
-                }
-            } else {
-                lenormandOptional = {...LENORMAND_OPTIONAL_DEFAULT};
-            }
-        }
-
-        function saveLenormandOptional() {
-            localStorage.setItem('oracleLenormandOptional', JSON.stringify(lenormandOptional));
-        }
-
-        function isLenormandOptionalCard(cardId) {
-            return cardId === 36 || cardId === 37 || cardId === 39;
-        }
-
-        function isLenormandCardEnabled(cardId) {
-            if (!isLenormandOptionalCard(cardId)) {
-                return true;
-            }
-            if (cardId === 36) return lenormandOptional.extraGentleman;
-            if (cardId === 37) return lenormandOptional.extraLady;
-            if (cardId === 39) return lenormandOptional.person;
-            return true;
-        }
-
-        function getLenormandActiveCards() {
-            return getLenormandCards().filter(card => isLenormandCardEnabled(card.id));
-        }
-
-        function syncSignificatorsWithActiveCards() {
-            const activeIds = new Set(getCurrentCards().map(card => card.id));
-            const before = significatorIds.length;
-            significatorIds = significatorIds.filter(id => activeIds.has(id));
-            if (significatorIds.length !== before) {
-                localStorage.setItem('oracleSignificators', JSON.stringify(significatorIds));
-            }
-        }
-
-        function setLenormandOption(key, value) {
-            lenormandOptional[key] = value;
-            saveLenormandOptional();
-            renderLenormandGrid();
-            renderSetsList();
-            updateActiveCount();
-            syncSignificatorsWithActiveCards();
-            updateSignificatorDisplay();
-            if (isUsingPreset) {
-                resetLottery();
-            }
-        }
-
-        function updateLenormandOptionUI() {
-            const extraGentleman = document.getElementById('lenormand-extra-gentleman');
-            const extraLady = document.getElementById('lenormand-extra-lady');
-            const person = document.getElementById('lenormand-person');
-            if (extraGentleman) extraGentleman.checked = !!lenormandOptional.extraGentleman;
-            if (extraLady) extraLady.checked = !!lenormandOptional.extraLady;
-            if (person) person.checked = !!lenormandOptional.person;
-        }
-
-        function hasCardDescription(card) {
-            const desc = normalizeDescription(card.description);
-            return (desc.ja && desc.ja.trim().length > 0) || (desc.en && desc.en.trim().length > 0);
-        }
-
-        function getCardNumberFromName(name) {
-            if (!name) return '';
-            const match = name.match(/\d+/);
-            return match ? match[0] : '';
-        }
-
-        function getLenormandNumberFallback(cardId) {
-            if (cardId === 39) return '00';
-            return String(cardId + 1);
-        }
-
-        function getCardNumberLabel(card, fallbackNumber) {
-            const parsed = getCardNumberFromName(card.name);
-            return parsed || (fallbackNumber ?? '');
-        }
-
-        function matchesCardSearch(card) {
-            const needle = cardFilterState.searchText.trim().toLowerCase();
-            if (!needle) return true;
-            const desc = normalizeDescription(card.description);
-            const haystack = `${card.name} ${desc.ja} ${desc.en}`.toLowerCase();
-            return haystack.includes(needle);
-        }
-
-        function filterCards(cards, options = {}) {
-            const {allowArchived = false} = options;
-            return cards.filter(card => {
-                if (!allowArchived && card.archived) {
-                    return false;
-                }
-                if (cardFilterState.imageFilter === 'with' && !card.imageData) {
-                    return false;
-                }
-                if (cardFilterState.imageFilter === 'without' && card.imageData) {
-                    return false;
-                }
-                if (cardFilterState.descFilter === 'with' && !hasCardDescription(card)) {
-                    return false;
-                }
-                if (cardFilterState.descFilter === 'without' && hasCardDescription(card)) {
-                    return false;
-                }
-                if (!matchesCardSearch(card)) {
-                    return false;
-                }
-                return true;
-            });
-        }
-
-        function applyCardDensity() {
-            const isCompact = cardFilterState.density === 'compact';
-            const grid = document.getElementById('card-grid');
-            const lenormandGrid = document.getElementById('lenormand-grid');
-            if (grid) {
-                grid.classList.toggle('compact', isCompact);
-            }
-            if (lenormandGrid) {
-                lenormandGrid.classList.toggle('compact', isCompact);
-            }
-            const largeBtn = document.getElementById('density-large');
-            const compactBtn = document.getElementById('density-compact');
-            if (largeBtn) largeBtn.classList.toggle('active', cardFilterState.density === 'large');
-            if (compactBtn) compactBtn.classList.toggle('active', cardFilterState.density === 'compact');
-        }
-
-        function renderCardFilterSetOptions() {
-            const select = document.getElementById('card-filter-set');
-            if (!select) return;
-            const options = [];
-            options.push({
-                value: 'all',
-                label: getLang('all', 'すべて', 'All')
-            });
-            options.push({
-                value: 'lenormand',
-                label: currentLang === 'ja' ? 'ルノルマン' : 'Lenormand'
-            });
-            Object.keys(cardSets).forEach(setName => {
-                const displayName = (setName === 'デフォルト')
-                    ? (currentLang === 'ja' ? 'デフォルト' : 'Default')
-                    : setName;
-                options.push({value: setName, label: displayName});
-            });
-            select.innerHTML = '';
-            options.forEach(option => {
-                const opt = document.createElement('option');
-                opt.value = option.value;
-                opt.textContent = option.label;
-                opt.style.color = '#000';
-                opt.style.background = '#fff';
-                select.appendChild(opt);
-            });
-            if (!options.find(option => option.value === cardFilterState.setFilter)) {
-                cardFilterState.setFilter = 'all';
-            }
-            select.value = cardFilterState.setFilter;
-        }
-
-        function initCardFilters() {
-            const searchInput = document.getElementById('card-search');
-            const setSelect = document.getElementById('card-filter-set');
-            const imageSelect = document.getElementById('card-filter-image');
-            const descSelect = document.getElementById('card-filter-desc');
-            const showArchived = document.getElementById('card-show-archived');
-            const densityLarge = document.getElementById('density-large');
-            const densityCompact = document.getElementById('density-compact');
-
-            if (searchInput) {
-                searchInput.value = cardFilterState.searchText;
-                searchInput.addEventListener('input', (event) => {
-                    cardFilterState.searchText = event.target.value;
-                    renderCards();
-                    renderLenormandGrid();
-                });
-            }
-            if (setSelect) {
-                setSelect.addEventListener('change', (event) => {
-                    cardFilterState.setFilter = event.target.value;
-                    renderCards();
-                    renderLenormandGrid();
-                });
-            }
-            if (imageSelect) {
-                imageSelect.value = cardFilterState.imageFilter;
-                imageSelect.addEventListener('change', (event) => {
-                    cardFilterState.imageFilter = event.target.value;
-                    renderCards();
-                    renderLenormandGrid();
-                });
-            }
-            if (descSelect) {
-                descSelect.value = cardFilterState.descFilter;
-                descSelect.addEventListener('change', (event) => {
-                    cardFilterState.descFilter = event.target.value;
-                    renderCards();
-                    renderLenormandGrid();
-                });
-            }
-            if (showArchived) {
-                showArchived.checked = cardFilterState.showArchived;
-                showArchived.addEventListener('change', (event) => {
-                    cardFilterState.showArchived = event.target.checked;
-                    renderCards();
-                });
-            }
-            if (densityLarge) {
-                densityLarge.addEventListener('click', () => {
-                    cardFilterState.density = 'large';
-                    applyCardDensity();
-                });
-            }
-            if (densityCompact) {
-                densityCompact.addEventListener('click', () => {
-                    cardFilterState.density = 'compact';
-                    applyCardDensity();
-                });
-            }
-            applyCardDensity();
         }
         
         // ホーム画面に戻る
@@ -1900,9 +1494,6 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                 document.getElementById('lang-select').value = savedLang;
                 changeLang(savedLang);
             }
-
-            loadLenormandOptional();
-            updateLenormandOptionUI();
             
             // プリセット使用フラグを読み込み
             const savedPreset = localStorage.getItem('oracleIsPreset');
@@ -1920,8 +1511,7 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                         id: i,
                         name: `Card ${i + 1}`,
                         description: {ja: '', en: ''},
-                        imageData: '',
-                        archived: false
+                        imageData: ''
                     });
                 }
                 saveMasterCards();
@@ -1960,27 +1550,6 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             if (savedReversal !== null) {
                 useReversal = savedReversal === 'true';
             }
-
-            const extraGentleman = document.getElementById('lenormand-extra-gentleman');
-            const extraLady = document.getElementById('lenormand-extra-lady');
-            const person = document.getElementById('lenormand-person');
-            if (extraGentleman) {
-                extraGentleman.addEventListener('change', (event) => {
-                    setLenormandOption('extraGentleman', event.target.checked);
-                });
-            }
-            if (extraLady) {
-                extraLady.addEventListener('change', (event) => {
-                    setLenormandOption('extraLady', event.target.checked);
-                });
-            }
-            if (person) {
-                person.addEventListener('change', (event) => {
-                    setLenormandOption('person', event.target.checked);
-                });
-            }
-            renderCardFilterSetOptions();
-            initCardFilters();
             
             renderCards();
             renderLenormandGrid();
@@ -2034,8 +1603,7 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             const nameDisplay = document.getElementById('sig-name-display');
             
             if (!preview1 || !preview2) return;
-
-            syncSignificatorsWithActiveCards();
+            
             const notSetText = currentLang === 'ja' ? '未設定' : 'Not set';
             const activeCards = getCurrentCards();
             
@@ -2243,8 +1811,7 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                         id: i,
                         name: `${cardPrefix} ${i + 1}`,
                         description: {ja: '', en: ''},
-                        imageData: '',
-                        archived: false
+                        imageData: ''
                     });
                 }
             } else if (count < currentCount) {
@@ -2264,11 +1831,8 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
         function renderLenormandGrid() {
             const grid = document.getElementById('lenormand-grid');
             if (!grid) return;
-            const shouldShow = cardFilterState.setFilter === 'all' || cardFilterState.setFilter === 'lenormand';
-            grid.style.display = shouldShow ? 'grid' : 'none';
             grid.innerHTML = '';
-            if (!shouldShow) return;
-            const cards = filterCards(getLenormandActiveCards(), {allowArchived: true});
+            const cards = getLenormandCards();
             const noDescText = currentLang === 'ja' ? '説明なし' : 'No description';
             cards.forEach(card => {
                 const item = document.createElement('div');
@@ -2276,7 +1840,7 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                 const previewContent = card.imageData
                     ? `<img src="${card.imageData}">`
                     : card.name;
-                const numberLabel = getCardNumberLabel(card, getLenormandNumberFallback(card.id));
+                const numberLabel = getCardNumberLabel(card, String(card.id + 1));
                 item.innerHTML = `
                     <div class="card-number">No.${numberLabel}</div>
                     <div class="card-preview">${previewContent}</div>
@@ -2288,7 +1852,7 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
         }
 
         function getLenormandThumbGridHtml() {
-            const cards = getLenormandActiveCards();
+            const cards = getLenormandCards();
             const thumbs = cards.map(card => {
                 const img = card.imageData
                     ? `<img src="${card.imageData}" alt="${card.name}">`
@@ -2301,26 +1865,8 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
         function renderCards() {
             const grid = document.getElementById('card-grid');
             grid.innerHTML = '';
-            const shouldShow = cardFilterState.setFilter === 'all' || cardFilterState.setFilter in cardSets;
-            grid.style.display = shouldShow ? 'grid' : 'none';
-            if (!shouldShow) return;
-
-            const activeSetIds = cardFilterState.setFilter === 'all'
-                ? null
-                : cardSets[cardFilterState.setFilter] || [];
-            const filtered = masterCards
-                .map((card, index) => ({card, index}))
-                .filter(({card}) => {
-                    if (activeSetIds && !activeSetIds.includes(card.id)) {
-                        return false;
-                    }
-                    if (!cardFilterState.showArchived && card.archived) {
-                        return false;
-                    }
-                    return filterCards([card], {allowArchived: true}).length > 0;
-                });
-
-            filtered.forEach(({card, index}) => {
+            
+            masterCards.forEach((card, index) => {
                 const item = document.createElement('div');
                 item.className = 'card-item';
                 
@@ -2332,11 +1878,8 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                 const namePlaceholder = currentLang === 'ja' ? '名前' : 'Name';
                 const descPlaceholder = currentLang === 'ja' ? '説明' : 'Description';
                 const uploadBtnText = currentLang === 'ja' ? '画像選択' : 'Select Image';
+                const numberLabel = getCardNumberLabel(card, String(index + 1));
                 
-                const archiveText = card.archived
-                    ? (currentLang === 'ja' ? '復元' : 'Restore')
-                    : (currentLang === 'ja' ? 'アーカイブ' : 'Archive');
-                const numberLabel = getCardNumberLabel(card, String(card.id + 1));
                 item.innerHTML = `
                     <div class="card-number">No.${numberLabel}</div>
                     <div class="card-preview" id="preview-${index}">${previewContent}</div>
@@ -2348,10 +1891,6 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                     <button class="upload-btn" onclick="document.getElementById('file-${index}').click()">
                         ${uploadBtnText}
                     </button>
-                    <div class="archive-toggle">
-                        <span>${card.archived ? getLang('archived', 'アーカイブ中', 'Archived') : ''}</span>
-                        <button class="btn" onclick="toggleArchive(${index}, ${!card.archived})">${archiveText}</button>
-                    </div>
                 `;
                 grid.appendChild(item);
             });
@@ -2365,16 +1904,6 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
         function updateCardDesc(index, value) {
             setDescriptionForLang(masterCards[index], value);
             saveMasterCards();
-        }
-
-        function toggleArchive(index, shouldArchive) {
-            masterCards[index].archived = shouldArchive;
-            saveMasterCards();
-            renderCards();
-            updateActiveCount();
-            syncSignificatorsWithActiveCards();
-            updateSignificatorDisplay();
-            resetLottery();
         }
         
         function selectImageFile(index, input) {
@@ -2546,8 +2075,6 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             currentSetName = setName;
             localStorage.setItem('oracleCurrentSet', currentSetName);
             updateActiveCount();
-            syncSignificatorsWithActiveCards();
-            updateSignificatorDisplay();
             renderSetsList();
             updateBackPreview();
             resetLottery();
@@ -2588,8 +2115,7 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                 presetCard.style.background = 'rgba(255,200,100,0.2)';
             }
             const presetName = currentLang === 'ja' ? LENORMAND_PRESET.nameJa : LENORMAND_PRESET.nameEn;
-            const lenormandCount = getLenormandActiveCards().length;
-            let presetHtml = `<h3>${presetName}</h3><p>${lenormandCount}${cardsText}</p>`;
+            let presetHtml = `<h3>${presetName}</h3><p>39${cardsText}</p>`;
             presetHtml += `<p style="color:#ffcc66;font-size:11px;">${presetText}</p>`;
             presetHtml += getLenormandThumbGridHtml();
             if (isUsingPreset) {
@@ -2609,10 +2135,7 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                     setCard.style.background = 'rgba(100,200,255,0.2)';
                 }
                 
-                const cardCount = cardSets[setName].filter(id => {
-                    const card = masterCards.find(c => c.id === id);
-                    return card && !card.archived;
-                }).length;
+                const cardCount = cardSets[setName].length;
                 
                 // デフォルトセットの表示名を言語に合わせる
                 const displayName = (setName === 'デフォルト') 
@@ -2634,7 +2157,6 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                 setCard.innerHTML = html;
                 list.appendChild(setCard);
             });
-            renderCardFilterSetOptions();
         }
         
         // タロットプリセットに切り替え
@@ -2644,8 +2166,6 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             localStorage.setItem('oracleIsPreset', 'true');
             renderSetsList();
             updateActiveCount();
-            syncSignificatorsWithActiveCards();
-            updateSignificatorDisplay();
             updateBackPreview();
             resetLottery();
         }
@@ -2682,10 +2202,10 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
         // 現在のアクティブカードを取得（プリセット対応）
         function getCurrentCards() {
             if (isUsingPreset) {
-                return getLenormandActiveCards();
+                return getLenormandCards();
             }
             const activeIds = cardSets[currentSetName] || [];
-            return masterCards.filter(c => activeIds.includes(c.id) && !c.archived);
+            return masterCards.filter(c => activeIds.includes(c.id));
         }
 
         function editSetCards() {
