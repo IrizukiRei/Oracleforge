@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ja">
+<meta charset="utf-8">
+<title>OracleForge Lenormand Injector</title>
+<body style="font-family:system-ui; padding:16px;">
+  <h2>OracleForgeにルノルマンJSONを埋め込む</h2>
+  <ol>
+    <li>oracleforge.html を選ぶ</li>
+    <li>lenormand-39-cards.json を選ぶ</li>
+    <li>「埋め込み版HTMLを作る」を押す</li>
+  </ol>
+
+  <p>
+    <input id="htmlFile" type="file" accept=".html">
+  </p>
+  <p>
+    <input id="jsonFile" type="file" accept=".json">
+  </p>
+
+  <button id="run" disabled>埋め込み版HTMLを作る</button>
+  <p id="msg"></p>
+
+<script>
+const htmlInput = document.getElementById('htmlFile');
+const jsonInput = document.getElementById('jsonFile');
+const runBtn = document.getElementById('run');
+const msg = document.getElementById('msg');
+
+function canRun(){
+  runBtn.disabled = !(htmlInput.files[0] && jsonInput.files[0]);
+}
+htmlInput.addEventListener('change', canRun);
+jsonInput.addEventListener('change', canRun);
+
+function downloadText(filename, text){
+  const blob = new Blob([text], {type:'text/html;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+}
+
+runBtn.addEventListener('click', async ()=>{
+  msg.textContent = '読み込み中…';
+  const htmlText = await htmlInput.files[0].text();
+  const jsonText = await jsonInput.files[0].text();
+
+  let data;
+  try { data = JSON.parse(jsonText); } catch(e){
+    msg.textContent = 'JSONが壊れてるか、別ファイル選んでる。';
+    return;
+  }
+  const master = data.masterCards;
+  if (!Array.isArray(master) || master.length === 0){
+    msg.textContent = 'このJSONに masterCards が無い。ビルダーの出力ファイルを選んで。';
+    return;
+  }
+
+  const embedded = master.map(c => ({
+    id: c.id,
+    name: c.name || c.nameEn || c.nameJa || '',
+    description: c.description || '',
+    imageData: c.imageData || ''
+  }));
+
+  const marker = "/*__LENORMAND_EMBED__*/";
+  if (!htmlText.includes(marker)){
+    msg.textContent = 'oracleforge.html に注入口が無い。次の手順の「注入口追加」を先にやって。';
+    return;
+  }
+
+  const payload = "window.__LENORMAND_EMBEDDED_CARDS__ = " + JSON.stringify(embedded) + ";\n";
+  const out = htmlText.replace(marker, marker + "\n" + payload);
+
+  downloadText('oracleforge_embedded.html', out);
+  msg.textContent = '完了！ oracleforge_embedded.html を使って。';
+});
+</script>
+</body>
+</html>
