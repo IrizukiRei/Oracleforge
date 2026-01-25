@@ -1481,13 +1481,13 @@
         };
         const I18N = {
             ja: {
-                languageLabel: '言語',
-                langName_ja: '日本語',
+                languageLabel: 'Language',
+                langName_ja: 'Japanese',
                 langName_en: 'English'
             },
             en: {
-                languageLabel: 'Language',
-                langName_ja: 'Japanese',
+                languageLabel: '言語',
+                langName_ja: '日本語',
                 langName_en: 'English'
             }
         };
@@ -1643,7 +1643,8 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             if (currentLang === 'ja') {
                 return normalized.ja || normalized.en || '';
             }
-            const lenormandFallback = cardId !== null ? lenormandDescEn[cardId] : '';
+            const key = cardId !== null ? String(cardId) : null;
+            const lenormandFallback = key !== null ? lenormandDescEn[key] : '';
             return normalized.en || lenormandFallback || normalized.ja || '';
         }
 
@@ -1902,6 +1903,26 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             }
             applyCardDensity();
         }
+
+        function normalizeLenormandSetEntries() {
+            const lenormandSetNames = ['ルノルマン', 'Lenormand'];
+            let updated = false;
+            lenormandSetNames.forEach(name => {
+                if (!cardSets[name]) return;
+                const ids = new Set(cardSets[name].map(id => Number(id)));
+                if (ids.has(39)) {
+                    ids.delete(39);
+                    ids.add(38);
+                    updated = true;
+                }
+                const normalizedIds = Array.from(ids);
+                if (normalizedIds.length !== cardSets[name].length) {
+                    updated = true;
+                }
+                cardSets[name] = normalizedIds;
+            });
+            return updated;
+        }
         
         // ホーム画面に戻る
         function goHome() {
@@ -1958,6 +1979,9 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             const savedSets = localStorage.getItem('oracleSets');
             if (savedSets) {
                 cardSets = JSON.parse(savedSets);
+                if (normalizeLenormandSetEntries()) {
+                    saveSets();
+                }
             } else {
                 cardSets = {'デフォルト': masterCards.map(c => c.id)};
                 saveSets();
@@ -2685,7 +2709,8 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             if (window.__LENORMAND_EMBEDDED_CARDS__ && window.__LENORMAND_EMBEDDED_CARDS__.length > 0) {
                 return window.__LENORMAND_EMBEDDED_CARDS__.map(c => {
                     const desc = normalizeDescription(c.description);
-                    desc.en = lenormandDescEn[c.id] ?? desc.en;
+                    const key = String(c.id);
+                    desc.en = lenormandDescEn[key] ?? desc.en;
                     const preset = presetMap.get(String(c.id));
                     const fallbackPersonName = c.id === 38 || c.name?.includes('人物') ? '00. Person' : c.name;
                     return {
@@ -2701,7 +2726,8 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             /// フォールバック: LENORMAND_PRESETを使用
             return LENORMAND_PRESET.cards.map(c => {
                 const desc = normalizeDescription(c.desc);
-                desc.en = lenormandDescEn[c.id] ?? desc.en;
+                const key = String(c.id);
+                desc.en = lenormandDescEn[key] ?? desc.en;
                 return {
                     id: c.id,
                     name: currentLang === 'ja' ? c.nameJa : c.nameEn,
