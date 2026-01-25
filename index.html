@@ -1228,6 +1228,13 @@
         let currentSpreadSize = 0;
         let drawnCards = [];
         let backCardImage = '';
+
+        // デフォルト裏面画像（base64）
+        const DEFAULT_BACK_IMAGE = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iNDAwIiB2aWV3Qm94PSIwIDAgMzAwIDQwMCI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJnIiB4MT0iMCUiIHkxPSIwJSIgeDI9IjEwMCUiIHkyPSIxMDAlIj48c3RvcCBvZmZzZXQ9IjAlIiBzdHlsZT0ic3RvcC1jb2xvcjojMGYyMDI3Ii8+PHN0b3Agb2Zmc2V0PSI1MCUiIHN0eWxlPSJzdG9wLWNvbG9yOiMxNTNhNGUiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiMxYzNkNWEiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cmVjdCBmaWxsPSJ1cmwoI2cpIiB3aWR0aD0iMzAwIiBoZWlnaHQ9IjQwMCIgcng9IjgiLz48cmVjdCB4PSI4IiB5PSI4IiB3aWR0aD0iMjg0IiBoZWlnaHQ9IjM4NCIgcng9IjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2M5YTg1YyIgc3Ryb2tlLXdpZHRoPSIyIi8+PGNpcmNsZSBjeD0iMTUwIiBjeT0iMjAwIiByPSI4MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjYzlhODVjIiBzdHJva2Utd2lkdGg9IjEiIG9wYWNpdHk9IjAuNiIvPjxjaXJjbGUgY3g9IjE1MCIgY3k9IjIwMCIgcj0iNjAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2M5YTg1YyIgc3Ryb2tlLXdpZHRoPSIxIiBvcGFjaXR5PSIwLjQiLz48cG9seWdvbiBwb2ludHM9IjE1MCwxMzAgMTc1LDE4NSAxMzUsMTU1IDE2NSwxNTUgMTI1LDE4NSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjYzlhODVjIiBzdHJva2Utd2lkdGg9IjEuNSIgb3BhY2l0eT0iMC43Ii8+PHBvbHlnb24gcG9pbnRzPSIxNTAsMjcwIDE3NSwyMTUgMTM1LDI0NSAxNjUsMjQ1IDEyNSwyMTUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2M5YTg1YyIgc3Ryb2tlLXdpZHRoPSIxLjUiIG9wYWNpdHk9IjAuNyIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iNTAiIHI9IjMiIGZpbGw9IiNjOWE4NWMiIG9wYWNpdHk9IjAuNSIvPjxjaXJjbGUgY3g9IjI1MCIgY3k9IjUwIiByPSIzIiBmaWxsPSIjYzlhODVjIiBvcGFjaXR5PSIwLjUiLz48Y2lyY2xlIGN4PSI1MCIgY3k9IjM1MCIgcj0iMyIgZmlsbD0iI2M5YTg1YyIgb3BhY2l0eT0iMC41Ii8+PGNpcmNsZSBjeD0iMjUwIiBjeT0iMzUwIiByPSIzIiBmaWxsPSIjYzlhODVjIiBvcGFjaXR5PSIwLjUiLz48L3N2Zz4=';
+
+        // ルノルマン英語説明（後から差し込み用）
+        let LENORMAND_DESC_EN = {};
+
         let useSignificator = false; // シグニフィケーター使用フラグ
         let useReversal = true; // 正逆を取るかどうか
         let currentLang = 'ja'; // 言語設定
@@ -1623,8 +1630,9 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
         function updateBackPreview() {
             const preview = document.getElementById('back-preview');
             if (!preview) return;
-            if (backCardImage) {
-                preview.innerHTML = `<img src="${backCardImage}">`;
+            const backImg = backCardImage || DEFAULT_BACK_IMAGE;
+            if (backImg) {
+                preview.innerHTML = `<img src="${backImg}">`;
             } else {
                 preview.innerHTML = '🔮';
             }
@@ -1966,19 +1974,45 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             resetLottery();
         }
         
-        // ルノルマンプリセットのカードを取得
-        // ルノルマンプリセットのカードを取得（埋め込みデータ優先）
+        // 説明文を言語に応じて取得するヘルパー関数
+        function getLocalizedDescription(card) {
+            const desc = card.description;
+            let ja = '';
+            let en = '';
+
+            // description が { ja, en } 形式の場合
+            if (desc && typeof desc === 'object') {
+                ja = desc.ja || '';
+                en = desc.en || '';
+            } else {
+                // 旧形式（string）の場合は日本語として扱う
+                ja = desc || '';
+            }
+
+            // LENORMAND_DESC_EN から英語説明を補完
+            if (!en && LENORMAND_DESC_EN[card.id]) {
+                en = LENORMAND_DESC_EN[card.id];
+            }
+
+            // 言語に応じて返す（英語が空なら日本語にフォールバック）
+            if (currentLang === 'en') {
+                return en || ja;
+            }
+            return ja;
+        }
+
+        // ルノルマンプリセットのカードを取得（埋め込みデータ優先、多言語対応）
         function getLenormandCards() {
             // 埋め込みカードデータが存在すれば優先使用
             if (window.__LENORMAND_EMBEDDED_CARDS__ && window.__LENORMAND_EMBEDDED_CARDS__.length > 0) {
                 return window.__LENORMAND_EMBEDDED_CARDS__.map(c => ({
                     id: c.id,
                     name: c.name,
-                    description: c.description,
+                    description: getLocalizedDescription(c),
                     imageData: c.imageData
                 }));
             }
-            /// フォールバック: LENORMAND_PRESETを使用
+            // フォールバック: LENORMAND_PRESETを使用
             return LENORMAND_PRESET.cards.map(c => ({
                 id: c.id,
                 name: currentLang === 'ja' ? c.nameJa : c.nameEn,
@@ -2330,8 +2364,9 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                     cursor:pointer;
                     display:flex;align-items:center;justify-content:center;
                 `;
-                if (backCardImage) {
-                    card.innerHTML = `<img src="${backCardImage}" style="width:100%;height:100%;object-fit:cover;border-radius:6px;">`;
+                const backImg = backCardImage || DEFAULT_BACK_IMAGE;
+                if (backImg) {
+                    card.innerHTML = `<img src="${backImg}" style="width:100%;height:100%;object-fit:cover;border-radius:6px;">`;
                 } else {
                     card.innerHTML = '🔮';
                     card.style.fontSize = '24px';
@@ -2510,8 +2545,9 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             
             const cardBack = document.createElement('div');
             cardBack.className = 'card-face card-back';
-            if (backCardImage) {
-                cardBack.innerHTML = `<img src="${backCardImage}">`;
+            const backImg = backCardImage || DEFAULT_BACK_IMAGE;
+            if (backImg) {
+                cardBack.innerHTML = `<img src="${backImg}">`;
             } else {
                 cardBack.innerHTML = '🔮';
             }
