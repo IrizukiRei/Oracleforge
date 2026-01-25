@@ -2648,17 +2648,19 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
         // ルノルマンプリセットのカードを取得
         // ルノルマンプリセットのカードを取得（埋め込みデータ優先）
         function getLenormandCards() {
+            const presetMap = new Map(LENORMAND_PRESET.cards.map(card => [String(card.id), card]));
             // 埋め込みカードデータが存在すれば優先使用
             if (window.__LENORMAND_EMBEDDED_CARDS__ && window.__LENORMAND_EMBEDDED_CARDS__.length > 0) {
                 return window.__LENORMAND_EMBEDDED_CARDS__.map(c => {
                     const desc = normalizeDescription(c.description);
                     desc.en = lenormandDescEn[c.id] ?? desc.en;
-                    const preset = LENORMAND_PRESET.cards.find(card => card.id === c.id);
+                    const preset = presetMap.get(String(c.id));
+                    const fallbackPersonName = c.id === 38 || c.name?.includes('人物') ? '00. Person' : c.name;
                     return {
                         id: c.id,
                         name: currentLang === 'ja'
                             ? (preset?.nameJa ?? c.name)
-                            : (preset?.nameEn ?? c.name),
+                            : (preset?.nameEn ?? fallbackPersonName),
                         description: desc,
                         imageData: c.imageData
                     };
