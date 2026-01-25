@@ -881,6 +881,7 @@
             margin-top: 10px;
         }
     </style>
+    <script src="lenormand-embedded.js"></script>
 </head>
 <body>
     <!-- タイトル画面 -->
@@ -1966,12 +1967,23 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
         }
         
         // ルノルマンプリセットのカードを取得
+        // ルノルマンプリセットのカードを取得（埋め込みデータ優先）
         function getLenormandCards() {
+            // 埋め込みカードデータが存在すれば優先使用
+            if (window.__LENORMAND_EMBEDDED_CARDS__ && window.__LENORMAND_EMBEDDED_CARDS__.length > 0) {
+                return window.__LENORMAND_EMBEDDED_CARDS__.map(c => ({
+                    id: c.id,
+                    name: c.name,
+                    description: c.description,
+                    imageData: c.imageData
+                }));
+            }
+            /// フォールバック: LENORMAND_PRESETを使用
             return LENORMAND_PRESET.cards.map(c => ({
                 id: c.id,
                 name: currentLang === 'ja' ? c.nameJa : c.nameEn,
                 description: c.desc,
-                imageData: '' // 画像は後で追加
+                imageData: ''
             }));
         }
         
