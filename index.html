@@ -1672,7 +1672,7 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
         }
 
         function isLenormandOptionalCard(cardId) {
-            return cardId === 36 || cardId === 37 || cardId === 39;
+            return cardId === 36 || cardId === 37 || cardId === 38;
         }
 
         function isLenormandCardEnabled(cardId) {
@@ -1681,7 +1681,7 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             }
             if (cardId === 36) return lenormandOptional.extraGentleman;
             if (cardId === 37) return lenormandOptional.extraLady;
-            if (cardId === 39) return lenormandOptional.person;
+            if (cardId === 38) return lenormandOptional.person;
             return true;
         }
 
@@ -2650,9 +2650,12 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                 return window.__LENORMAND_EMBEDDED_CARDS__.map(c => {
                     const desc = normalizeDescription(c.description);
                     desc.en = lenormandDescEn[c.id] ?? desc.en;
+                    const preset = LENORMAND_PRESET.cards.find(card => card.id === c.id);
                     return {
                         id: c.id,
-                        name: c.name,
+                        name: currentLang === 'ja'
+                            ? (preset?.nameJa ?? c.name)
+                            : (preset?.nameEn ?? c.name),
                         description: desc,
                         imageData: c.imageData
                     };
