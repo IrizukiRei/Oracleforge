@@ -1612,7 +1612,7 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             if (currentLang === 'ja') {
                 return normalized.ja || normalized.en || '';
             }
-            const lenormandFallback = cardId !== null ? lenormandDescEn[cardId] : '';
+            const lenormandFallback = cardId !== null ? lenormandDescEn[String(cardId)] : '';
             return normalized.en || lenormandFallback || normalized.ja || '';
         }
 
@@ -2652,7 +2652,7 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             if (window.__LENORMAND_EMBEDDED_CARDS__ && window.__LENORMAND_EMBEDDED_CARDS__.length > 0) {
                 return window.__LENORMAND_EMBEDDED_CARDS__.map(c => {
                     const desc = normalizeDescription(c.description);
-                    desc.en = lenormandDescEn[c.id] ?? desc.en;
+                    desc.en = lenormandDescEn[String(c.id)] ?? desc.en;
                     const preset = LENORMAND_PRESET.cards.find(card => card.id === c.id);
                     return {
                         id: c.id,
@@ -2667,7 +2667,7 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             /// フォールバック: LENORMAND_PRESETを使用
             return LENORMAND_PRESET.cards.map(c => {
                 const desc = normalizeDescription(c.desc);
-                desc.en = lenormandDescEn[c.id] ?? desc.en;
+                desc.en = lenormandDescEn[String(c.id)] ?? desc.en;
                 return {
                     id: c.id,
                     name: currentLang === 'ja' ? c.nameJa : c.nameEn,
