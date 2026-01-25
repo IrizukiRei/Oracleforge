@@ -136,6 +136,9 @@
             color: #ccc;
             line-height: 1.4;
             min-height: 32px;
+            white-space: normal;
+            overflow-wrap: anywhere;
+            word-break: break-word;
         }
 
         .preset-thumb-grid {
@@ -1411,6 +1414,21 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             return currentLang === 'ja' ? ja : en;
         }
 
+        function getLenormandCardName(cardId, fallbackName) {
+            const presetCard = LENORMAND_PRESET.cards.find(card => card.id === cardId);
+            if (!presetCard) return fallbackName;
+            return currentLang === 'ja' ? presetCard.nameJa : presetCard.nameEn;
+        }
+
+        function getCardNumberLabel(card, fallbackNumber) {
+            const name = card?.name ?? '';
+            const match = name.match(/^\s*(\d+)\s*(?:[.\-:]\s*)?/);
+            if (match) {
+                return match[1];
+            }
+            return fallbackNumber;
+        }
+
         function normalizeDescription(desc) {
             if (!desc) return {ja: '', en: ''};
             if (typeof desc === 'string') {
@@ -1448,8 +1466,17 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             }));
         }
 
-        function loadLenormandDescEn() {
-            lenormandDescEn = {...LENORMAND_DESC_EN};
+        async function loadLenormandDescEn() {
+            try {
+                const response = await fetch('lenormand-desc-en.json', {cache: 'no-store'});
+                if (!response.ok) {
+                    throw new Error('Failed to load lenormand-desc-en.json');
+                }
+                const data = await response.json();
+                lenormandDescEn = {...LENORMAND_DESC_EN, ...data};
+            } catch (error) {
+                lenormandDescEn = {...LENORMAND_DESC_EN};
+            }
         }
 
         function resolveBackImage() {
@@ -1828,8 +1855,9 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                 const previewContent = card.imageData
                     ? `<img src="${card.imageData}">`
                     : card.name;
+                const numberLabel = getCardNumberLabel(card, String(card.id + 1));
                 item.innerHTML = `
-                    <div class="card-number">No.${card.id + 1}</div>
+                    <div class="card-number">No.${numberLabel}</div>
                     <div class="card-preview">${previewContent}</div>
                     <div class="preset-name">${card.name}</div>
                     <div class="preset-desc">${getDescriptionForLang(card.description) || noDescText}</div>
@@ -1865,9 +1893,10 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                 const namePlaceholder = currentLang === 'ja' ? '名前' : 'Name';
                 const descPlaceholder = currentLang === 'ja' ? '説明' : 'Description';
                 const uploadBtnText = currentLang === 'ja' ? '画像選択' : 'Select Image';
+                const numberLabel = getCardNumberLabel(card, String(index + 1));
                 
                 item.innerHTML = `
-                    <div class="card-number">No.${index + 1}</div>
+                    <div class="card-number">No.${numberLabel}</div>
                     <div class="card-preview" id="preview-${index}">${previewContent}</div>
                     <input type="text" placeholder="${namePlaceholder}" value="${card.name}" 
                            onchange="updateCardName(${index}, this.value)">
@@ -2166,7 +2195,7 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                     desc.en = lenormandDescEn[c.id] ?? desc.en;
                     return {
                         id: c.id,
-                        name: c.name,
+                        name: getLenormandCardName(c.id, c.name),
                         description: desc,
                         imageData: c.imageData
                     };
@@ -2203,10 +2232,11 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             let checkboxes = '';
             masterCards.forEach(card => {
                 const checked = currentCardIds.includes(card.id) ? 'checked' : '';
+                const numberLabel = getCardNumberLabel(card, String(card.id + 1));
                 checkboxes += `
                     <label style="display:flex;align-items:center;padding:10px;background:rgba(255,255,255,0.05);margin:5px 0;border-radius:4px;">
                         <input type="checkbox" value="${card.id}" ${checked} style="margin-right:10px;width:20px;height:20px;">
-                        <span style="font-size:14px;">No.${card.id + 1}: ${card.name}</span>
+                        <span style="font-size:14px;">No.${numberLabel}: ${card.name}</span>
                     </label>
                 `;
             });
