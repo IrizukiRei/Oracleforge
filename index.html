@@ -1607,10 +1607,13 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             return {ja: '', en: ''};
         }
 
-        function getDescriptionForLang(desc) {
+        function getDescriptionForLang(desc, cardId = null) {
             const normalized = normalizeDescription(desc);
-            const text = currentLang === 'ja' ? normalized.ja : normalized.en;
-            return text || normalized.ja || '';
+            if (currentLang === 'ja') {
+                return normalized.ja || normalized.en || '';
+            }
+            const lenormandFallback = cardId !== null ? lenormandDescEn[cardId] : '';
+            return normalized.en || lenormandFallback || normalized.ja || '';
         }
 
         function setDescriptionForLang(card, value) {
@@ -1672,7 +1675,7 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
         }
 
         function isLenormandOptionalCard(cardId) {
-            return cardId === 36 || cardId === 37 || cardId === 39;
+            return cardId === 36 || cardId === 37 || cardId === 38;
         }
 
         function isLenormandCardEnabled(cardId) {
@@ -1681,7 +1684,7 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             }
             if (cardId === 36) return lenormandOptional.extraGentleman;
             if (cardId === 37) return lenormandOptional.extraLady;
-            if (cardId === 39) return lenormandOptional.person;
+            if (cardId === 38) return lenormandOptional.person;
             return true;
         }
 
@@ -2273,7 +2276,7 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                     <div class="card-number">No.${numberLabel}</div>
                     <div class="card-preview">${previewContent}</div>
                     <div class="preset-name">${card.name}</div>
-                    <div class="preset-desc">${getDescriptionForLang(card.description) || noDescText}</div>
+                    <div class="preset-desc">${getDescriptionForLang(card.description, card.id) || noDescText}</div>
                 `;
                 grid.appendChild(item);
             });
@@ -2650,9 +2653,12 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                 return window.__LENORMAND_EMBEDDED_CARDS__.map(c => {
                     const desc = normalizeDescription(c.description);
                     desc.en = lenormandDescEn[c.id] ?? desc.en;
+                    const preset = LENORMAND_PRESET.cards.find(card => card.id === c.id);
                     return {
                         id: c.id,
-                        name: c.name,
+                        name: currentLang === 'ja'
+                            ? (preset?.nameJa ?? c.name)
+                            : (preset?.nameEn ?? c.name),
                         description: desc,
                         imageData: c.imageData
                     };
@@ -3278,7 +3284,10 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                 const label = positions[i] ? positions[i].label : (i + 1);
                 const sigStyle = card.isSignificator ? 'border-left:3px solid rgba(255,200,100,0.8);' : '';
                 const sigBadge = card.isSignificator ? `<span style="background:rgba(255,200,100,0.3);padding:2px 6px;border-radius:4px;font-size:11px;margin-left:5px;">${sigBadgeText}</span>` : '';
-                html += `<div class="card-meaning" style="${sigStyle}"><strong>${label}: ${card.name} (${pos})${sigBadge}</strong><br>${getDescriptionForLang(card.description) || noDescText}</div>`;
+                const descText = isUsingPreset
+                    ? getDescriptionForLang(card.description, card.id)
+                    : getDescriptionForLang(card.description);
+                html += `<div class="card-meaning" style="${sigStyle}"><strong>${label}: ${card.name} (${pos})${sigBadge}</strong><br>${descText || noDescText}</div>`;
             });
             
             // 補足カード表示
@@ -3288,7 +3297,10 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                 supplementCards.forEach((card, i) => {
                     const pos = card.isReversed ? reversedText : uprightText;
                     const supLabel = currentLang === 'ja' ? `補足${i + 1}` : `Sup.${i + 1}`;
-                    html += `<div class="card-meaning" style="border-left:3px solid rgba(255,200,100,0.5);"><strong>${supLabel}: ${card.name} (${pos})</strong><br>${getDescriptionForLang(card.description) || noDescText}</div>`;
+                    const supDescText = isUsingPreset
+                        ? getDescriptionForLang(card.description, card.id)
+                        : getDescriptionForLang(card.description);
+                    html += `<div class="card-meaning" style="border-left:3px solid rgba(255,200,100,0.5);"><strong>${supLabel}: ${card.name} (${pos})</strong><br>${supDescText || noDescText}</div>`;
                 });
             }
             
