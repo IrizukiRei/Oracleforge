@@ -1191,6 +1191,35 @@
                 </div>
             </div>
 
+            <div class="info-box">
+                <h3>🔊 <span data-ja="サウンド設定" data-en="Sound Settings">サウンド設定</span></h3>
+                <div class="sound-options" style="display:flex;flex-direction:column;gap:12px;">
+                    <label style="display:flex;align-items:center;gap:8px;">
+                        <input type="checkbox" id="sound-bgm" onchange="audioManager.toggleBGM(this.checked)">
+                        <span data-ja="BGM（背景音楽）" data-en="BGM (Background Music)">BGM（背景音楽）</span>
+                    </label>
+                    <div style="display:flex;align-items:center;gap:8px;margin-left:24px;">
+                        <span style="font-size:12px;color:#888;" data-ja="音量:" data-en="Volume:">音量:</span>
+                        <input type="range" id="sound-bgm-volume" min="0" max="100" value="25"
+                               style="flex:1;max-width:120px;"
+                               onchange="audioManager.setBGMVolume(this.value/100)">
+                        <span id="sound-bgm-volume-label" style="font-size:12px;width:35px;">25%</span>
+                    </div>
+                    <label style="display:flex;align-items:center;gap:8px;">
+                        <input type="checkbox" id="sound-se" onchange="audioManager.toggleSE(this.checked)">
+                        <span data-ja="効果音（タップ・めくり音など）" data-en="Sound Effects (tap, flip, etc.)">効果音（タップ・めくり音など）</span>
+                    </label>
+                    <div style="display:flex;align-items:center;gap:8px;margin-left:24px;">
+                        <span style="font-size:12px;color:#888;" data-ja="音量:" data-en="Volume:">音量:</span>
+                        <input type="range" id="sound-se-volume" min="0" max="100" value="60"
+                               style="flex:1;max-width:120px;"
+                               onchange="audioManager.setSEVolume(this.value/100)">
+                        <span id="sound-se-volume-label" style="font-size:12px;width:35px;">60%</span>
+                    </div>
+                    <p style="font-size:11px;color:#888;margin:0;" data-ja="※ブラウザ制限により、初回タップ後に音声が再生されます" data-en="* Audio plays after first tap (browser restriction)">※ブラウザ制限により、初回タップ後に音声が再生されます</p>
+                </div>
+            </div>
+
             <div class="info-box" style="background:rgba(255,200,100,0.12);border-color:rgba(255,200,100,0.35);">
                 <h3 data-ja="🃏 ルノルマンプリセット（編集不可）" data-en="🃏 Lenormand Preset (Read-only)">🃏 ルノルマンプリセット（編集不可）</h3>
                 <p style="margin-bottom:0;" data-ja="カード画像一覧（説明は現在の言語で表示）" data-en="Image list (descriptions shown in the current language)">カード画像一覧（説明は現在の言語で表示）</p>
@@ -1429,8 +1458,18 @@
     <script>
         // グローバル変数
         let masterCards = [];
+        let activeCount = 10; // 使用枚数（allCardsを削らず、この枚数だけ使う）
         let cardSets = {};
         let currentSetName = 'デフォルト';
+
+        // 音声設定（BGM/SE）
+        let soundSettings = {
+            bgm: true,
+            se: true,
+            bgmVolume: 0.25,
+            seVolume: 0.6
+        };
+        let audioManager = null; // 後で初期化
         let currentSpread = null;
         let currentSpreadSize = 0;
         let drawnCards = [];
@@ -1885,9 +1924,179 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             const title = document.getElementById('titleScreen');
             title.classList.add('hidden');
         }
-        
+
+        // ====== 音声管理システム (AudioManager) ======
+        class AudioManager {
+            constructor() {
+                this.bgm = null;
+                this.bgmPath = 'audio/bgm.mp3';
+                this.sePaths = {
+                    tap: 'audio/se_tap.mp3',
+                    flip: 'audio/se_flip.mp3',
+                    confirm: 'audio/se_confirm.mp3'
+                };
+                this.seCache = {};
+                this.userInteracted = false;
+                this.bgmPlaying = false;
+            }
+
+            // 設定をlocalStorageから読み込み
+            loadSettings() {
+                const saved = localStorage.getItem('oracleSoundSettings');
+                if (saved) {
+                    try {
+                        const parsed = JSON.parse(saved);
+                        soundSettings = { ...soundSettings, ...parsed };
+                    } catch(e) {
+                        console.error('Sound settings parse error:', e);
+                    }
+                }
+            }
+
+            // 設定をlocalStorageに保存
+            saveSettings() {
+                localStorage.setItem('oracleSoundSettings', JSON.stringify(soundSettings));
+            }
+
+            // 初回ユーザー操作時に呼び出し（ブラウザ制限対応）
+            onUserInteraction() {
+                if (this.userInteracted) return;
+                this.userInteracted = true;
+                // BGMがONなら開始
+                if (soundSettings.bgm) {
+                    this.startBGM();
+                }
+            }
+
+            // BGM開始（1インスタンスで管理、二重再生防止）
+            startBGM() {
+                if (!soundSettings.bgm || !this.userInteracted) return;
+                if (this.bgmPlaying) return;
+
+                if (!this.bgm) {
+                    this.bgm = new Audio(this.bgmPath);
+                    this.bgm.loop = true;
+                }
+                this.bgm.volume = soundSettings.bgmVolume;
+                this.bgm.play().then(() => {
+                    this.bgmPlaying = true;
+                }).catch(e => {
+                    console.log('BGM play failed (user interaction required):', e.message);
+                });
+            }
+
+            // BGM停止
+            stopBGM() {
+                if (this.bgm) {
+                    this.bgm.pause();
+                    this.bgm.currentTime = 0;
+                    this.bgmPlaying = false;
+                }
+            }
+
+            // BGM設定変更時
+            toggleBGM(enabled) {
+                soundSettings.bgm = enabled;
+                this.saveSettings();
+                if (enabled) {
+                    this.startBGM();
+                } else {
+                    this.stopBGM();
+                }
+            }
+
+            // SE設定変更時
+            toggleSE(enabled) {
+                soundSettings.se = enabled;
+                this.saveSettings();
+            }
+
+            // BGMボリューム変更
+            setBGMVolume(vol) {
+                soundSettings.bgmVolume = vol;
+                if (this.bgm) {
+                    this.bgm.volume = vol;
+                }
+                this.saveSettings();
+            }
+
+            // SEボリューム変更
+            setSEVolume(vol) {
+                soundSettings.seVolume = vol;
+                this.saveSettings();
+            }
+
+            // SE再生
+            playSE(type) {
+                if (!soundSettings.se) return;
+                const path = this.sePaths[type];
+                if (!path) return;
+
+                // キャッシュがあれば再利用、なければ新規作成
+                // 同時再生のため毎回新しいAudioを使う
+                const se = new Audio(path);
+                se.volume = soundSettings.seVolume;
+                se.play().catch(e => {
+                    // console.log('SE play failed:', e.message);
+                });
+            }
+
+            // タップSE
+            playTap() {
+                this.playSE('tap');
+            }
+
+            // カードめくりSE
+            playFlip() {
+                this.playSE('flip');
+            }
+
+            // 確定SE
+            playConfirm() {
+                this.playSE('confirm');
+            }
+        }
+
+        // 音声設定UIを更新
+        function updateSoundSettingsUI() {
+            const bgmCheck = document.getElementById('sound-bgm');
+            const seCheck = document.getElementById('sound-se');
+            const bgmVolume = document.getElementById('sound-bgm-volume');
+            const seVolume = document.getElementById('sound-se-volume');
+            const bgmLabel = document.getElementById('sound-bgm-volume-label');
+            const seLabel = document.getElementById('sound-se-volume-label');
+
+            if (bgmCheck) bgmCheck.checked = soundSettings.bgm;
+            if (seCheck) seCheck.checked = soundSettings.se;
+            if (bgmVolume) {
+                bgmVolume.value = Math.round(soundSettings.bgmVolume * 100);
+                if (bgmLabel) bgmLabel.textContent = bgmVolume.value + '%';
+            }
+            if (seVolume) {
+                seVolume.value = Math.round(soundSettings.seVolume * 100);
+                if (seLabel) seLabel.textContent = seVolume.value + '%';
+            }
+
+            // スライダーの変更でラベルも更新
+            if (bgmVolume) {
+                bgmVolume.addEventListener('input', function() {
+                    if (bgmLabel) bgmLabel.textContent = this.value + '%';
+                });
+            }
+            if (seVolume) {
+                seVolume.addEventListener('input', function() {
+                    if (seLabel) seLabel.textContent = this.value + '%';
+                });
+            }
+        }
+
         // 初期化
         function init() {
+            // 音声マネージャー初期化
+            audioManager = new AudioManager();
+            audioManager.loadSettings();
+            updateSoundSettingsUI();
+
             // 言語設定を読み込み
             const savedLang = localStorage.getItem('oracleLang');
             if (savedLang) {
@@ -1898,18 +2107,29 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
 
             loadLenormandOptional();
             updateLenormandOptionUI();
-            
+
             // プリセット使用フラグを読み込み
             const savedPreset = localStorage.getItem('oracleIsPreset');
             if (savedPreset === 'true') {
                 isUsingPreset = true;
                 currentSetName = currentLang === 'ja' ? 'ルノルマン' : 'Lenormand';
             }
-            
-            const savedMaster = localStorage.getItem('oracleCards');
-            if (savedMaster) {
-                masterCards = JSON.parse(savedMaster);
+
+            // ====== カードデータの互換移行処理 ======
+            // 旧キー(oracleCards) → 新キー(oracleAllCards)への移行
+            const savedAllCards = localStorage.getItem('oracleAllCards');
+            const savedOldCards = localStorage.getItem('oracleCards');
+
+            if (savedAllCards) {
+                // 新キーが存在 → 新形式で読み込み
+                masterCards = JSON.parse(savedAllCards);
+            } else if (savedOldCards) {
+                // 旧キーのみ存在 → 移行処理
+                masterCards = JSON.parse(savedOldCards);
+                // 新キーに保存（旧キーは残す：後方互換性のため）
+                localStorage.setItem('oracleAllCards', savedOldCards);
             } else {
+                // 初回起動：デフォルト10枚作成
                 for (let i = 0; i < 10; i++) {
                     masterCards.push({
                         id: i,
@@ -1922,6 +2142,23 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                 saveMasterCards();
             }
             normalizeMasterCards();
+
+            // activeCount（使用枚数）を読み込み
+            const savedActiveCount = localStorage.getItem('oracleActiveCount');
+            if (savedActiveCount) {
+                activeCount = parseInt(savedActiveCount, 10);
+            } else {
+                // 移行時：既存データがあればその枚数をactiveCountに
+                activeCount = masterCards.length;
+                localStorage.setItem('oracleActiveCount', String(activeCount));
+            }
+            // activeCountがmasterCards.lengthを超える場合は調整
+            if (activeCount > masterCards.length) {
+                activeCount = masterCards.length;
+            }
+            // UI更新
+            const countInput = document.getElementById('card-count-input');
+            if (countInput) countInput.value = activeCount;
 
             const savedSets = localStorage.getItem('oracleSets');
             if (savedSets) {
@@ -1989,10 +2226,20 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
 
         function saveMasterCards() {
             try {
-                localStorage.setItem('oracleCards', JSON.stringify(masterCards));
+                const data = JSON.stringify(masterCards);
+                // 新キー（メイン）と旧キー（後方互換）両方に保存
+                localStorage.setItem('oracleAllCards', data);
+                localStorage.setItem('oracleCards', data);
             } catch(e) {
-                alert('保存容量を超えました。画像サイズを小さくしてください。');
+                alert(currentLang === 'ja'
+                    ? '保存容量を超えました。画像サイズを小さくしてください。'
+                    : 'Storage limit exceeded. Please reduce image sizes.');
             }
+        }
+
+        // activeCountを保存
+        function saveActiveCount() {
+            localStorage.setItem('oracleActiveCount', String(activeCount));
         }
 
         function saveSets() {
@@ -2229,9 +2476,11 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                 alert(currentLang === 'ja' ? '1〜150枚で設定してください' : 'Please set between 1-150 cards');
                 return;
             }
-            
+
             const currentCount = masterCards.length;
             const cardPrefix = currentLang === 'ja' ? 'カード' : 'Card';
+
+            // 枚数を増やす場合：新しいカードを追加
             if (count > currentCount) {
                 for (let i = currentCount; i < count; i++) {
                     masterCards.push({
@@ -2242,15 +2491,26 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                         archived: false
                     });
                 }
-            } else if (count < currentCount) {
-                masterCards = masterCards.slice(0, count);
-                Object.keys(cardSets).forEach(setName => {
-                    cardSets[setName] = cardSets[setName].filter(id => id < count);
-                });
+                saveMasterCards();
             }
-            
-            saveMasterCards();
-            saveSets();
+            // 枚数を減らす場合：カードは削除しない、activeCountのみ変更
+            // ※masterCardsは不変に保つ（重要！）
+            else if (count < activeCount) {
+                // 安心文言を表示
+                const msg = currentLang === 'ja'
+                    ? '枚数を減らしてもカードデータは削除されません。\n展開やくじで使う枚数が変わるだけです。'
+                    : 'Reducing the count does not delete card data.\nIt only changes how many cards are used in spreads and draws.';
+                alert(msg);
+            }
+
+            // activeCountを更新
+            activeCount = count;
+            saveActiveCount();
+
+            // カードセットはそのまま維持（削除しない）
+            // 注：activeCount外のカードIDがセットにあっても、
+            // 展開時にはactiveCount内のカードのみ使用される
+
             renderCards();
             updateActiveCount();
             updateStorageInfo();
@@ -2394,12 +2654,18 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
         }
         
         function showScreen(screen) {
+            // タップSE再生
+            if (audioManager) {
+                audioManager.onUserInteraction();
+                audioManager.playTap();
+            }
+
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.nav-tabs button').forEach(b => b.classList.remove('active'));
-            
+
             document.getElementById(`${screen}-screen`).classList.add('active');
             event.target.classList.add('active');
-            
+
             if (screen === 'spread') {
                 updateActiveCount();
             } else if (screen === 'sets') {
@@ -2470,12 +2736,18 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
         }
         
         function drawLottery() {
+            // くじ引きSE
+            if (audioManager) {
+                audioManager.onUserInteraction();
+                audioManager.playFlip();
+            }
+
             const count = parseInt(document.getElementById('lottery-count').value);
             if (count <= 0 || lotteryPool.length < count) {
                 alert(currentLang === 'ja' ? 'カードが足りません' : 'Not enough cards');
                 return;
             }
-            
+
             const resultDiv = document.getElementById('lottery-result');
             
             for (let i = 0; i < count; i++) {
@@ -2683,7 +2955,17 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                 return getLenormandActiveCards();
             }
             const activeIds = cardSets[currentSetName] || [];
-            return masterCards.filter(c => activeIds.includes(c.id) && !c.archived);
+            // activeCount範囲内のカードのみを使用（IDがactiveCount未満のもの）
+            return masterCards.filter(c =>
+                c.id < activeCount &&
+                activeIds.includes(c.id) &&
+                !c.archived
+            );
+        }
+
+        // activeCount範囲内の全カード（セット関係なく）を取得
+        function getActiveRangeCards() {
+            return masterCards.filter(c => c.id < activeCount);
         }
 
         function editSetCards() {
@@ -2969,6 +3251,12 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
         }
         
         function shuffleAndDraw() {
+            // タップSE再生
+            if (audioManager) {
+                audioManager.onUserInteraction();
+                audioManager.playTap();
+            }
+
             // 補足カードをリセット
             supplementCards = [];
             const supArea = document.getElementById('supplement-area');
@@ -3182,9 +3470,14 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
         }
         
         function drawCard(index, card, instant) {
+            // カードめくりSE再生
+            if (audioManager && !instant) {
+                audioManager.playFlip();
+            }
+
             const slot = document.getElementById(`slot-${index}`);
             if (!slot) return;
-            
+
             slot.classList.add('filled');
             if (card.isSignificator) {
                 slot.style.boxShadow = '0 0 15px rgba(255,200,100,0.8)';
@@ -3247,9 +3540,14 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
         const MAX_SUPPLEMENT = 3;
         
         function showResults() {
+            // 結果表示時の確定SE
+            if (audioManager) {
+                audioManager.playConfirm();
+            }
+
             const resultDiv = document.getElementById('result-info');
             resultDiv.style.display = 'block';
-            
+
             const resultTitle = currentLang === 'ja' ? '結果' : 'Results';
             let html = `<h3>${resultTitle}</h3>`;
             
@@ -3531,6 +3829,11 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
         // タイトル画面から開始
         function startApp() {
             console.log('startApp called');
+            // 初回ユーザー操作を検知（ブラウザ制限対応）
+            if (audioManager) {
+                audioManager.onUserInteraction();
+                audioManager.playConfirm();
+            }
             const title = document.getElementById('titleScreen');
             if (title) {
                 title.style.transition = 'opacity 0.5s';
@@ -3576,16 +3879,18 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
         // エクスポート機能
         function exportData() {
             const data = {
-                version: 1,
+                version: 2, // バージョンアップ（activeCount追加）
                 exportDate: new Date().toISOString(),
                 masterCards: masterCards,
+                activeCount: activeCount, // 使用枚数
                 cardSets: cardSets,
                 currentSetName: currentSetName,
                 backCardImage: backCardImage,
                 significatorIds: significatorIds,
-                crystals: JSON.parse(localStorage.getItem('oracleCrystals') || '[]')
+                crystals: JSON.parse(localStorage.getItem('oracleCrystals') || '[]'),
+                soundSettings: soundSettings // 音声設定
             };
-            
+
             const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -3595,34 +3900,51 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-            
-            alert('エクスポート完了！\nファイルをスマホに送ってインポートしてください');
+
+            const msg = currentLang === 'ja'
+                ? 'エクスポート完了！\nファイルをスマホに送ってインポートしてください'
+                : 'Export complete!\nSend the file to your phone and import it.';
+            alert(msg);
         }
         
         // インポート機能
         function importData(input) {
             const file = input.files[0];
             if (!file) return;
-            
+
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
                     const data = JSON.parse(e.target.result);
-                    
+
                     if (!data.masterCards || !data.cardSets) {
-                        alert('無効なファイル形式です');
+                        const msg = currentLang === 'ja' ? '無効なファイル形式です' : 'Invalid file format';
+                        alert(msg);
                         return;
                     }
-                    
-                    if (!confirm('現在のデータを上書きしますか？')) {
+
+                    const confirmMsg = currentLang === 'ja' ? '現在のデータを上書きしますか？' : 'Overwrite current data?';
+                    if (!confirm(confirmMsg)) {
                         return;
                     }
-                    
+
                     masterCards = data.masterCards;
                     normalizeMasterCards();
                     cardSets = data.cardSets;
                     currentSetName = data.currentSetName || 'デフォルト';
                     backCardImage = data.backCardImage ?? null;
+
+                    // activeCount（使用枚数）のインポート
+                    if (data.activeCount !== undefined) {
+                        activeCount = data.activeCount;
+                    } else {
+                        // 旧形式：masterCards.lengthをactiveCountに
+                        activeCount = masterCards.length;
+                    }
+                    saveActiveCount();
+                    const countInput = document.getElementById('card-count-input');
+                    if (countInput) countInput.value = activeCount;
+
                     // 旧形式(単数)と新形式(配列)の両方に対応
                     if (data.significatorIds) {
                         significatorIds = data.significatorIds;
@@ -3631,7 +3953,16 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                     } else {
                         significatorIds = [];
                     }
-                    
+
+                    // 音声設定のインポート
+                    if (data.soundSettings) {
+                        soundSettings = { ...soundSettings, ...data.soundSettings };
+                        if (audioManager) {
+                            audioManager.saveSettings();
+                        }
+                        updateSoundSettingsUI();
+                    }
+
                     saveMasterCards();
                     saveSets();
                     localStorage.setItem('oracleCurrentSet', currentSetName);
@@ -3648,17 +3979,21 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                     if (data.crystals) {
                         localStorage.setItem('oracleCrystals', JSON.stringify(data.crystals));
                     }
-                    
+
                     renderCards();
                     renderLenormandGrid();
                     updateActiveCount();
                     updateBackPreview();
                     updateStorageInfo();
                     updateSignificatorDisplay();
-                    
-                    alert('インポート完了！');
+
+                    const successMsg = currentLang === 'ja' ? 'インポート完了！' : 'Import complete!';
+                    alert(successMsg);
                 } catch(err) {
-                    alert('ファイルの読み込みに失敗しました: ' + err.message);
+                    const errorMsg = currentLang === 'ja'
+                        ? 'ファイルの読み込みに失敗しました: '
+                        : 'Failed to load file: ';
+                    alert(errorMsg + err.message);
                 }
             };
             reader.readAsText(file);
