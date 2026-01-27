@@ -343,7 +343,14 @@
             opacity: 0.5;
             cursor: not-allowed;
         }
-        
+
+        /* OracleForge custom storage fix: セット編集フィルタ・ソートボタンのアクティブスタイル */
+        .set-filter-btn.active,
+        .set-sort-btn.active {
+            background: rgba(100,200,255,0.5);
+            border-color: rgba(100,200,255,0.8);
+        }
+
         /* 情報ボックス */
         .deck-info {
             background: rgba(255,255,255,0.1);
@@ -2228,6 +2235,9 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             loadLenormandDescEn();
         }
 
+        // OracleForge custom storage fix: カード倉庫の永続保存
+        // キー：oracleAllCards - ユーザー作成カード配列（id, name, description, imageData, archived）
+        // カード追加・編集・削除時に自動保存、起動時に必ず読み込みUIに反映
         function saveMasterCards() {
             try {
                 const data = JSON.stringify(masterCards);
@@ -2246,8 +2256,17 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             localStorage.setItem('oracleActiveCount', String(activeCount));
         }
 
+        // OracleForge custom storage fix: デッキ（セット）の永続保存
+        // キー：oracleSets - デッキ一覧（セット名: カードID配列）
+        // デッキ作成・編集時に保存、起動時に復元
         function saveSets() {
             localStorage.setItem('oracleSets', JSON.stringify(cardSets));
+        }
+
+        // OracleForge custom storage fix: 現在使用中のデッキを保存
+        // キー：oracleCurrentSet - 現在アクティブなセット名
+        function saveCurrentSet() {
+            localStorage.setItem('oracleCurrentSet', currentSetName);
         }
 
         function updateStorageInfo() {
@@ -2415,7 +2434,9 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             useReversal = document.getElementById('use-reversal-toggle').checked;
         }
 
-        // 画像をBase64に変換（リサイズ付き）
+        // OracleForge custom storage fix: 画像をBase64に変換（自動軽量化）
+        // Canvasで長辺maxSize px以内にリサイズ、JPEG品質0.7で圧縮
+        // 大量カード保存時の容量オーバーを防ぐ
         function imageToBase64(file, maxSize, callback) {
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -2639,10 +2660,11 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
         function selectImageFile(index, input) {
             const file = input.files[0];
             if (file) {
-                imageToBase64(file, 400, function(data) {
+                // OracleForge custom storage fix: 長辺512px以内、JPEG品質0.7で圧縮
+                imageToBase64(file, 512, function(data) {
                     masterCards[index].imageData = data;
                     saveMasterCards();
-                    
+
                     const preview = document.getElementById(`preview-${index}`);
                     preview.innerHTML = `<img src="${data}">`;
                     updateStorageInfo();
@@ -2810,12 +2832,13 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             renderSetsList();
         }
 
+        // OracleForge custom storage fix: セット切り替え時に現在セットを保存
         function switchSet(setName) {
             if (!cardSets[setName]) return;
             isUsingPreset = false;
             localStorage.setItem('oracleIsPreset', 'false');
             currentSetName = setName;
-            localStorage.setItem('oracleCurrentSet', currentSetName);
+            saveCurrentSet(); // 現在使用中のデッキを永続保存
             updateActiveCount();
             syncSignificatorsWithActiveCards();
             updateSignificatorDisplay();
@@ -2972,56 +2995,228 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             return masterCards.filter(c => c.id < activeCount);
         }
 
+        // OracleForge custom storage fix: セット編集画面に絞り込み機能を追加
+        // 検索バー、フィルタトグル、並び替え、選択数/表示総数表示
+        let setEditState = {
+            searchText: '',
+            filterMode: 'all', // 'all', 'selected', 'unselected'
+            sortMode: 'id',    // 'id', 'name', 'selected'
+            checkedIds: new Set() // フィルタ切り替え時も選択状態を維持
+        };
+
         function editSetCards() {
             const modal = document.createElement('div');
             modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);z-index:10000;overflow:auto;padding:20px;';
-            
+
+            // 言語対応テキスト
+            const isJa = currentLang === 'ja';
+            const texts = {
+                title: isJa ? `「${currentSetName}」を編集` : `Edit "${currentSetName}"`,
+                searchPlaceholder: isJa ? 'カード名で検索...' : 'Search by card name...',
+                filterAll: isJa ? 'すべて' : 'All',
+                filterSelected: isJa ? '選択済み' : 'Selected',
+                filterUnselected: isJa ? '未選択' : 'Unselected',
+                sortId: isJa ? '追加順' : 'By ID',
+                sortName: isJa ? '名前順' : 'By Name',
+                sortSelected: isJa ? '選択済み優先' : 'Selected First',
+                selectAll: isJa ? '全選択' : 'Select All',
+                deselectAll: isJa ? '全解除' : 'Deselect All',
+                save: isJa ? '保存' : 'Save',
+                close: isJa ? '閉じる' : 'Close',
+                selected: isJa ? '選択' : 'selected',
+                displayed: isJa ? '表示' : 'displayed'
+            };
+
+            modal.innerHTML = `
+                <div style="max-width:600px;margin:0 auto;background:rgba(15,32,39,0.98);padding:20px;border-radius:12px;border:2px solid rgba(100,200,255,0.5);">
+                    <h2 style="color:#64c8ff;margin-bottom:15px;font-size:1.1em;">${texts.title}</h2>
+
+                    <!-- OracleForge custom storage fix: 検索バー -->
+                    <div style="margin-bottom:10px;">
+                        <input type="text" id="set-edit-search" placeholder="${texts.searchPlaceholder}"
+                               style="width:100%;padding:10px;border-radius:6px;border:1px solid rgba(100,200,255,0.3);background:rgba(0,0,0,0.3);color:#fff;font-size:14px;"
+                               oninput="updateSetEditFilter()">
+                    </div>
+
+                    <!-- OracleForge custom storage fix: フィルタトグル -->
+                    <div style="margin-bottom:10px;display:flex;gap:5px;flex-wrap:wrap;">
+                        <button id="filter-all" class="btn set-filter-btn active" onclick="setFilterMode('all')" style="padding:6px 12px;font-size:11px;">${texts.filterAll}</button>
+                        <button id="filter-selected" class="btn set-filter-btn" onclick="setFilterMode('selected')" style="padding:6px 12px;font-size:11px;">${texts.filterSelected}</button>
+                        <button id="filter-unselected" class="btn set-filter-btn" onclick="setFilterMode('unselected')" style="padding:6px 12px;font-size:11px;">${texts.filterUnselected}</button>
+                    </div>
+
+                    <!-- OracleForge custom storage fix: 並び替え -->
+                    <div style="margin-bottom:10px;display:flex;gap:5px;flex-wrap:wrap;">
+                        <button id="sort-id" class="btn set-sort-btn active" onclick="setSortMode('id')" style="padding:6px 12px;font-size:11px;">${texts.sortId}</button>
+                        <button id="sort-name" class="btn set-sort-btn" onclick="setSortMode('name')" style="padding:6px 12px;font-size:11px;">${texts.sortName}</button>
+                        <button id="sort-selected" class="btn set-sort-btn" onclick="setSortMode('selected')" style="padding:6px 12px;font-size:11px;">${texts.sortSelected}</button>
+                    </div>
+
+                    <!-- OracleForge custom storage fix: 選択数/表示総数表示 -->
+                    <div id="set-edit-count" style="margin-bottom:10px;color:#64c8ff;font-size:13px;text-align:center;"></div>
+
+                    <div style="margin-bottom:10px;">
+                        <button onclick="selectAllCards(true)" class="btn" style="padding:8px 15px;font-size:12px;margin:3px;">${texts.selectAll}</button>
+                        <button onclick="selectAllCards(false)" class="btn" style="padding:8px 15px;font-size:12px;margin:3px;">${texts.deselectAll}</button>
+                    </div>
+                    <div id="card-checkboxes" style="max-height:45vh;overflow-y:auto;"></div>
+                    <div style="margin-top:15px;text-align:center;">
+                        <button onclick="saveSetCards()" class="btn" style="padding:12px 25px;margin:5px;">${texts.save}</button>
+                        <button onclick="closeSetModal()" class="btn" style="padding:12px 25px;margin:5px;background:rgba(220,53,69,0.5);border-color:#dc3545;">${texts.close}</button>
+                    </div>
+                </div>
+            `;
+
+            modal.id = 'set-modal';
+            document.body.appendChild(modal);
+
+            // 初期状態をリセット（既存セットの選択状態を読み込み）
             const currentCardIds = cardSets[currentSetName] || [];
-            
+            setEditState = {
+                searchText: '',
+                filterMode: 'all',
+                sortMode: 'id',
+                checkedIds: new Set(currentCardIds)
+            };
+            renderSetEditCards();
+        }
+
+        // OracleForge custom storage fix: フィルタモード切り替え
+        function setFilterMode(mode) {
+            setEditState.filterMode = mode;
+            document.querySelectorAll('.set-filter-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('filter-' + mode).classList.add('active');
+            renderSetEditCards();
+        }
+
+        // OracleForge custom storage fix: ソートモード切り替え
+        function setSortMode(mode) {
+            setEditState.sortMode = mode;
+            document.querySelectorAll('.set-sort-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('sort-' + mode).classList.add('active');
+            renderSetEditCards();
+        }
+
+        // OracleForge custom storage fix: 検索入力時の更新
+        function updateSetEditFilter() {
+            setEditState.searchText = document.getElementById('set-edit-search').value.toLowerCase();
+            renderSetEditCards();
+        }
+
+        // OracleForge custom storage fix: カードリストの再描画（絞り込み・並び替え適用）
+        function renderSetEditCards() {
+            const container = document.getElementById('card-checkboxes');
+            if (!container) return;
+
+            // setEditState.checkedIds を使用（フィルタ切り替え時も選択状態を維持）
+            const checkedIds = setEditState.checkedIds;
+
+            // フィルタリング
+            let filteredCards = masterCards.filter(card => {
+                // 検索フィルタ
+                if (setEditState.searchText) {
+                    const nameMatch = card.name.toLowerCase().includes(setEditState.searchText);
+                    const descMatch = card.description && (
+                        (card.description.ja && card.description.ja.toLowerCase().includes(setEditState.searchText)) ||
+                        (card.description.en && card.description.en.toLowerCase().includes(setEditState.searchText))
+                    );
+                    if (!nameMatch && !descMatch) return false;
+                }
+
+                // 選択状態フィルタ
+                const isSelected = checkedIds.has(card.id);
+                if (setEditState.filterMode === 'selected' && !isSelected) return false;
+                if (setEditState.filterMode === 'unselected' && isSelected) return false;
+
+                return true;
+            });
+
+            // 並び替え
+            filteredCards = [...filteredCards].sort((a, b) => {
+                switch (setEditState.sortMode) {
+                    case 'name':
+                        return a.name.localeCompare(b.name, currentLang === 'ja' ? 'ja' : 'en');
+                    case 'selected':
+                        const aSelected = checkedIds.has(a.id) ? 0 : 1;
+                        const bSelected = checkedIds.has(b.id) ? 0 : 1;
+                        if (aSelected !== bSelected) return aSelected - bSelected;
+                        return a.id - b.id;
+                    default: // 'id'
+                        return a.id - b.id;
+                }
+            });
+
+            // カードリスト生成
             let checkboxes = '';
-            masterCards.forEach(card => {
-                const checked = currentCardIds.includes(card.id) ? 'checked' : '';
+            filteredCards.forEach(card => {
+                const checked = checkedIds.has(card.id) ? 'checked' : '';
                 const numberLabel = getCardNumberLabel(card, String(card.id + 1));
                 checkboxes += `
                     <label style="display:flex;align-items:center;padding:10px;background:rgba(255,255,255,0.05);margin:5px 0;border-radius:4px;">
-                        <input type="checkbox" value="${card.id}" ${checked} style="margin-right:10px;width:20px;height:20px;">
+                        <input type="checkbox" value="${card.id}" ${checked} style="margin-right:10px;width:20px;height:20px;" onchange="onSetEditCheckboxChange(this)">
                         <span style="font-size:14px;">No.${numberLabel}: ${card.name}</span>
                     </label>
                 `;
             });
-            
-            modal.innerHTML = `
-                <div style="max-width:600px;margin:0 auto;background:rgba(15,32,39,0.98);padding:20px;border-radius:12px;border:2px solid rgba(100,200,255,0.5);">
-                    <h2 style="color:#64c8ff;margin-bottom:15px;font-size:1.1em;">「${currentSetName}」を編集</h2>
-                    <div style="margin-bottom:15px;">
-                        <button onclick="selectAllCards(true)" class="btn" style="padding:8px 15px;font-size:12px;margin:3px;">全選択</button>
-                        <button onclick="selectAllCards(false)" class="btn" style="padding:8px 15px;font-size:12px;margin:3px;">全解除</button>
-                    </div>
-                    <div id="card-checkboxes" style="max-height:50vh;overflow-y:auto;">${checkboxes}</div>
-                    <div style="margin-top:15px;text-align:center;">
-                        <button onclick="saveSetCards()" class="btn" style="padding:12px 25px;margin:5px;">保存</button>
-                        <button onclick="closeSetModal()" class="btn" style="padding:12px 25px;margin:5px;background:rgba(220,53,69,0.5);border-color:#dc3545;">閉じる</button>
-                    </div>
-                </div>
-            `;
-            
-            modal.id = 'set-modal';
-            document.body.appendChild(modal);
+
+            container.innerHTML = checkboxes;
+            updateSetEditCount();
         }
 
+        // OracleForge custom storage fix: チェックボックス変更時に選択状態を更新
+        function onSetEditCheckboxChange(checkbox) {
+            const cardId = parseInt(checkbox.value);
+            if (checkbox.checked) {
+                setEditState.checkedIds.add(cardId);
+            } else {
+                setEditState.checkedIds.delete(cardId);
+            }
+            updateSetEditCount();
+        }
+
+        // OracleForge custom storage fix: 選択数/表示総数の更新
+        function updateSetEditCount() {
+            const countEl = document.getElementById('set-edit-count');
+            if (!countEl) return;
+
+            const isJa = currentLang === 'ja';
+            // 全カードから選択されている数（グローバル状態から取得）
+            const totalSelected = setEditState.checkedIds.size;
+            const totalDisplayed = document.querySelectorAll('#card-checkboxes input').length;
+            const totalCards = masterCards.length;
+
+            if (isJa) {
+                countEl.textContent = `選択: ${totalSelected}枚 / 表示: ${totalDisplayed}枚 / 全${totalCards}枚`;
+            } else {
+                countEl.textContent = `Selected: ${totalSelected} / Displayed: ${totalDisplayed} / Total: ${totalCards}`;
+            }
+        }
+
+        // OracleForge custom storage fix: 表示中のカードを全選択/全解除（グローバル状態を更新）
         function selectAllCards(select) {
-            document.querySelectorAll('#card-checkboxes input').forEach(cb => cb.checked = select);
+            document.querySelectorAll('#card-checkboxes input').forEach(cb => {
+                cb.checked = select;
+                const cardId = parseInt(cb.value);
+                if (select) {
+                    setEditState.checkedIds.add(cardId);
+                } else {
+                    setEditState.checkedIds.delete(cardId);
+                }
+            });
+            updateSetEditCount();
         }
 
+        // OracleForge custom storage fix: グローバル状態から選択カードを保存
         function saveSetCards() {
-            const checked = document.querySelectorAll('#card-checkboxes input:checked');
-            const ids = Array.from(checked).map(cb => parseInt(cb.value));
-            
+            // グローバル状態から全選択カードを取得（フィルタで非表示のものも含む）
+            const ids = Array.from(setEditState.checkedIds);
+
             if (ids.length < 1) {
-                alert('最低1枚選択');
+                const msg = currentLang === 'ja' ? '最低1枚選択してください' : 'Please select at least 1 card';
+                alert(msg);
                 return;
             }
-            
+
             cardSets[currentSetName] = ids;
             saveSets();
             updateActiveCount();
