@@ -1288,6 +1288,10 @@
                     <h3 data-ja="シンプルクロス" data-en="Simple Cross">シンプルクロス</h3>
                     <p data-ja="2枚 / 状況と障害" data-en="2 cards / Situation & Obstacle">2枚 / 状況と障害</p>
                 </div>
+                <div class="spread-card" onclick="selectSpread('horizontal2', 2)">
+                    <h3 data-ja="横2枚" data-en="Two Card Horizontal">横2枚</h3>
+                    <p data-ja="2枚 / 横並び" data-en="2 cards / Side by side">2枚 / 横並び</p>
+                </div>
                 <div class="spread-card" onclick="selectSpread('choice', 3)">
                     <h3 data-ja="二者択一" data-en="Two Choices">二者択一</h3>
                     <p data-ja="3枚 / 選択肢の比較" data-en="3 cards / Compare options">3枚 / 選択肢の比較</p>
@@ -3084,6 +3088,11 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                     // シンプルクロス（2枚）- 状況が上、障害が重なる
                     positions.push({x: cx, y: cy - 60, label: getLang('situation', '状況', 'Situation')});
                     positions.push({x: cx, y: cy + 60, label: getLang('obstacle', '障害', 'Obstacle')});
+                    break;
+                case 'horizontal2':
+                    // 横2枚展開
+                    positions.push({x: cx - 60, y: cy, label: '1'});
+                    positions.push({x: cx + 60, y: cy, label: '2'});
                     break;
                 case 'choice':
                     // 二者択一（3枚）
