@@ -1061,7 +1061,7 @@
         <div class="title-text">OracleForge</div>
         <div class="title-sub">Card Shuffler</div>
         
-        <button class="start-btn" id="startBtn" data-ja="はじめる" data-en="START" onclick="hideTitle()">はじめる</button>
+        <button class="start-btn" id="startBtn" data-ja="はじめる" data-en="START">はじめる</button>
     </div>
 
     <div class="container">
@@ -4546,23 +4546,27 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             console.error('loadCrystals error:', e);
         }
         
-        // タイトル画面ボタン（DOMContentLoaded後に設定）
-        document.addEventListener('DOMContentLoaded', function() {
+        // タイトル画面ボタン設定
+        // スクリプトが</body>直前にあるためDOMは既にロード済み
+        (function setupStartButton() {
             var btn = document.getElementById('startBtn');
             if (btn) {
-                btn.addEventListener('click', startApp);
-                btn.addEventListener('touchend', function(e) {
+                // 既存のonclick属性をクリア
+                btn.removeAttribute('onclick');
+                // イベントリスナーを設定
+                btn.addEventListener('click', function(e) {
                     e.preventDefault();
+                    e.stopPropagation();
                     startApp();
                 });
-            }
-        });
-        
-        // 即時実行版も念のため
-        (function() {
-            var btn = document.getElementById('startBtn');
-            if (btn) {
-                btn.onclick = startApp;
+                btn.addEventListener('touchend', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    startApp();
+                });
+                console.log('Start button initialized');
+            } else {
+                console.error('startBtn not found');
             }
         })();
         
