@@ -726,6 +726,7 @@
             width: 100%;
             height: 100%;
             opacity: 0.15;
+            pointer-events: none;
             background-image: 
                 radial-gradient(circle at 50% 50%, transparent 0%, transparent 40%, rgba(100,200,255,0.1) 41%, transparent 42%),
                 radial-gradient(circle at 50% 50%, transparent 0%, transparent 60%, rgba(100,200,255,0.08) 61%, transparent 62%),
@@ -762,6 +763,7 @@
             clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
             animation: floatCrystal 6s ease-in-out infinite;
             filter: blur(1px);
+            pointer-events: none;
         }
 
         @keyframes floatCrystal {
@@ -859,6 +861,7 @@
             transition: all 0.3s;
             position: relative;
             overflow: hidden;
+            z-index: 10;
         }
 
         .start-btn::before {
@@ -887,6 +890,7 @@
             font-size: 20px;
             opacity: 0.6;
             animation: butterflyFly 15s linear infinite;
+            pointer-events: none;
         }
 
         @keyframes butterflyFly {
@@ -4551,19 +4555,17 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
         (function setupStartButton() {
             var btn = document.getElementById('startBtn');
             if (btn) {
-                // 既存のonclick属性をクリア
-                btn.removeAttribute('onclick');
-                // イベントリスナーを設定
-                btn.addEventListener('click', function(e) {
+                var triggered = false;
+                var handler = function(e) {
+                    if (triggered) return;
+                    triggered = true;
                     e.preventDefault();
-                    e.stopPropagation();
                     startApp();
-                });
-                btn.addEventListener('touchend', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    startApp();
-                });
+                };
+                // タッチデバイス用（touchstartで即座に反応）
+                btn.addEventListener('touchstart', handler, { passive: false });
+                // マウス/デスクトップ用
+                btn.addEventListener('click', handler);
                 console.log('Start button initialized');
             } else {
                 console.error('startBtn not found');
