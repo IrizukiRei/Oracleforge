@@ -1480,6 +1480,403 @@
             bgmVolume: 0.25,
             seVolume: 0.6
         };
+
+        // ====== IndexedDB Storage Layer (OracleForgeDB) ======
+        // DB名: OracleForgeDB
+        // ObjectStores: cards (カード倉庫), decks (セット/デッキ), settings (設定)
+        const ORACLE_DB_NAME = 'OracleForgeDB';
+        const ORACLE_DB_VERSION = 1;
+        let oracleDB = null; // IndexedDB接続
+
+        class OracleDB {
+            constructor() {
+                this.db = null;
+                this.ready = false;
+            }
+
+            // DB初期化（起動時に呼び出し）
+            async init() {
+                return new Promise((resolve, reject) => {
+                    const request = indexedDB.open(ORACLE_DB_NAME, ORACLE_DB_VERSION);
+
+                    request.onerror = (event) => {
+                        console.error('IndexedDB open error:', event.target.error);
+                        reject(event.target.error);
+                    };
+
+                    request.onupgradeneeded = (event) => {
+                        const db = event.target.result;
+
+                        // cards store: カード倉庫（画像はBlobで保存）
+                        if (!db.objectStoreNames.contains('cards')) {
+                            const cardsStore = db.createObjectStore('cards', { keyPath: 'id' });
+                            cardsStore.createIndex('title', 'title', { unique: false });
+                            cardsStore.createIndex('createdAt', 'createdAt', { unique: false });
+                        }
+
+                        // decks store: セット/デッキ
+                        if (!db.objectStoreNames.contains('decks')) {
+                            const decksStore = db.createObjectStore('decks', { keyPath: 'deckId' });
+                            decksStore.createIndex('name', 'name', { unique: false });
+                        }
+
+                        // settings store: 設定
+                        if (!db.objectStoreNames.contains('settings')) {
+                            db.createObjectStore('settings', { keyPath: 'key' });
+                        }
+                    };
+
+                    request.onsuccess = (event) => {
+                        this.db = event.target.result;
+                        this.ready = true;
+                        resolve(this.db);
+                    };
+                });
+            }
+
+            // === Cards CRUD ===
+            async getAllCards() {
+                if (!this.db) return [];
+                return new Promise((resolve, reject) => {
+                    const tx = this.db.transaction('cards', 'readonly');
+                    const store = tx.objectStore('cards');
+                    const request = store.getAll();
+                    request.onsuccess = () => resolve(request.result || []);
+                    request.onerror = () => reject(request.error);
+                });
+            }
+
+            async putCard(card) {
+                if (!this.db) return;
+                return new Promise((resolve, reject) => {
+                    const tx = this.db.transaction('cards', 'readwrite');
+                    const store = tx.objectStore('cards');
+                    const request = store.put(card);
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => reject(request.error);
+                });
+            }
+
+            async putAllCards(cards) {
+                if (!this.db) return;
+                return new Promise((resolve, reject) => {
+                    const tx = this.db.transaction('cards', 'readwrite');
+                    const store = tx.objectStore('cards');
+                    cards.forEach(card => store.put(card));
+                    tx.oncomplete = () => resolve();
+                    tx.onerror = () => reject(tx.error);
+                });
+            }
+
+            async deleteCard(id) {
+                if (!this.db) return;
+                return new Promise((resolve, reject) => {
+                    const tx = this.db.transaction('cards', 'readwrite');
+                    const store = tx.objectStore('cards');
+                    const request = store.delete(id);
+                    request.onsuccess = () => resolve();
+                    request.onerror = () => reject(request.error);
+                });
+            }
+
+            // === Decks CRUD ===
+            async getAllDecks() {
+                if (!this.db) return [];
+                return new Promise((resolve, reject) => {
+                    const tx = this.db.transaction('decks', 'readonly');
+                    const store = tx.objectStore('decks');
+                    const request = store.getAll();
+                    request.onsuccess = () => resolve(request.result || []);
+                    request.onerror = () => reject(request.error);
+                });
+            }
+
+            async putDeck(deck) {
+                if (!this.db) return;
+                return new Promise((resolve, reject) => {
+                    const tx = this.db.transaction('decks', 'readwrite');
+                    const store = tx.objectStore('decks');
+                    const request = store.put(deck);
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => reject(request.error);
+                });
+            }
+
+            async putAllDecks(decks) {
+                if (!this.db) return;
+                return new Promise((resolve, reject) => {
+                    const tx = this.db.transaction('decks', 'readwrite');
+                    const store = tx.objectStore('decks');
+                    decks.forEach(deck => store.put(deck));
+                    tx.oncomplete = () => resolve();
+                    tx.onerror = () => reject(tx.error);
+                });
+            }
+
+            async deleteDeck(deckId) {
+                if (!this.db) return;
+                return new Promise((resolve, reject) => {
+                    const tx = this.db.transaction('decks', 'readwrite');
+                    const store = tx.objectStore('decks');
+                    const request = store.delete(deckId);
+                    request.onsuccess = () => resolve();
+                    request.onerror = () => reject(request.error);
+                });
+            }
+
+            // === Settings CRUD ===
+            async getSetting(key) {
+                if (!this.db) return null;
+                return new Promise((resolve, reject) => {
+                    const tx = this.db.transaction('settings', 'readonly');
+                    const store = tx.objectStore('settings');
+                    const request = store.get(key);
+                    request.onsuccess = () => resolve(request.result ? request.result.value : null);
+                    request.onerror = () => reject(request.error);
+                });
+            }
+
+            async putSetting(key, value) {
+                if (!this.db) return;
+                return new Promise((resolve, reject) => {
+                    const tx = this.db.transaction('settings', 'readwrite');
+                    const store = tx.objectStore('settings');
+                    const request = store.put({ key, value });
+                    request.onsuccess = () => resolve();
+                    request.onerror = () => reject(request.error);
+                });
+            }
+
+            async getAllSettings() {
+                if (!this.db) return [];
+                return new Promise((resolve, reject) => {
+                    const tx = this.db.transaction('settings', 'readonly');
+                    const store = tx.objectStore('settings');
+                    const request = store.getAll();
+                    request.onsuccess = () => resolve(request.result || []);
+                    request.onerror = () => reject(request.error);
+                });
+            }
+        }
+
+        // Base64データURLをBlobに変換
+        function base64ToBlob(dataUrl) {
+            if (!dataUrl || !dataUrl.startsWith('data:')) return null;
+            try {
+                const [header, base64] = dataUrl.split(',');
+                const mime = header.match(/:(.*?);/)?.[1] || 'image/jpeg';
+                const binary = atob(base64);
+                const array = new Uint8Array(binary.length);
+                for (let i = 0; i < binary.length; i++) {
+                    array[i] = binary.charCodeAt(i);
+                }
+                return new Blob([array], { type: mime });
+            } catch (e) {
+                console.error('base64ToBlob error:', e);
+                return null;
+            }
+        }
+
+        // BlobをBase64データURLに変換（表示用）
+        function blobToBase64(blob) {
+            return new Promise((resolve, reject) => {
+                if (!blob) { resolve(''); return; }
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(blob);
+            });
+        }
+
+        // localStorage → IndexedDB 移行処理
+        async function migrateLocalStorageToIndexedDB() {
+            // 移行済みチェック
+            const migrated = await oracleDB.getSetting('migrationCompleted');
+            if (migrated) return false; // 既に移行済み
+
+            console.log('Starting localStorage to IndexedDB migration...');
+            let migrationHappened = false;
+
+            try {
+                // === カードデータの移行 ===
+                const savedAllCards = localStorage.getItem('oracleAllCards');
+                const savedOldCards = localStorage.getItem('oracleCards');
+                const cardsJson = savedAllCards || savedOldCards;
+
+                if (cardsJson) {
+                    const oldCards = JSON.parse(cardsJson);
+                    const now = Date.now();
+                    const newCards = oldCards.map((card, index) => {
+                        // Base64画像をBlobに変換
+                        const imageBlob = card.imageData ? base64ToBlob(card.imageData) : null;
+                        return {
+                            id: String(card.id !== undefined ? card.id : index),
+                            title: card.name || \`Card \${index + 1}\`,
+                            desc: typeof card.description === 'object'
+                                ? card.description
+                                : { ja: card.description || '', en: '' },
+                            tags: card.tags || ['user'],
+                            imageBlob: imageBlob,
+                            archived: card.archived || false,
+                            createdAt: now,
+                            updatedAt: now,
+                            // 旧形式との互換性のため元データも保持
+                            _legacyId: card.id,
+                            _legacyName: card.name
+                        };
+                    });
+                    await oracleDB.putAllCards(newCards);
+                    migrationHappened = true;
+                    console.log(\`Migrated \${newCards.length} cards\`);
+                }
+
+                // === デッキ/セットの移行 ===
+                const savedSets = localStorage.getItem('oracleSets');
+                if (savedSets) {
+                    const oldSets = JSON.parse(savedSets);
+                    const now = Date.now();
+                    const newDecks = Object.entries(oldSets).map(([name, cardIds]) => ({
+                        deckId: 'deck_' + name.replace(/[^a-zA-Z0-9]/g, '_'),
+                        name: name,
+                        cardIds: cardIds.map(id => String(id)),
+                        createdAt: now,
+                        updatedAt: now
+                    }));
+                    await oracleDB.putAllDecks(newDecks);
+                    migrationHappened = true;
+                    console.log(\`Migrated \${newDecks.length} decks\`);
+                }
+
+                // === 設定の移行 ===
+                const settingsToMigrate = [
+                    { oldKey: 'oracleCurrentSet', newKey: 'activeDeckId', transform: (v) => 'deck_' + v.replace(/[^a-zA-Z0-9]/g, '_') },
+                    { oldKey: 'oracleSoundSettings', newKey: 'soundSettings', transform: JSON.parse },
+                    { oldKey: 'oracleUseReversal', newKey: 'useReversal', transform: (v) => v === 'true' },
+                    { oldKey: 'oracleActiveCount', newKey: 'activeCount', transform: parseInt },
+                    { oldKey: 'oracleLang', newKey: 'lang', transform: (v) => v },
+                    { oldKey: 'oracleBackImage', newKey: 'backCardImage', transform: (v) => v },
+                    { oldKey: 'oracleSignificators', newKey: 'significatorIds', transform: JSON.parse },
+                    { oldKey: 'oracleIsPreset', newKey: 'isUsingPreset', transform: (v) => v === 'true' },
+                    { oldKey: 'oracleLenormandOptional', newKey: 'lenormandOptional', transform: JSON.parse }
+                ];
+
+                for (const setting of settingsToMigrate) {
+                    const oldValue = localStorage.getItem(setting.oldKey);
+                    if (oldValue !== null) {
+                        try {
+                            const newValue = setting.transform(oldValue);
+                            await oracleDB.putSetting(setting.newKey, newValue);
+                            migrationHappened = true;
+                        } catch (e) {
+                            console.warn(\`Failed to migrate setting \${setting.oldKey}:\`, e);
+                        }
+                    }
+                }
+
+                // 移行完了フラグを保存（旧データは削除しない）
+                if (migrationHappened) {
+                    await oracleDB.putSetting('migrationCompleted', true);
+                    await oracleDB.putSetting('migrationDate', Date.now());
+                    console.log('Migration completed successfully');
+                }
+
+            } catch (e) {
+                console.error('Migration error (localStorage preserved):', e);
+                // 旧データは削除しない - 失敗しても元データは安全
+            }
+
+            return migrationHappened;
+        }
+
+        // IndexedDBからカードデータを読み込み（表示用にBase64に変換）
+        async function loadCardsFromIndexedDB() {
+            const idbCards = await oracleDB.getAllCards();
+            const cards = [];
+
+            for (const card of idbCards) {
+                let imageData = '';
+                if (card.imageBlob) {
+                    imageData = await blobToBase64(card.imageBlob);
+                }
+                cards.push({
+                    id: parseInt(card._legacyId !== undefined ? card._legacyId : card.id) || cards.length,
+                    name: card._legacyName || card.title,
+                    description: card.desc || { ja: '', en: '' },
+                    imageData: imageData,
+                    archived: card.archived || false,
+                    tags: card.tags || []
+                });
+            }
+
+            return cards;
+        }
+
+        // IndexedDBからデッキを読み込み
+        async function loadDecksFromIndexedDB() {
+            const idbDecks = await oracleDB.getAllDecks();
+            const sets = {};
+
+            for (const deck of idbDecks) {
+                const name = deck.name;
+                sets[name] = deck.cardIds.map(id => parseInt(id));
+            }
+
+            return sets;
+        }
+
+        // カードをIndexedDBに保存（masterCards配列全体）
+        async function saveCardsToIndexedDB(cards) {
+            if (!oracleDB || !oracleDB.ready) return;
+
+            const now = Date.now();
+            const idbCards = cards.map(card => {
+                const imageBlob = card.imageData ? base64ToBlob(card.imageData) : null;
+                return {
+                    id: String(card.id),
+                    title: card.name,
+                    desc: typeof card.description === 'object'
+                        ? card.description
+                        : { ja: card.description || '', en: '' },
+                    tags: card.tags || ['user'],
+                    imageBlob: imageBlob,
+                    archived: card.archived || false,
+                    createdAt: now,
+                    updatedAt: now,
+                    _legacyId: card.id,
+                    _legacyName: card.name
+                };
+            });
+
+            await oracleDB.putAllCards(idbCards);
+        }
+
+        // デッキをIndexedDBに保存（cardSetsオブジェクト全体）
+        async function saveDecksToIndexedDB(sets) {
+            if (!oracleDB || !oracleDB.ready) return;
+
+            const now = Date.now();
+            const idbDecks = Object.entries(sets).map(([name, cardIds]) => ({
+                deckId: 'deck_' + name.replace(/[^a-zA-Z0-9]/g, '_'),
+                name: name,
+                cardIds: cardIds.map(id => String(id)),
+                createdAt: now,
+                updatedAt: now
+            }));
+
+            // 既存のデッキをクリアして新しいものを保存
+            const existingDecks = await oracleDB.getAllDecks();
+            for (const deck of existingDecks) {
+                await oracleDB.deleteDeck(deck.deckId);
+            }
+            await oracleDB.putAllDecks(idbDecks);
+        }
+
+        // 設定をIndexedDBに保存
+        async function saveSettingToIndexedDB(key, value) {
+            if (!oracleDB || !oracleDB.ready) return;
+            await oracleDB.putSetting(key, value);
+        }
+
         let audioManager = null; // 後で初期化
         let currentSpread = null;
         let currentSpreadSize = 0;
@@ -2102,14 +2499,32 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
         }
 
         // 初期化
-        function init() {
+        async function init() {
+            // ====== IndexedDB初期化 ======
+            try {
+                oracleDB = new OracleDB();
+                await oracleDB.init();
+                console.log('IndexedDB initialized');
+
+                // localStorage → IndexedDB 移行処理（初回のみ）
+                await migrateLocalStorageToIndexedDB();
+            } catch (e) {
+                console.warn('IndexedDB init failed, falling back to localStorage:', e);
+            }
+
             // 音声マネージャー初期化
             audioManager = new AudioManager();
             audioManager.loadSettings();
             updateSoundSettingsUI();
 
-            // 言語設定を読み込み
-            const savedLang = localStorage.getItem('oracleLang');
+            // 言語設定を読み込み（IndexedDB優先）
+            let savedLang = null;
+            if (oracleDB && oracleDB.ready) {
+                savedLang = await oracleDB.getSetting('lang');
+            }
+            if (!savedLang) {
+                savedLang = localStorage.getItem('oracleLang');
+            }
             if (savedLang) {
                 currentLang = savedLang;
                 document.getElementById('lang-select').value = savedLang;
@@ -2119,67 +2534,118 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             loadLenormandOptional();
             updateLenormandOptionUI();
 
-            // プリセット使用フラグを読み込み
-            const savedPreset = localStorage.getItem('oracleIsPreset');
-            if (savedPreset === 'true') {
+            // プリセット使用フラグを読み込み（IndexedDB優先）
+            let savedPreset = null;
+            if (oracleDB && oracleDB.ready) {
+                savedPreset = await oracleDB.getSetting('isUsingPreset');
+            }
+            if (savedPreset === null) {
+                savedPreset = localStorage.getItem('oracleIsPreset') === 'true';
+            }
+            if (savedPreset) {
                 isUsingPreset = true;
                 currentSetName = currentLang === 'ja' ? 'ルノルマン' : 'Lenormand';
             }
 
-            // ====== カードデータの互換移行処理 ======
-            // 旧キー(oracleCards) → 新キー(oracleAllCards)への移行
-            const savedAllCards = localStorage.getItem('oracleAllCards');
-            const savedOldCards = localStorage.getItem('oracleCards');
+            // ====== カードデータの読み込み（IndexedDB優先） ======
+            let cardsLoaded = false;
 
-            if (savedAllCards) {
-                // 新キーが存在 → 新形式で読み込み
-                masterCards = JSON.parse(savedAllCards);
-            } else if (savedOldCards) {
-                // 旧キーのみ存在 → 移行処理
-                masterCards = JSON.parse(savedOldCards);
-                // 新キーに保存（旧キーは残す：後方互換性のため）
-                localStorage.setItem('oracleAllCards', savedOldCards);
-            } else {
-                // 初回起動：デフォルト10枚作成
-                for (let i = 0; i < 10; i++) {
-                    masterCards.push({
-                        id: i,
-                        name: `Card ${i + 1}`,
-                        description: {ja: '', en: ''},
-                        imageData: '',
-                        archived: false
-                    });
+            if (oracleDB && oracleDB.ready) {
+                const idbCards = await loadCardsFromIndexedDB();
+                if (idbCards.length > 0) {
+                    masterCards = idbCards;
+                    cardsLoaded = true;
+                    console.log(\`Loaded \${masterCards.length} cards from IndexedDB\`);
                 }
-                saveMasterCards();
+            }
+
+            if (!cardsLoaded) {
+                // IndexedDBにデータがない場合はlocalStorageから読み込み（後方互換）
+                const savedAllCards = localStorage.getItem('oracleAllCards');
+                const savedOldCards = localStorage.getItem('oracleCards');
+
+                if (savedAllCards) {
+                    masterCards = JSON.parse(savedAllCards);
+                } else if (savedOldCards) {
+                    masterCards = JSON.parse(savedOldCards);
+                    localStorage.setItem('oracleAllCards', savedOldCards);
+                } else {
+                    // 初回起動：デフォルト10枚作成
+                    for (let i = 0; i < 10; i++) {
+                        masterCards.push({
+                            id: i,
+                            name: \`Card \${i + 1}\`,
+                            description: {ja: '', en: ''},
+                            imageData: '',
+                            archived: false
+                        });
+                    }
+                    saveMasterCards();
+                }
             }
             normalizeMasterCards();
 
-            // activeCount（使用枚数）を読み込み
-            const savedActiveCount = localStorage.getItem('oracleActiveCount');
-            if (savedActiveCount) {
-                activeCount = parseInt(savedActiveCount, 10);
+            // activeCount（使用枚数）を読み込み（IndexedDB優先）
+            let savedActiveCount = null;
+            if (oracleDB && oracleDB.ready) {
+                savedActiveCount = await oracleDB.getSetting('activeCount');
+            }
+            if (savedActiveCount === null) {
+                const lsActiveCount = localStorage.getItem('oracleActiveCount');
+                savedActiveCount = lsActiveCount ? parseInt(lsActiveCount, 10) : null;
+            }
+
+            if (savedActiveCount !== null) {
+                activeCount = savedActiveCount;
             } else {
-                // 移行時：既存データがあればその枚数をactiveCountに
                 activeCount = masterCards.length;
                 localStorage.setItem('oracleActiveCount', String(activeCount));
             }
-            // activeCountがmasterCards.lengthを超える場合は調整
             if (activeCount > masterCards.length) {
                 activeCount = masterCards.length;
             }
-            // UI更新
             const countInput = document.getElementById('card-count-input');
             if (countInput) countInput.value = activeCount;
 
-            const savedSets = localStorage.getItem('oracleSets');
-            if (savedSets) {
-                cardSets = JSON.parse(savedSets);
-            } else {
-                cardSets = {'デフォルト': masterCards.map(c => c.id)};
-                saveSets();
+            // ====== デッキ/セットの読み込み（IndexedDB優先） ======
+            let setsLoaded = false;
+
+            if (oracleDB && oracleDB.ready) {
+                const idbSets = await loadDecksFromIndexedDB();
+                if (Object.keys(idbSets).length > 0) {
+                    cardSets = idbSets;
+                    setsLoaded = true;
+                    console.log(\`Loaded \${Object.keys(cardSets).length} decks from IndexedDB\`);
+                }
             }
 
-            const savedCurrentSet = localStorage.getItem('oracleCurrentSet');
+            if (!setsLoaded) {
+                const savedSets = localStorage.getItem('oracleSets');
+                if (savedSets) {
+                    cardSets = JSON.parse(savedSets);
+                } else {
+                    cardSets = {'デフォルト': masterCards.map(c => c.id)};
+                    saveSets();
+                }
+            }
+
+            // 現在のセットを読み込み
+            let savedCurrentSet = null;
+            if (oracleDB && oracleDB.ready) {
+                const activeDeckId = await oracleDB.getSetting('activeDeckId');
+                if (activeDeckId) {
+                    // deck_xxx形式からセット名を復元
+                    const matchingDeck = Object.keys(cardSets).find(name =>
+                        'deck_' + name.replace(/[^a-zA-Z0-9]/g, '_') === activeDeckId
+                    );
+                    if (matchingDeck) {
+                        savedCurrentSet = matchingDeck;
+                    }
+                }
+            }
+            if (!savedCurrentSet) {
+                savedCurrentSet = localStorage.getItem('oracleCurrentSet');
+            }
             if (savedCurrentSet && cardSets[savedCurrentSet] && !isUsingPreset) {
                 currentSetName = savedCurrentSet;
             }
@@ -2241,9 +2707,13 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
         function saveMasterCards() {
             try {
                 const data = JSON.stringify(masterCards);
-                // 新キー（メイン）と旧キー（後方互換）両方に保存
+                // localStorageに保存（後方互換）
                 localStorage.setItem('oracleAllCards', data);
                 localStorage.setItem('oracleCards', data);
+                // IndexedDBにも保存（非同期、エラーはログのみ）
+                if (oracleDB && oracleDB.ready) {
+                    saveCardsToIndexedDB(masterCards).catch(e => console.warn('IndexedDB save error:', e));
+                }
             } catch(e) {
                 alert(currentLang === 'ja'
                     ? '保存容量を超えました。画像サイズを小さくしてください。'
@@ -2254,6 +2724,10 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
         // activeCountを保存
         function saveActiveCount() {
             localStorage.setItem('oracleActiveCount', String(activeCount));
+            // IndexedDBにも保存
+            if (oracleDB && oracleDB.ready) {
+                saveSettingToIndexedDB('activeCount', activeCount).catch(e => console.warn('IndexedDB save error:', e));
+            }
         }
 
         // OracleForge custom storage fix: デッキ（セット）の永続保存
@@ -2261,12 +2735,21 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
         // デッキ作成・編集時に保存、起動時に復元
         function saveSets() {
             localStorage.setItem('oracleSets', JSON.stringify(cardSets));
+            // IndexedDBにも保存
+            if (oracleDB && oracleDB.ready) {
+                saveDecksToIndexedDB(cardSets).catch(e => console.warn('IndexedDB save error:', e));
+            }
         }
 
         // OracleForge custom storage fix: 現在使用中のデッキを保存
         // キー：oracleCurrentSet - 現在アクティブなセット名
         function saveCurrentSet() {
             localStorage.setItem('oracleCurrentSet', currentSetName);
+            // IndexedDBにも保存
+            if (oracleDB && oracleDB.ready) {
+                const deckId = 'deck_' + currentSetName.replace(/[^a-zA-Z0-9]/g, '_');
+                saveSettingToIndexedDB('activeDeckId', deckId).catch(e => console.warn('IndexedDB save error:', e));
+            }
         }
 
         function updateStorageInfo() {
@@ -3113,14 +3596,18 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
 
             // フィルタリング
             let filteredCards = masterCards.filter(card => {
-                // 検索フィルタ
+                // 検索フィルタ（カード名、説明、タグに部分一致）
                 if (setEditState.searchText) {
                     const nameMatch = card.name.toLowerCase().includes(setEditState.searchText);
                     const descMatch = card.description && (
                         (card.description.ja && card.description.ja.toLowerCase().includes(setEditState.searchText)) ||
                         (card.description.en && card.description.en.toLowerCase().includes(setEditState.searchText))
                     );
-                    if (!nameMatch && !descMatch) return false;
+                    // タグ検索を追加
+                    const tagsMatch = card.tags && card.tags.some(tag => 
+                        tag.toLowerCase().includes(setEditState.searchText)
+                    );
+                    if (!nameMatch && !descMatch && !tagsMatch) return false;
                 }
 
                 // 選択状態フィルタ
@@ -3321,10 +3808,10 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                 case 'pyramid':
                     // ピラミッド（6枚）
                     const pyGap = isMobile ? 60 : 80;
-                    // 底辺（現状・原因・障害）
+                    // 底辺（現状・原因・過程）
                     positions.push({x: cx - pyGap, y: cy + pyGap, label: getLang('current', '現状', 'Current')});
                     positions.push({x: cx, y: cy + pyGap, label: getLang('cause', '原因', 'Cause')});
-                    positions.push({x: cx + pyGap, y: cy + pyGap, label: getLang('obstacle', '障害', 'Obstacle')});
+                    positions.push({x: cx + pyGap, y: cy + pyGap, label: getLang('process', '過程', 'Process')});
                     // 中段（解決1・解決2）
                     positions.push({x: cx - pyGap/2, y: cy, label: getLang('solution1', '解決①', 'Solution 1')});
                     positions.push({x: cx + pyGap/2, y: cy, label: getLang('solution2', '解決②', 'Solution 2')});
@@ -4049,11 +4536,10 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
         }
         
         // 初期化（エラーがあってもtitleScreenは動くように）
-        try {
-            init();
-        } catch(e) {
+        // IndexedDB対応のため非同期初期化
+        init().catch(e => {
             console.error('init error:', e);
-        }
+        });
         try {
             loadCrystals();
         } catch(e) {
