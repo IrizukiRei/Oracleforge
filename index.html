@@ -12,6 +12,10 @@
             -webkit-tap-highlight-color: transparent;
         }
         
+        html, body {
+            background-color: #0f2027;
+        }
+
         body {
             font-family: 'Hiragino Mincho ProN', 'Yu Mincho', 'YuMincho', serif;
             background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
@@ -1724,7 +1728,7 @@
                         const imageBlob = card.imageData ? base64ToBlob(card.imageData) : null;
                         return {
                             id: String(card.id !== undefined ? card.id : index),
-                            title: card.name || \`Card \${index + 1}\`,
+                            title: card.name || `Card \${index + 1}`,
                             desc: typeof card.description === 'object'
                                 ? card.description
                                 : { ja: card.description || '', en: '' },
@@ -1740,7 +1744,7 @@
                     });
                     await oracleDB.putAllCards(newCards);
                     migrationHappened = true;
-                    console.log(\`Migrated \${newCards.length} cards\`);
+                    console.log(`Migrated \${newCards.length} cards`);
                 }
 
                 // === デッキ/セットの移行 ===
@@ -1757,7 +1761,7 @@
                     }));
                     await oracleDB.putAllDecks(newDecks);
                     migrationHappened = true;
-                    console.log(\`Migrated \${newDecks.length} decks\`);
+                    console.log(`Migrated \${newDecks.length} decks`);
                 }
 
                 // === 設定の移行 ===
@@ -1781,7 +1785,7 @@
                             await oracleDB.putSetting(setting.newKey, newValue);
                             migrationHappened = true;
                         } catch (e) {
-                            console.warn(\`Failed to migrate setting \${setting.oldKey}:\`, e);
+                            console.warn(`Failed to migrate setting \${setting.oldKey}:`, e);
                         }
                     }
                 }
@@ -2570,7 +2574,7 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                 if (idbCards.length > 0) {
                     masterCards = idbCards;
                     cardsLoaded = true;
-                    console.log(\`Loaded \${masterCards.length} cards from IndexedDB\`);
+                    console.log(`Loaded \${masterCards.length} cards from IndexedDB`);
                 }
             }
 
@@ -2589,7 +2593,7 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                     for (let i = 0; i < 10; i++) {
                         masterCards.push({
                             id: i,
-                            name: \`Card \${i + 1}\`,
+                            name: `Card \${i + 1}`,
                             description: {ja: '', en: ''},
                             imageData: '',
                             archived: false
@@ -2630,7 +2634,7 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                 if (Object.keys(idbSets).length > 0) {
                     cardSets = idbSets;
                     setsLoaded = true;
-                    console.log(\`Loaded \${Object.keys(cardSets).length} decks from IndexedDB\`);
+                    console.log(`Loaded \${Object.keys(cardSets).length} decks from IndexedDB`);
                 }
             }
 
