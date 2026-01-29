@@ -4551,19 +4551,29 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
         (function setupStartButton() {
             var btn = document.getElementById('startBtn');
             if (btn) {
+                var isHandling = false;
+
                 // 既存のonclick属性をクリア
                 btn.removeAttribute('onclick');
-                // イベントリスナーを設定
-                btn.addEventListener('click', function(e) {
+
+                // タップ遅延を解消
+                btn.style.touchAction = 'manipulation';
+
+                function handleStart(e) {
+                    if (isHandling) return;
+                    isHandling = true;
                     e.preventDefault();
                     e.stopPropagation();
+                    console.log('Start button triggered via:', e.type);
                     startApp();
-                });
-                btn.addEventListener('touchend', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    startApp();
-                });
+                    // 500ms後にフラグをリセット（二重タップ防止）
+                    setTimeout(function() { isHandling = false; }, 500);
+                }
+
+                // タッチとクリックの両方に対応（フラグで二重実行防止）
+                btn.addEventListener('touchend', handleStart, { passive: false });
+                btn.addEventListener('click', handleStart);
+
                 console.log('Start button initialized');
             } else {
                 console.error('startBtn not found');
