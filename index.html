@@ -21,6 +21,14 @@
             padding: 15px;
             padding-bottom: 80px;
         }
+
+        /* タイトル画面表示中はスクロール無効 */
+        body.title-visible {
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+        }
         
         .container {
             max-width: 1200px;
@@ -1038,7 +1046,7 @@
     </style>
     <script src="lenormand-embedded.js"></script>
 </head>
-<body>
+<body class="title-visible">
     <!-- タイトル画面 -->
     <div class="title-screen" id="titleScreen">
         <div class="web-bg"></div>
@@ -2330,6 +2338,8 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             // インラインスタイルを全部クリア
             title.style.cssText = '';
             title.classList.remove('hidden');
+            // スクロールを無効化
+            document.body.classList.add('title-visible');
         }
         
         // タイトル画面を閉じる
@@ -4536,6 +4546,8 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                 title.style.opacity = '0';
                 setTimeout(() => {
                     title.classList.add('hidden');
+                    // スクロールを有効化
+                    document.body.classList.remove('title-visible');
                 }, 500);
             }
         }
@@ -4555,54 +4567,32 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
         // スクリプトが</body>直前にあるためDOMは既にロード済み
         (function setupStartButton() {
             var btn = document.getElementById('startBtn');
-            if (btn) {
-                var isHandling = false;
-                var isTouchDevice = false;
-
-                // 既存のonclick属性をクリア
-                btn.removeAttribute('onclick');
-
-                // タップ遅延を解消
-                btn.style.touchAction = 'manipulation';
-                btn.style.webkitTapHighlightColor = 'transparent';
-                btn.style.userSelect = 'none';
-                btn.style.webkitUserSelect = 'none';
-
-                function handleStart(e) {
-                    // タッチデバイスでclickイベントが来た場合はスキップ（touchstartで処理済み）
-                    if (e.type === 'click' && isTouchDevice) {
-                        e.preventDefault();
-                        return;
-                    }
-
-                    if (isHandling) return;
-                    isHandling = true;
-
-                    e.preventDefault();
-                    e.stopPropagation();
-                    e.stopImmediatePropagation();
-
-                    console.log('Start button triggered via:', e.type);
-                    startApp();
-
-                    // 1秒後にフラグをリセット
-                    setTimeout(function() { isHandling = false; }, 1000);
-                }
-
-                function handleTouchStart(e) {
-                    isTouchDevice = true;
-                    handleStart(e);
-                }
-
-                // touchstartで即座に反応（touchendより早い）
-                btn.addEventListener('touchstart', handleTouchStart, { passive: false, capture: true });
-                // マウス用にclickも残す
-                btn.addEventListener('click', handleStart, { capture: true });
-
-                console.log('Start button initialized with touch support');
-            } else {
+            if (!btn) {
                 console.error('startBtn not found');
+                return;
             }
+
+            var handled = false;
+
+            // シンプルなハンドラ
+            function doStart() {
+                if (handled) return;
+                handled = true;
+                console.log('startApp called from button');
+                startApp();
+                setTimeout(function() { handled = false; }, 1000);
+            }
+
+            // 直接onclick設定（最もシンプルで確実）
+            btn.onclick = doStart;
+
+            // タッチデバイス用: pointerupを使用（タッチとマウス両対応）
+            btn.addEventListener('pointerup', function(e) {
+                e.preventDefault();
+                doStart();
+            }, { passive: false });
+
+            console.log('Start button initialized');
         })();
         
         // エクスポート機能
