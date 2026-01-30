@@ -12,6 +12,15 @@
             -webkit-tap-highlight-color: transparent;
         }
         
+        :root {
+            --cardW-large: clamp(110px, 28vw, 180px);
+            --cardW-compact: clamp(92px, 24vw, 150px);
+            --cardW: var(--cardW-large);
+            --cardRadius: 12px;
+            --cardGap: clamp(8px, 2vw, 16px);
+            --cardLabelSize: clamp(12px, 3.2vw, 16px);
+        }
+
         html, body {
             background-color: #0f2027;
         }
@@ -112,16 +121,9 @@
         /* カードグリッド */
         .card-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 10px;
+            grid-template-columns: repeat(auto-fill, minmax(var(--cardW), 1fr));
+            gap: var(--cardGap);
             margin-top: 15px;
-        }
-        
-        @media (min-width: 768px) {
-            .card-grid {
-                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-                gap: 15px;
-            }
         }
         
         .card-item {
@@ -278,7 +280,7 @@
             background: rgba(0,0,0,0.3);
             border: 3px solid rgba(100,200,255,0.5);
             border-radius: 16px;
-            padding: 20px;
+            padding: clamp(12px, 3vw, 20px);
             box-shadow: 0 0 20px rgba(100,200,255,0.3);
             overflow-x: auto;
         }
@@ -290,16 +292,16 @@
         }
         
         .card-slot {
-            width: 70px;
-            height: 105px;
+            width: var(--cardW);
+            height: calc(var(--cardW) * 1.5);
             background: rgba(255,255,255,0.1);
             border: 2px dashed rgba(255,255,255,0.3);
-            border-radius: 6px;
+            border-radius: var(--cardRadius);
             position: absolute;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 10px;
+            font-size: clamp(10px, 2.4vw, 12px);
             color: #888;
             cursor: pointer;
             transition: all 0.3s;
@@ -308,12 +310,6 @@
         }
         
         @media (min-width: 768px) {
-            .card-slot {
-                width: 100px;
-                height: 150px;
-                font-size: 12px;
-            }
-            
             .spread-inner {
                 min-width: 700px;
                 min-height: 450px;
@@ -493,10 +489,10 @@
         
         .shuffle-card {
             position: absolute;
-            width: 70px;
-            height: 105px;
+            width: var(--cardW);
+            height: calc(var(--cardW) * 1.5);
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 6px;
+            border-radius: var(--cardRadius);
             box-shadow: 0 2px 10px rgba(0,0,0,0.3);
             display: flex;
             align-items: center;
@@ -597,8 +593,46 @@
         .card-text {
             padding: 5px;
             color: #333;
-            font-size: 10px;
+            font-size: clamp(10px, 2.6vw, 14px);
             text-align: center;
+        }
+
+        .question-display {
+            background: rgba(100,200,255,0.1);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(100,200,255,0.3);
+        }
+
+        .question-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .question-title {
+            font-size: 11px;
+            color: #64c8ff;
+        }
+
+        .question-toggle {
+            padding: 6px 12px;
+            font-size: 11px;
+            border-radius: 6px;
+            border: 1px solid rgba(100,200,255,0.5);
+            background: rgba(100,200,255,0.15);
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .question-display.collapsed #question-text {
+            display: none;
+        }
+
+        .question-display.collapsed {
+            padding: 8px 12px;
         }
 
         /* モーダル */
@@ -940,6 +974,21 @@
             border-radius: 8px;
             margin-bottom: 15px;
             font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .storage-warning.compact {
+            padding: 8px 10px;
+            font-size: 12px;
+        }
+
+        .storage-warning .storage-action {
+            padding: 6px 10px;
+            font-size: 11px;
         }
 
         .storage-info {
@@ -1000,7 +1049,7 @@
         }
 
         .card-grid.compact {
-            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(var(--cardW), 1fr));
         }
 
         .card-grid.compact .card-item {
@@ -1047,6 +1096,28 @@
             align-items: center;
             gap: 8px;
         }
+
+        .lottery-card {
+            width: var(--cardW);
+            text-align: center;
+            animation: fadeIn 0.5s;
+        }
+
+        .lottery-card-inner {
+            width: var(--cardW);
+            height: calc(var(--cardW) * 1.5);
+            border-radius: var(--cardRadius);
+            overflow: hidden;
+            border: 3px solid rgba(100,200,255,0.8);
+            box-shadow: 0 0 20px rgba(100,200,255,0.5);
+            cursor: pointer;
+        }
+
+        .lottery-card-label {
+            font-size: var(--cardLabelSize);
+            margin-top: 8px;
+            color: #fff;
+        }
     </style>
     <script src="lenormand-embedded.js"></script>
 </head>
@@ -1086,12 +1157,13 @@
         
         <div class="nav-tabs">
             <button onclick="goHome()" style="background:rgba(255,200,100,0.2);border-color:rgba(255,200,100,0.5);">🏠</button>
-            <button class="active" onclick="showScreen('edit')" data-ja="編集" data-en="Edit">編集</button>
-            <button onclick="showScreen('sets')" data-ja="セット" data-en="Sets">セット</button>
-            <button onclick="showScreen('spread')" data-ja="展開" data-en="Spread">展開</button>
-            <button onclick="showScreen('reading')" data-ja="占う" data-en="Read">占う</button>
-            <button onclick="showScreen('lottery')" data-ja="くじ" data-en="Draw">くじ</button>
-            <button onclick="showScreen('ritual')" data-ja="記録" data-en="Notes">記録</button>
+            <button class="active" onclick="showScreen('edit')" data-screen="edit" data-ja="編集" data-en="Edit">編集</button>
+            <button onclick="showScreen('sets')" data-screen="sets" data-ja="セット" data-en="Sets">セット</button>
+            <button onclick="showScreen('spread')" data-screen="spread" data-ja="展開" data-en="Spread">展開</button>
+            <button onclick="showScreen('reading')" data-screen="reading" data-ja="占う" data-en="Read">占う</button>
+            <button onclick="showScreen('lottery')" data-screen="lottery" data-ja="くじ" data-en="Draw">くじ</button>
+            <button onclick="showScreen('ritual')" data-screen="ritual" data-ja="記録" data-en="Notes">記録</button>
+            <button onclick="showScreen('settings')" data-screen="settings" data-ja="設定" data-en="Settings">設定</button>
         </div>
 
         <!-- カード編集画面 -->
@@ -1100,18 +1172,9 @@
                 <p style="margin:0;" data-ja="🃏 ルノルマン39枚のプリセットが「セット」タブにあります。すぐに占いを始められます！" data-en="🃏 A 39-card Lenormand preset is available in the 'Sets' tab. Ready to read immediately!">🃏 ルノルマン39枚のプリセットが「セット」タブにあります。すぐに占いを始められます！</p>
             </div>
 
-            <div class="info-box" style="background:rgba(255,200,100,0.1);border-color:rgba(255,200,100,0.3);">
-                <h3>💾 <span data-ja="データ移行" data-en="Data Transfer">データ移行</span></h3>
-                <p style="margin-bottom:10px;" data-ja="PC↔スマホ間でデータを移すにはエクスポート/インポートを使用" data-en="Use Export/Import to transfer data between PC and mobile">PC↔スマホ間でデータを移すにはエクスポート/インポートを使用</p>
-                <div style="display:flex;gap:10px;flex-wrap:wrap;">
-                    <button class="btn" onclick="exportData()" style="padding:10px 15px;font-size:13px;" data-ja="エクスポート" data-en="Export">エクスポート</button>
-                    <input type="file" accept=".json" style="display:none" id="import-file" onchange="importData(this)">
-                    <button class="btn" onclick="document.getElementById('import-file').click()" style="padding:10px 15px;font-size:13px;" data-ja="インポート" data-en="Import">インポート</button>
-                </div>
-            </div>
-
-            <div id="storage-warning" class="storage-warning" style="display:none;" data-ja="⚠️ ストレージ使用量が多くなっています。画像サイズを小さくするか、不要なカードを削除してください。" data-en="⚠️ Storage is running low. Reduce image sizes or delete unused cards.">
-                ⚠️ ストレージ使用量が多くなっています。画像サイズを小さくするか、不要なカードを削除してください。
+            <div id="storage-warning" class="storage-warning compact" style="display:none;">
+                <span>⚠️ <span data-ja="ストレージ使用量が多くなっています。画像サイズを小さくするか、不要なカードを削除してください。" data-en="Storage is running low. Reduce image sizes or delete unused cards.">ストレージ使用量が多くなっています。画像サイズを小さくするか、不要なカードを削除してください。</span></span>
+                <button class="btn storage-action" onclick="showScreen('settings')" data-ja="設定へ" data-en="Open Settings">設定へ</button>
             </div>
 
             <div class="deck-info">
@@ -1212,35 +1275,6 @@
                         <input type="checkbox" id="lenormand-person">
                         <span data-ja="00.Personを使う" data-en="Use 00.Person">00.Personを使う</span>
                     </label>
-                </div>
-            </div>
-
-            <div class="info-box">
-                <h3>🔊 <span data-ja="サウンド設定" data-en="Sound Settings">サウンド設定</span></h3>
-                <div class="sound-options" style="display:flex;flex-direction:column;gap:12px;">
-                    <label style="display:flex;align-items:center;gap:8px;">
-                        <input type="checkbox" id="sound-bgm" onchange="audioManager.toggleBGM(this.checked)">
-                        <span data-ja="BGM（背景音楽）" data-en="BGM (Background Music)">BGM（背景音楽）</span>
-                    </label>
-                    <div style="display:flex;align-items:center;gap:8px;margin-left:24px;">
-                        <span style="font-size:12px;color:#888;" data-ja="音量:" data-en="Volume:">音量:</span>
-                        <input type="range" id="sound-bgm-volume" min="0" max="100" value="25"
-                               style="flex:1;max-width:120px;"
-                               onchange="audioManager.setBGMVolume(this.value/100)">
-                        <span id="sound-bgm-volume-label" style="font-size:12px;width:35px;">25%</span>
-                    </div>
-                    <label style="display:flex;align-items:center;gap:8px;">
-                        <input type="checkbox" id="sound-se" onchange="audioManager.toggleSE(this.checked)">
-                        <span data-ja="効果音（タップ・めくり音など）" data-en="Sound Effects (tap, flip, etc.)">効果音（タップ・めくり音など）</span>
-                    </label>
-                    <div style="display:flex;align-items:center;gap:8px;margin-left:24px;">
-                        <span style="font-size:12px;color:#888;" data-ja="音量:" data-en="Volume:">音量:</span>
-                        <input type="range" id="sound-se-volume" min="0" max="100" value="60"
-                               style="flex:1;max-width:120px;"
-                               onchange="audioManager.setSEVolume(this.value/100)">
-                        <span id="sound-se-volume-label" style="font-size:12px;width:35px;">60%</span>
-                    </div>
-                    <p style="font-size:11px;color:#888;margin:0;" data-ja="※ブラウザ制限により、初回タップ後に音声が再生されます" data-en="* Audio plays after first tap (browser restriction)">※ブラウザ制限により、初回タップ後に音声が再生されます</p>
                 </div>
             </div>
 
@@ -1382,8 +1416,11 @@
         <!-- リーディング画面 -->
         <div id="reading-screen" class="screen">
             <!-- 問い表示エリア -->
-            <div id="question-display" style="display:none;background:rgba(100,200,255,0.1);padding:12px;border-radius:8px;margin-bottom:15px;border:1px solid rgba(100,200,255,0.3);">
-                <div style="font-size:11px;color:#64c8ff;margin-bottom:5px;" data-ja="📝 問い" data-en="📝 Question">📝 問い</div>
+            <div id="question-display" class="question-display collapsed" style="display:none;">
+                <div class="question-header">
+                    <div class="question-title" data-ja="📝 問い" data-en="📝 Question">📝 問い</div>
+                    <button type="button" class="question-toggle" id="question-toggle" onclick="toggleQuestionDisplay()"></button>
+                </div>
                 <div id="question-text" style="font-size:14px;color:#fff;"></div>
             </div>
             
@@ -1472,6 +1509,53 @@
                         <h4 style="color:#64c8ff;margin-bottom:10px;font-size:0.9em;" data-ja="過去の記録" data-en="Past Insights">過去の記録</h4>
                         <div id="crystalList"></div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 設定画面 -->
+        <div id="settings-screen" class="screen">
+            <div class="info-box">
+                <h3>⚙️ <span data-ja="設定" data-en="Settings">設定</span></h3>
+                <p data-ja="アプリ全体の設定やデータ移行はこちら" data-en="App-wide settings and data transfer.">アプリ全体の設定やデータ移行はこちら</p>
+            </div>
+
+            <div class="info-box" style="background:rgba(255,200,100,0.1);border-color:rgba(255,200,100,0.3);">
+                <h3>💾 <span data-ja="データ移行" data-en="Data Transfer">データ移行</span></h3>
+                <p style="margin-bottom:10px;" data-ja="PC↔スマホ間でデータを移すにはエクスポート/インポートを使用" data-en="Use Export/Import to transfer data between PC and mobile">PC↔スマホ間でデータを移すにはエクスポート/インポートを使用</p>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                    <button class="btn" onclick="exportData()" style="padding:10px 15px;font-size:13px;" data-ja="エクスポート" data-en="Export">エクスポート</button>
+                    <input type="file" accept=".json" style="display:none" id="import-file" onchange="importData(this)">
+                    <button class="btn" onclick="document.getElementById('import-file').click()" style="padding:10px 15px;font-size:13px;" data-ja="インポート" data-en="Import">インポート</button>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <h3>🔊 <span data-ja="サウンド設定" data-en="Sound Settings">サウンド設定</span></h3>
+                <div class="sound-options" style="display:flex;flex-direction:column;gap:12px;">
+                    <label style="display:flex;align-items:center;gap:8px;">
+                        <input type="checkbox" id="sound-bgm" onchange="audioManager.toggleBGM(this.checked)">
+                        <span data-ja="BGM（背景音楽）" data-en="BGM (Background Music)">BGM（背景音楽）</span>
+                    </label>
+                    <div style="display:flex;align-items:center;gap:8px;margin-left:24px;">
+                        <span style="font-size:12px;color:#888;" data-ja="音量:" data-en="Volume:">音量:</span>
+                        <input type="range" id="sound-bgm-volume" min="0" max="100" value="25"
+                               style="flex:1;max-width:160px;"
+                               onchange="audioManager.setBGMVolume(this.value/100)">
+                        <span id="sound-bgm-volume-label" style="font-size:12px;width:35px;">25%</span>
+                    </div>
+                    <label style="display:flex;align-items:center;gap:8px;">
+                        <input type="checkbox" id="sound-se" onchange="audioManager.toggleSE(this.checked)">
+                        <span data-ja="効果音（タップ・めくり音など）" data-en="Sound Effects (tap, flip, etc.)">効果音（タップ・めくり音など）</span>
+                    </label>
+                    <div style="display:flex;align-items:center;gap:8px;margin-left:24px;">
+                        <span style="font-size:12px;color:#888;" data-ja="音量:" data-en="Volume:">音量:</span>
+                        <input type="range" id="sound-se-volume" min="0" max="100" value="60"
+                               style="flex:1;max-width:160px;"
+                               onchange="audioManager.setSEVolume(this.value/100)">
+                        <span id="sound-se-volume-label" style="font-size:12px;width:35px;">60%</span>
+                    </div>
+                    <p style="font-size:11px;color:#888;margin:0;" data-ja="※ブラウザ制限により、初回タップ後に音声が再生されます" data-en="* Audio plays after first tap (browser restriction)">※ブラウザ制限により、初回タップ後に音声が再生されます</p>
                 </div>
             </div>
         </div>
@@ -2041,6 +2125,7 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             applyCardDensity();
             updateStorageInfo();
             updateSignificatorDisplay();
+            updateQuestionToggleLabel();
         }
         
         // 言語に応じたテキスト取得
@@ -2229,6 +2314,10 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             const isCompact = cardFilterState.density === 'compact';
             const grid = document.getElementById('card-grid');
             const lenormandGrid = document.getElementById('lenormand-grid');
+            const root = document.documentElement;
+            if (root) {
+                root.style.setProperty('--cardW', isCompact ? 'var(--cardW-compact)' : 'var(--cardW-large)');
+            }
             if (grid) {
                 grid.classList.toggle('compact', isCompact);
             }
@@ -2239,6 +2328,7 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             const compactBtn = document.getElementById('density-compact');
             if (largeBtn) largeBtn.classList.toggle('active', cardFilterState.density === 'large');
             if (compactBtn) compactBtn.classList.toggle('active', cardFilterState.density === 'compact');
+            refreshSpreadLayout();
         }
 
         function renderCardFilterSetOptions() {
@@ -3181,7 +3271,7 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             document.getElementById('spread-active-count').textContent = count;
         }
         
-        function showScreen(screen) {
+        function showScreen(screen, sourceEvent) {
             // タップSE再生
             if (audioManager) {
                 audioManager.onUserInteraction();
@@ -3192,7 +3282,14 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             document.querySelectorAll('.nav-tabs button').forEach(b => b.classList.remove('active'));
 
             document.getElementById(`${screen}-screen`).classList.add('active');
-            event.target.classList.add('active');
+            const resolvedEvent = sourceEvent || window.event;
+            const isNavTarget = resolvedEvent && resolvedEvent.target && resolvedEvent.target.closest('.nav-tabs');
+            if (isNavTarget) {
+                resolvedEvent.target.classList.add('active');
+            } else {
+                const navBtn = document.querySelector(`.nav-tabs button[data-screen="${screen}"]`);
+                if (navBtn) navBtn.classList.add('active');
+            }
 
             if (screen === 'spread') {
                 updateActiveCount();
@@ -3204,6 +3301,8 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                 initLottery();
             } else if (screen === 'reading') {
                 loadQuestion();
+            } else if (screen === 'settings') {
+                updateStorageInfo();
             }
         }
         
@@ -3212,13 +3311,36 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             const question = localStorage.getItem('oracleQuestion');
             const display = document.getElementById('question-display');
             const text = document.getElementById('question-text');
+            const toggleBtn = document.getElementById('question-toggle');
             
             if (question && question.trim()) {
                 text.textContent = question;
                 display.style.display = 'block';
+                display.classList.add('collapsed');
+                updateQuestionToggleLabel();
             } else {
                 display.style.display = 'none';
             }
+        }
+
+        function updateQuestionToggleLabel() {
+            const display = document.getElementById('question-display');
+            const toggleBtn = document.getElementById('question-toggle');
+            if (!display || !toggleBtn) return;
+            const isCollapsed = display.classList.contains('collapsed');
+            toggleBtn.textContent = isCollapsed
+                ? (currentLang === 'ja' ? '表示' : 'Show')
+                : (currentLang === 'ja' ? '隠す' : 'Hide');
+        }
+
+        function toggleQuestionDisplay(forceState) {
+            const display = document.getElementById('question-display');
+            if (!display) return;
+            const shouldCollapse = typeof forceState === 'boolean'
+                ? !forceState
+                : !display.classList.contains('collapsed');
+            display.classList.toggle('collapsed', shouldCollapse);
+            updateQuestionToggleLabel();
         }
         
         // くじ引き機能
@@ -3284,17 +3406,10 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                 
                 // カード表示（大きめ）
                 const cardDiv = document.createElement('div');
-                cardDiv.style.cssText = 'width:120px;text-align:center;animation:fadeIn 0.5s;';
+                cardDiv.className = 'lottery-card';
                 
                 const cardInner = document.createElement('div');
-                cardInner.style.cssText = `
-                    width:120px;height:180px;
-                    border-radius:10px;
-                    overflow:hidden;
-                    border:3px solid rgba(100,200,255,0.8);
-                    box-shadow:0 0 20px rgba(100,200,255,0.5);
-                    cursor:pointer;
-                `;
+                cardInner.className = 'lottery-card-inner';
                 
                 if (card.imageData) {
                     cardInner.innerHTML = `<img src="${card.imageData}" style="width:100%;height:100%;object-fit:cover;">`;
@@ -3305,7 +3420,7 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                 cardInner.onclick = () => showCardModal(card);
                 
                 const label = document.createElement('div');
-                label.style.cssText = 'font-size:12px;margin-top:8px;color:#fff;';
+                label.className = 'lottery-card-label';
                 label.textContent = card.name;
                 
                 cardDiv.appendChild(cardInner);
@@ -3750,8 +3865,6 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             currentSpreadSize = size;
             
             showScreen('reading');
-            document.querySelectorAll('.nav-tabs button').forEach(b => b.classList.remove('active'));
-            document.querySelector('.nav-tabs button:nth-child(4)').classList.add('active');
             setupSpread(type, size);
         }
         
@@ -3772,12 +3885,40 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                 inner.appendChild(slot);
             });
         }
+
+        function refreshSpreadLayout() {
+            if (!currentSpread) return;
+            setupSpread(currentSpread, currentSpreadSize);
+            if (drawnCards.length > 0) {
+                drawnCards.forEach((card, i) => drawCard(i, card, true));
+                showResults(true);
+            }
+        }
+
+        function getCardBaseWidth() {
+            if (!document.body) return 100;
+            let probe = document.getElementById('card-size-probe');
+            if (!probe) {
+                probe = document.createElement('div');
+                probe.id = 'card-size-probe';
+                probe.style.cssText = 'position:absolute;visibility:hidden;pointer-events:none;height:0;';
+                document.body.appendChild(probe);
+            }
+            probe.style.width = 'var(--cardW)';
+            const width = probe.getBoundingClientRect().width;
+            return width || 100;
+        }
         
         function getSpreadPositions(type, size) {
             const positions = [];
             const isMobile = window.innerWidth < 768;
             // モバイルでは左に余白を確保
             const offsetX = isMobile ? 50 : 0;
+            const cardW = getCardBaseWidth();
+            const cardH = cardW * 1.5;
+            const baseGap = cardW * (isMobile ? 0.9 : 1.1);
+            const wideGap = cardW * (isMobile ? 1.4 : 1.7);
+            const vGap = cardH * (isMobile ? 0.55 : 0.65);
             const cx = 250 + offsetX;
             const cy = 200;
             
@@ -3787,46 +3928,43 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                     break;
                 case 'simplecross':
                     // シンプルクロス（2枚）- 状況が上、障害が重なる
-                    positions.push({x: cx, y: cy - 60, label: getLang('situation', '状況', 'Situation')});
-                    positions.push({x: cx, y: cy + 60, label: getLang('obstacle', '障害', 'Obstacle')});
+                    positions.push({x: cx, y: cy - vGap, label: getLang('situation', '状況', 'Situation')});
+                    positions.push({x: cx, y: cy + vGap, label: getLang('obstacle', '障害', 'Obstacle')});
                     break;
                 case 'horizontal2':
                     // 横2枚展開
-                    positions.push({x: cx - 60, y: cy, label: '1'});
-                    positions.push({x: cx + 60, y: cy, label: '2'});
+                    positions.push({x: cx - baseGap, y: cy, label: '1'});
+                    positions.push({x: cx + baseGap, y: cy, label: '2'});
                     break;
                 case 'choice':
                     // 二者択一（3枚）
-                    const choiceGap = isMobile ? 80 : 120;
-                    positions.push({x: cx - choiceGap, y: cy - 60, label: getLang('choice1', '選択①', 'Choice 1')});
-                    positions.push({x: cx + choiceGap, y: cy - 60, label: getLang('choice2', '選択②', 'Choice 2')});
-                    positions.push({x: cx, y: cy + 80, label: getLang('situation', '状況', 'Situation')});
+                    positions.push({x: cx - wideGap, y: cy - vGap, label: getLang('choice1', '選択①', 'Choice 1')});
+                    positions.push({x: cx + wideGap, y: cy - vGap, label: getLang('choice2', '選択②', 'Choice 2')});
+                    positions.push({x: cx, y: cy + cardH * 0.7, label: getLang('situation', '状況', 'Situation')});
                     break;
                 case 'three':
-                    positions.push({x: cx - 120, y: cy, label: getLang('past', '過去', 'Past')});
+                    positions.push({x: cx - wideGap, y: cy, label: getLang('past', '過去', 'Past')});
                     positions.push({x: cx, y: cy, label: getLang('present', '現在', 'Present')});
-                    positions.push({x: cx + 120, y: cy, label: getLang('future', '未来', 'Future')});
+                    positions.push({x: cx + wideGap, y: cy, label: getLang('future', '未来', 'Future')});
                     break;
                 case 'diamond':
                     // ダイヤモンドクロス（4枚）
-                    const dGap = isMobile ? 70 : 100;
-                    positions.push({x: cx, y: cy - dGap, label: getLang('result', '結果', 'Result')});
-                    positions.push({x: cx - dGap, y: cy, label: getLang('self', '自分', 'Self')});
-                    positions.push({x: cx + dGap, y: cy, label: getLang('other', '相手', 'Other')});
-                    positions.push({x: cx, y: cy + dGap, label: getLang('advice', '対策', 'Advice')});
+                    positions.push({x: cx, y: cy - baseGap, label: getLang('result', '結果', 'Result')});
+                    positions.push({x: cx - baseGap, y: cy, label: getLang('self', '自分', 'Self')});
+                    positions.push({x: cx + baseGap, y: cy, label: getLang('other', '相手', 'Other')});
+                    positions.push({x: cx, y: cy + baseGap, label: getLang('advice', '対策', 'Advice')});
                     break;
                 case 'greek':
                     // ギリシャ十字（5枚）
-                    const gkGap = isMobile ? 70 : 100;
-                    positions.push({x: cx, y: cy - gkGap, label: getLang('trend', '傾向', 'Trend')});
-                    positions.push({x: cx - gkGap, y: cy, label: getLang('current', '現状', 'Current')});
+                    positions.push({x: cx, y: cy - baseGap, label: getLang('trend', '傾向', 'Trend')});
+                    positions.push({x: cx - baseGap, y: cy, label: getLang('current', '現状', 'Current')});
                     positions.push({x: cx, y: cy, label: getLang('result', '結果', 'Result')});
-                    positions.push({x: cx + gkGap, y: cy, label: getLang('obstacle', '障害', 'Obstacle')});
-                    positions.push({x: cx, y: cy + gkGap, label: getLang('advice', '対策', 'Advice')});
+                    positions.push({x: cx + baseGap, y: cy, label: getLang('obstacle', '障害', 'Obstacle')});
+                    positions.push({x: cx, y: cy + baseGap, label: getLang('advice', '対策', 'Advice')});
                     break;
                 case 'pyramid':
                     // ピラミッド（6枚）
-                    const pyGap = isMobile ? 60 : 80;
+                    const pyGap = isMobile ? cardW * 0.85 : cardW;
                     // 底辺（現状・原因・過程）
                     positions.push({x: cx - pyGap, y: cy + pyGap, label: getLang('current', '現状', 'Current')});
                     positions.push({x: cx, y: cy + pyGap, label: getLang('cause', '原因', 'Cause')});
@@ -3839,8 +3977,8 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                     break;
                 case 'horseshoe':
                     // ホースシュー（7枚）- U字型
-                    const hsGap = isMobile ? 55 : 80;
-                    const hsV = isMobile ? 50 : 70;
+                    const hsGap = isMobile ? cardW * 0.8 : cardW * 1.05;
+                    const hsV = isMobile ? cardH * 0.45 : cardH * 0.5;
                     positions.push({x: cx - hsGap*2, y: cy - hsV*2, label: getLang('past', '過去', 'Past')});
                     positions.push({x: cx - hsGap*1.5, y: cy - hsV, label: getLang('present', '現在', 'Present')});
                     positions.push({x: cx - hsGap, y: cy, label: getLang('future', '未来', 'Future')});
@@ -3851,8 +3989,8 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                     break;
                 case 'hexagram':
                     // 六芒星配置（7枚）
-                    const hGap = isMobile ? 70 : 100;
-                    const hVGap = isMobile ? 60 : 80;
+                    const hGap = isMobile ? cardW * 0.95 : cardW * 1.2;
+                    const hVGap = isMobile ? cardH * 0.4 : cardH * 0.5;
                     positions.push({x: cx, y: cy - hVGap * 1.5, label: '1'});
                     positions.push({x: cx - hGap, y: cy + hVGap * 0.5, label: '2'});
                     positions.push({x: cx + hGap, y: cy + hVGap * 0.5, label: '3'});
@@ -3862,30 +4000,30 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                     positions.push({x: cx, y: cy, label: '7'});
                     break;
                 case 'celtic':
-                    const cGap = isMobile ? 80 : 120;
+                    const cGap = isMobile ? cardW * 1.1 : cardW * 1.5;
                     positions.push({x: cx, y: cy, label: '1'});
                     positions.push({x: cx, y: cy, label: '2'});
-                    positions.push({x: cx, y: cy - 100, label: '3'});
-                    positions.push({x: cx, y: cy + 100, label: '4'});
+                    positions.push({x: cx, y: cy - cardH * 0.7, label: '3'});
+                    positions.push({x: cx, y: cy + cardH * 0.7, label: '4'});
                     positions.push({x: cx - cGap, y: cy, label: '5'});
                     positions.push({x: cx + cGap, y: cy, label: '6'});
-                    positions.push({x: cx + cGap + 80, y: cy + 120, label: '7'});
-                    positions.push({x: cx + cGap + 80, y: cy + 40, label: '8'});
-                    positions.push({x: cx + cGap + 80, y: cy - 40, label: '9'});
-                    positions.push({x: cx + cGap + 80, y: cy - 120, label: '10'});
+                    positions.push({x: cx + cGap + cardW * 0.9, y: cy + cardH * 0.8, label: '7'});
+                    positions.push({x: cx + cGap + cardW * 0.9, y: cy + cardH * 0.3, label: '8'});
+                    positions.push({x: cx + cGap + cardW * 0.9, y: cy - cardH * 0.3, label: '9'});
+                    positions.push({x: cx + cGap + cardW * 0.9, y: cy - cardH * 0.8, label: '10'});
                     break;
                 case 'nine':
-                    const nineGap = isMobile ? 80 : 120;
+                    const nineGap = isMobile ? cardW * 1.1 : cardW * 1.4;
                     for (let r = 0; r < 3; r++) {
                         for (let c = 0; c < 3; c++) {
-                            positions.push({x: cx - nineGap + c * nineGap, y: cy - 100 + r * 100, label: r * 3 + c + 1});
+                            positions.push({x: cx - nineGap + c * nineGap, y: cy - cardH * 0.7 + r * cardH * 0.7, label: r * 3 + c + 1});
                         }
                     }
                     break;
                 case 'lifetree':
                     // 生命の樹（10枚）
-                    const ltGap = isMobile ? 50 : 70;
-                    const ltV = isMobile ? 45 : 60;
+                    const ltGap = isMobile ? cardW * 0.7 : cardW * 0.9;
+                    const ltV = isMobile ? cardH * 0.35 : cardH * 0.4;
                     positions.push({x: cx, y: cy - ltV*3, label: getLang('crown', '1.理想', '1.Crown')});
                     positions.push({x: cx + ltGap, y: cy - ltV*2, label: getLang('wisdom', '2.情熱', '2.Passion')});
                     positions.push({x: cx - ltGap, y: cy - ltV*2, label: getLang('understanding', '3.理解', '3.Understanding')});
@@ -3899,7 +4037,7 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                     break;
                 case 'horoscope':
                     // ホロスコープ（12枚）- 時計回り
-                    const horoRadius = isMobile ? 110 : 150;
+                    const horoRadius = isMobile ? cardW * 1.4 : cardW * 1.8;
                     const horoLabels = currentLang === 'ja' 
                         ? ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
                         : ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th', '10th', '11th', '12th'];
@@ -3919,7 +4057,10 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                     const gRows = 4;
                     const gPadding = 5;
                     const gGap = 2; // カード間の隙間
-                    const gCardW = Math.floor((screenW - gPadding * 2 - gGap * (gCols - 1)) / gCols);
+                    const gCardW = Math.min(
+                        getCardBaseWidth(),
+                        Math.floor((screenW - gPadding * 2 - gGap * (gCols - 1)) / gCols)
+                    );
                     const gCardH = Math.floor(gCardW * 1.5);
                     
                     // spread-innerのmin-widthとカードサイズを動的に設定
@@ -3999,6 +4140,9 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             // カードの山（リフルシャッフル）
             const deckX = shuffleArea.offsetWidth / 2 || 150;
             const deckY = 150;
+            const baseCardW = getCardBaseWidth();
+            const shuffleCardW = Math.max(54, baseCardW * 0.75);
+            const shuffleCardH = shuffleCardW * 1.5;
             
             const shuffleCards = [];
             const cardCount = Math.min(12, shufflePool.length);
@@ -4008,12 +4152,13 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                 card.className = 'shuffle-card';
                 card.style.cssText = `
                     position:absolute;
-                    width:60px;height:90px;
+                    width:${shuffleCardW}px;
+                    height:${shuffleCardH}px;
                     background:linear-gradient(135deg,#667eea,#764ba2);
                     border-radius:6px;
                     box-shadow:0 2px 8px rgba(0,0,0,0.4);
-                    left:${deckX - 30}px;
-                    top:${deckY - 45 - i * 2}px;
+                    left:${deckX - shuffleCardW / 2}px;
+                    top:${deckY - shuffleCardH / 2 - i * 2}px;
                     z-index:${20 + i};
                     transition:all 0.3s ease;
                     cursor:pointer;
@@ -4249,9 +4394,9 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
         let supplementCards = [];
         const MAX_SUPPLEMENT = 3;
         
-        function showResults() {
+        function showResults(silent = false) {
             // 結果表示時の確定SE
-            if (audioManager) {
+            if (audioManager && !silent) {
                 audioManager.playConfirm();
             }
 
