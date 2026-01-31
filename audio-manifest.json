@@ -8,6 +8,8 @@
   "se": {
     "tap": "audio/se_tap.mp3",
     "flip": "audio/se_flip.mp3",
+    "flipLight": "audio/se_tap.mp3",
+    "shuffle": "audio/se_flip.mp3",
     "confirm": "audio/se_confirm.mp3"
   }
 }

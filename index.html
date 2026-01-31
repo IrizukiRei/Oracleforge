@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>OracleForge - Card Shuffler</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Noto+Serif+JP:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -26,7 +29,7 @@
         }
 
         body {
-            font-family: 'Hiragino Mincho ProN', 'Yu Mincho', 'YuMincho', serif;
+            font-family: 'Noto Serif JP', 'Hiragino Mincho ProN', 'Yu Mincho', 'YuMincho', serif;
             background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
             color: #fff;
             min-height: 100vh;
@@ -51,15 +54,16 @@
         h1 {
             text-align: center;
             margin-bottom: 20px;
-            font-size: 1.5em;
+            font-size: 1.7em;
             text-shadow: 0 0 10px rgba(100,200,255,0.5);
             letter-spacing: 0.2em;
             font-weight: 300;
+            font-family: 'Cormorant Garamond', 'Noto Serif JP', serif;
         }
         
         @media (min-width: 768px) {
             h1 {
-                font-size: 2.2em;
+                font-size: 2.4em;
                 letter-spacing: 0.3em;
             }
         }
@@ -82,16 +86,17 @@
             border-radius: 8px;
             font-size: 12px;
             transition: all 0.3s;
-            flex: 1;
+            flex: 0 1 110px;
             min-width: 60px;
-            max-width: 120px;
+            max-width: 130px;
         }
         
         @media (min-width: 768px) {
             .nav-tabs button {
                 padding: 12px 24px;
                 font-size: 16px;
-                max-width: none;
+                flex: 0 1 150px;
+                max-width: 160px;
             }
         }
         
@@ -272,7 +277,7 @@
         /* スプレッド表示エリア */
         .spread-display {
             position: relative;
-            min-height: 350px;
+            min-height: clamp(380px, 55vh, 520px);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -287,8 +292,8 @@
         
         .spread-inner {
             position: relative;
-            min-width: 550px;
-            min-height: 300px;
+            min-width: clamp(600px, 85vw, 820px);
+            min-height: clamp(320px, 45vh, 460px);
         }
         
         .card-slot {
@@ -311,8 +316,8 @@
         
         @media (min-width: 768px) {
             .spread-inner {
-                min-width: 700px;
-                min-height: 450px;
+                min-width: clamp(720px, 85vw, 920px);
+                min-height: clamp(380px, 50vh, 520px);
             }
         }
         
@@ -441,6 +446,7 @@
             padding: 15px;
             border-radius: 8px;
             margin-top: 15px;
+            font-size: 14.5px;
         }
 
         .result-info h3 {
@@ -454,7 +460,7 @@
             padding: 10px;
             background: rgba(0,0,0,0.2);
             border-radius: 4px;
-            font-size: 14px;
+            font-size: 14.5px;
         }
 
         .card-meaning strong {
@@ -1015,7 +1021,7 @@
 
         /* タイトルテキスト */
         .title-text {
-            font-size: 2em;
+            font-size: 2.3em;
             letter-spacing: 0.2em;
             color: #fff;
             text-shadow: 
@@ -1024,11 +1030,12 @@
                 0 0 40px rgba(100,200,255,0.3);
             margin-bottom: 10px;
             animation: titleGlow 3s ease-in-out infinite;
+            font-family: 'Cormorant Garamond', 'Noto Serif JP', serif;
         }
         
         @media (min-width: 500px) {
             .title-text {
-                font-size: 2.5em;
+                font-size: 2.8em;
                 letter-spacing: 0.4em;
             }
         }
@@ -1777,6 +1784,8 @@
             se: {
                 tap: 'audio/se_tap.mp3',
                 flip: 'audio/se_flip.mp3',
+                flipLight: 'audio/se_tap.mp3',
+                shuffle: 'audio/se_flip.mp3',
                 confirm: 'audio/se_confirm.mp3'
             }
         };
@@ -2837,8 +2846,12 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
 
             // SE再生
             playSE(type) {
-                if (!soundSettings.se) return;
                 const path = this.sePaths[type];
+                this.playSEByPath(path, type);
+            }
+
+            playSEByPath(path, label = null) {
+                if (!soundSettings.se) return;
                 if (!path || this.invalidAudioFiles.has(path)) return;
 
                 // キャッシュがあれば再利用、なければ新規作成
@@ -2859,13 +2872,25 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             }
 
             // カードめくりSE
-            playFlip() {
+            playFlip(totalCards = 1) {
+                const shouldUseLight = totalCards <= 2;
+                if (shouldUseLight) {
+                    const lightPath = this.sePaths.flipLight || this.sePaths.tap;
+                    this.playSEByPath(lightPath, 'flipLight');
+                    return;
+                }
                 this.playSE('flip');
             }
 
             // 確定SE
             playConfirm() {
                 this.playSE('confirm');
+            }
+
+            // シャッフルSE
+            playShuffle() {
+                const shufflePath = this.sePaths.shuffle || this.sePaths.flip;
+                this.playSEByPath(shufflePath, 'shuffle');
             }
         }
 
@@ -3688,13 +3713,12 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
         }
         
         function drawLottery() {
+            const count = parseInt(document.getElementById('lottery-count').value);
             // くじ引きSE
             if (audioManager) {
                 audioManager.onUserInteraction();
-                audioManager.playFlip();
+                audioManager.playFlip(count);
             }
-
-            const count = parseInt(document.getElementById('lottery-count').value);
             if (count <= 0 || lotteryPool.length < count) {
                 alert(currentLang === 'ja' ? 'カードが足りません' : 'Not enough cards');
                 return;
@@ -4431,17 +4455,17 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             
             const inner = document.getElementById('spread-inner');
             inner.innerHTML = '';
-            inner.style.minHeight = '350px';
+            inner.style.minHeight = '380px';
             
             // シャッフル用のコンテナ
             const shuffleArea = document.createElement('div');
             shuffleArea.id = 'shuffle-area';
-            shuffleArea.style.cssText = 'position:relative;width:100%;height:350px;touch-action:none;';
+            shuffleArea.style.cssText = 'position:relative;width:100%;height:380px;touch-action:none;padding-bottom:70px;';
             inner.appendChild(shuffleArea);
             
             // カードの山（リフルシャッフル）
             const deckX = shuffleArea.offsetWidth / 2 || 150;
-            const deckY = 150;
+            const deckY = shuffleArea.offsetHeight / 2 || 170;
             const baseCardW = getCardBaseWidth();
             const shuffleCardW = Math.max(54, baseCardW * 0.75);
             const shuffleCardH = shuffleCardW * 1.5;
@@ -4473,6 +4497,10 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                 shuffleArea.appendChild(card);
             }
             
+            if (audioManager) {
+                audioManager.playShuffle();
+            }
+
             // リフルシャッフルアニメーション
             setTimeout(() => {
                 shuffleCards.forEach((card, i) => {
@@ -4504,7 +4532,7 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                 // 説明テキスト
                 const hint = document.createElement('div');
                 hint.id = 'collect-hint';
-                hint.style.cssText = 'text-align:center;color:#64c8ff;font-size:14px;margin-top:10px;position:absolute;bottom:10px;width:100%;';
+                hint.style.cssText = 'text-align:center;color:#64c8ff;font-size:14px;margin-top:10px;position:absolute;bottom:12px;width:100%;';
                 hint.innerHTML = currentLang === 'ja' ? '↓ カードをタップして集めてください ↓' : '↓ Tap cards to collect ↓';
                 shuffleArea.appendChild(hint);
                 
@@ -4532,7 +4560,7 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                 // まとめて集めるボタン
                 const collectAllBtn = document.createElement('button');
                 collectAllBtn.className = 'btn';
-                collectAllBtn.style.cssText = 'position:absolute;bottom:40px;left:50%;transform:translateX(-50%);padding:8px 20px;font-size:13px;';
+                collectAllBtn.style.cssText = 'position:absolute;bottom:54px;left:50%;transform:translateX(-50%);padding:8px 20px;font-size:13px;z-index:120;';
                 collectAllBtn.textContent = currentLang === 'ja' ? 'まとめて集める' : 'Collect All';
                 collectAllBtn.onclick = () => {
                     shuffleCards.forEach((card, i) => {
@@ -4576,7 +4604,7 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                     setupSpread(currentSpread, currentSpreadSize);
                     
                     drawnCards.forEach((card, i) => {
-                        setTimeout(() => drawCard(i, card, false), i * 400);
+                        setTimeout(() => drawCard(i, card, false, drawnCards.length), i * 400);
                     });
                     
                     setTimeout(showResults, drawnCards.length * 400 + 800);
@@ -4626,10 +4654,10 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             showResults();
         }
         
-        function drawCard(index, card, instant) {
+        function drawCard(index, card, instant, totalCards = 1) {
             // カードめくりSE再生
             if (audioManager && !instant) {
-                audioManager.playFlip();
+                audioManager.playFlip(totalCards);
             }
 
             const slot = document.getElementById(`slot-${index}`);
