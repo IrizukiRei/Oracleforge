@@ -1785,7 +1785,9 @@
                 tap: 'audio/se_tap.mp3',
                 flip: 'audio/se_flip.mp3',
                 flipLight: 'audio/se_tap.mp3',
+                flipHeavy: 'audio/se_flip.mp3',
                 shuffle: 'audio/se_flip.mp3',
+                shuffleAnimation: 'audio/se_flip.mp3',
                 confirm: 'audio/se_confirm.mp3'
             }
         };
@@ -2662,6 +2664,10 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                 se: {
                     tap: typeof raw.se?.tap === 'string' ? raw.se.tap : defaultAudioManifest.se.tap,
                     flip: typeof raw.se?.flip === 'string' ? raw.se.flip : defaultAudioManifest.se.flip,
+                    flipLight: typeof raw.se?.flipLight === 'string' ? raw.se.flipLight : defaultAudioManifest.se.flipLight,
+                    flipHeavy: typeof raw.se?.flipHeavy === 'string' ? raw.se.flipHeavy : defaultAudioManifest.se.flipHeavy,
+                    shuffle: typeof raw.se?.shuffle === 'string' ? raw.se.shuffle : defaultAudioManifest.se.shuffle,
+                    shuffleAnimation: typeof raw.se?.shuffleAnimation === 'string' ? raw.se.shuffleAnimation : defaultAudioManifest.se.shuffleAnimation,
                     confirm: typeof raw.se?.confirm === 'string' ? raw.se.confirm : defaultAudioManifest.se.confirm
                 }
             };
@@ -2874,9 +2880,15 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             // カードめくりSE
             playFlip(totalCards = 1) {
                 const shouldUseLight = totalCards <= 2;
+                const shouldUseHeavy = totalCards >= 8;
                 if (shouldUseLight) {
                     const lightPath = this.sePaths.flipLight || this.sePaths.tap;
                     this.playSEByPath(lightPath, 'flipLight');
+                    return;
+                }
+                if (shouldUseHeavy) {
+                    const heavyPath = this.sePaths.flipHeavy || this.sePaths.flip;
+                    this.playSEByPath(heavyPath, 'flipHeavy');
                     return;
                 }
                 this.playSE('flip');
@@ -2889,7 +2901,7 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
 
             // シャッフルSE
             playShuffle() {
-                const shufflePath = this.sePaths.shuffle || this.sePaths.flip;
+                const shufflePath = this.sePaths.shuffleAnimation || this.sePaths.shuffle || this.sePaths.flip;
                 this.playSEByPath(shufflePath, 'shuffle');
             }
         }
@@ -4198,6 +4210,13 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             const inner = document.getElementById('spread-inner');
             inner.innerHTML = '';
             document.getElementById('result-info').style.display = 'none';
+
+            if (type !== 'grand') {
+                const styleEl = document.getElementById('grand-tableau-style');
+                if (styleEl) {
+                    styleEl.remove();
+                }
+            }
             
             const positions = getSpreadPositions(type, size);
             

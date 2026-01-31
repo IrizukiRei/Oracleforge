@@ -9,7 +9,9 @@
     "tap": "audio/se_tap.mp3",
     "flip": "audio/se_flip.mp3",
     "flipLight": "audio/se_tap.mp3",
+    "flipHeavy": "audio/se_flip.mp3",
     "shuffle": "audio/se_flip.mp3",
+    "shuffleAnimation": "audio/se_flip.mp3",
     "confirm": "audio/se_confirm.mp3"
   }
 }
