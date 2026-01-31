@@ -476,6 +476,45 @@
             font-size: 1em;
         }
 
+        .edit-settings-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .edit-settings-stack .info-box {
+            margin-bottom: 0;
+        }
+
+        .edit-settings-label {
+            font-size: 11px;
+            color: #9ad6ff;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .edit-settings-label + * {
+            margin-top: 8px;
+        }
+
+        .edit-shortcut-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-left: auto;
+            font-size: 11px;
+            color: #9ad6ff;
+            background: transparent;
+            border: 1px solid rgba(100,200,255,0.4);
+            padding: 4px 8px;
+            border-radius: 999px;
+            cursor: pointer;
+        }
+
+        .edit-shortcut-link:hover {
+            background: rgba(100,200,255,0.15);
+        }
+
         /* シャッフルアニメーション */
         .shuffle-container {
             position: absolute;
@@ -671,6 +710,117 @@
             color: white;
             cursor: pointer;
             z-index: 10000;
+        }
+
+        .modal-overlay.modal-generic {
+            padding: 24px;
+            align-items: flex-start;
+            overflow-y: auto;
+        }
+
+        .modal-panel {
+            width: min(520px, 92vw);
+            margin: 40px auto;
+            background: rgba(15,32,39,0.96);
+            border: 2px solid rgba(100,200,255,0.4);
+            border-radius: 14px;
+            padding: 18px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.45);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .modal-title {
+            font-size: 1.05em;
+            color: #64c8ff;
+            font-weight: 600;
+        }
+
+        .modal-body {
+            font-size: 13px;
+            color: #e0e0e0;
+            line-height: 1.7;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .modal-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .modal-btn {
+            padding: 10px 18px;
+            font-size: 13px;
+        }
+
+        .modal-btn.primary {
+            background: rgba(100,200,255,0.35);
+            border-color: rgba(100,200,255,0.8);
+        }
+
+        .modal-btn.danger {
+            background: rgba(220,53,69,0.4);
+            border-color: rgba(220,53,69,0.8);
+        }
+
+        .modal-btn.ghost {
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        .modal-close-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: #fff;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .credits-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .credits-item {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 10px;
+            padding: 12px;
+        }
+
+        .credits-item h4 {
+            font-size: 14px;
+            color: #64c8ff;
+            margin-bottom: 6px;
+        }
+
+        .credits-field {
+            font-size: 12px;
+            color: #cfcfcf;
+            margin-bottom: 4px;
+        }
+
+        .credits-field span {
+            color: #9ad6ff;
+            margin-right: 6px;
         }
 
         /* 儀式画面 */
@@ -1038,6 +1188,11 @@
             font-size: 12px;
         }
 
+        .card-density .density-label {
+            font-weight: 600;
+            letter-spacing: 0.08em;
+        }
+
         .density-btn {
             padding: 8px 12px;
             font-size: 12px;
@@ -1224,57 +1379,65 @@
                 <button class="btn" onclick="setCardCount()" data-ja="設定" data-en="Set">設定</button>
             </div>
 
-            <div class="info-box">
-                <h3>🗂 <span data-ja="カード整理" data-en="Card Organizer">カード整理</span></h3>
-                <input type="text" id="card-search" class="set-input" data-ja-placeholder="カード名・説明を検索" data-en-placeholder="Search name or description">
-                <div class="card-tools">
-                    <div class="card-tool">
-                        <label data-ja="セット" data-en="Set">セット</label>
-                        <select id="card-filter-set"></select>
+            <div class="edit-settings-stack">
+                <div class="info-box">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <h3 style="margin-bottom:0;">🗂 <span data-ja="カード整理" data-en="Card Organizer">カード整理</span></h3>
+                        <button class="edit-shortcut-link" type="button" onclick="showScreen('settings')" data-ja="🔊 サウンド設定" data-en="🔊 Sound Settings">🔊 サウンド設定</button>
                     </div>
-                    <div class="card-tool">
-                        <label data-ja="画像" data-en="Image">画像</label>
-                        <select id="card-filter-image">
-                            <option value="all" data-ja="すべて" data-en="All">すべて</option>
-                            <option value="with" data-ja="あり" data-en="With image">あり</option>
-                            <option value="without" data-ja="なし" data-en="No image">なし</option>
-                        </select>
+                    <div style="margin-top:10px;">
+                        <div class="edit-settings-label" data-ja="検索 / フィルタ" data-en="Search / Filter">検索 / フィルタ</div>
+                        <input type="text" id="card-search" class="set-input" data-ja-placeholder="カード名・説明を検索" data-en-placeholder="Search name or description">
+                        <div class="card-tools">
+                            <div class="card-tool">
+                                <label data-ja="セット" data-en="Set">セット</label>
+                                <select id="card-filter-set"></select>
+                            </div>
+                            <div class="card-tool">
+                                <label data-ja="画像" data-en="Image">画像</label>
+                                <select id="card-filter-image">
+                                    <option value="all" data-ja="すべて" data-en="All">すべて</option>
+                                    <option value="with" data-ja="あり" data-en="With image">あり</option>
+                                    <option value="without" data-ja="なし" data-en="No image">なし</option>
+                                </select>
+                            </div>
+                            <div class="card-tool">
+                                <label data-ja="説明" data-en="Description">説明</label>
+                                <select id="card-filter-desc">
+                                    <option value="all" data-ja="すべて" data-en="All">すべて</option>
+                                    <option value="with" data-ja="あり" data-en="With description">あり</option>
+                                    <option value="without" data-ja="なし" data-en="No description">なし</option>
+                                </select>
+                            </div>
+                            <label class="card-tool checkbox">
+                                <input type="checkbox" id="card-show-archived">
+                                <span data-ja="アーカイブを表示" data-en="Show archived">アーカイブを表示</span>
+                            </label>
+                        </div>
                     </div>
-                    <div class="card-tool">
-                        <label data-ja="説明" data-en="Description">説明</label>
-                        <select id="card-filter-desc">
-                            <option value="all" data-ja="すべて" data-en="All">すべて</option>
-                            <option value="with" data-ja="あり" data-en="With description">あり</option>
-                            <option value="without" data-ja="なし" data-en="No description">なし</option>
-                        </select>
+                    <div class="card-density">
+                        <span class="density-label" data-ja="表示密度" data-en="Density">表示密度</span>
+                        <button type="button" class="btn density-btn" id="density-large" data-ja="大きい" data-en="Large">大きい</button>
+                        <button type="button" class="btn density-btn" id="density-compact" data-ja="小さい" data-en="Compact">小さい</button>
                     </div>
-                    <label class="card-tool checkbox">
-                        <input type="checkbox" id="card-show-archived">
-                        <span data-ja="アーカイブを表示" data-en="Show archived">アーカイブを表示</span>
-                    </label>
                 </div>
-                <div class="card-density">
-                    <span data-ja="表示密度" data-en="Density">表示密度</span>
-                    <button type="button" class="btn density-btn" id="density-large" data-ja="大きい" data-en="Large">大きい</button>
-                    <button type="button" class="btn density-btn" id="density-compact" data-ja="小さい" data-en="Compact">小さい</button>
-                </div>
-            </div>
 
-            <div class="info-box">
-                <h3>🂡 <span data-ja="ルノルマン設定" data-en="Lenormand Options">ルノルマン設定</span></h3>
-                <div class="lenormand-options">
-                    <label>
-                        <input type="checkbox" id="lenormand-extra-gentleman">
-                        <span data-ja="追加・紳士を使う" data-en="Use Extra Gentleman">追加・紳士を使う</span>
-                    </label>
-                    <label>
-                        <input type="checkbox" id="lenormand-extra-lady">
-                        <span data-ja="追加・淑女を使う" data-en="Use Extra Lady">追加・淑女を使う</span>
-                    </label>
-                    <label>
-                        <input type="checkbox" id="lenormand-person">
-                        <span data-ja="00.Personを使う" data-en="Use 00.Person">00.Personを使う</span>
-                    </label>
+                <div class="info-box">
+                    <h3>🂡 <span data-ja="ルノルマン設定" data-en="Lenormand Options">ルノルマン設定</span></h3>
+                    <div class="lenormand-options">
+                        <label>
+                            <input type="checkbox" id="lenormand-extra-gentleman">
+                            <span data-ja="追加・紳士を使う" data-en="Use Extra Gentleman">追加・紳士を使う</span>
+                        </label>
+                        <label>
+                            <input type="checkbox" id="lenormand-extra-lady">
+                            <span data-ja="追加・淑女を使う" data-en="Use Extra Lady">追加・淑女を使う</span>
+                        </label>
+                        <label>
+                            <input type="checkbox" id="lenormand-person">
+                            <span data-ja="00.Personを使う" data-en="Use 00.Person">00.Personを使う</span>
+                        </label>
+                    </div>
                 </div>
             </div>
 
@@ -1532,9 +1695,10 @@
 
             <div class="info-box">
                 <h3>🔊 <span data-ja="サウンド設定" data-en="Sound Settings">サウンド設定</span></h3>
+                <p style="font-size:12px;color:#aaa;margin-bottom:10px;" data-ja="BGM/SEのON・音量を一括で調整できます" data-en="Adjust BGM/SE toggles and volume in one place.">BGM/SEのON・音量を一括で調整できます</p>
                 <div class="sound-options" style="display:flex;flex-direction:column;gap:12px;">
                     <label style="display:flex;align-items:center;gap:8px;">
-                        <input type="checkbox" id="sound-bgm" onchange="audioManager.toggleBGM(this.checked)">
+                        <input type="checkbox" id="sound-bgm" data-sound-toggle="bgm" onchange="audioManager.toggleBGM(this.checked)">
                         <span data-ja="BGM（背景音楽）" data-en="BGM (Background Music)">BGM（背景音楽）</span>
                     </label>
                     <div style="display:flex;align-items:center;gap:8px;margin-left:24px;">
@@ -1545,7 +1709,7 @@
                         <span id="sound-bgm-volume-label" style="font-size:12px;width:35px;">25%</span>
                     </div>
                     <label style="display:flex;align-items:center;gap:8px;">
-                        <input type="checkbox" id="sound-se" onchange="audioManager.toggleSE(this.checked)">
+                        <input type="checkbox" id="sound-se" data-sound-toggle="se" onchange="audioManager.toggleSE(this.checked)">
                         <span data-ja="効果音（タップ・めくり音など）" data-en="Sound Effects (tap, flip, etc.)">効果音（タップ・めくり音など）</span>
                     </label>
                     <div style="display:flex;align-items:center;gap:8px;margin-left:24px;">
@@ -1558,6 +1722,18 @@
                     <p style="font-size:11px;color:#888;margin:0;" data-ja="※ブラウザ制限により、初回タップ後に音声が再生されます" data-en="* Audio plays after first tap (browser restriction)">※ブラウザ制限により、初回タップ後に音声が再生されます</p>
                 </div>
             </div>
+
+            <div class="info-box" style="background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.2);">
+                <h3>📜 <span data-ja="ライセンス＆クレジット" data-en="Licenses & Credits">ライセンス＆クレジット</span></h3>
+                <p style="font-size:12px;color:#aaa;margin-bottom:10px;" data-ja="BGM/SE/画像/フォントの出典一覧" data-en="Sources for BGM/SE/images/fonts.">BGM/SE/画像/フォントの出典一覧</p>
+                <button class="btn" onclick="openCreditsModal()" style="padding:10px 16px;font-size:13px;" data-ja="一覧を見る" data-en="View List">一覧を見る</button>
+            </div>
+
+            <div class="info-box">
+                <h3>✨ <span data-ja="汎用モーダル" data-en="Generic Modal">汎用モーダル</span></h3>
+                <p style="font-size:12px;color:#aaa;margin-bottom:10px;" data-ja="alert/confirm の置き換えに使えるポップアップ" data-en="Reusable popup for alert/confirm replacement.">alert/confirm の置き換えに使えるポップアップ</p>
+                <button class="btn" onclick="showModalExample()" style="padding:10px 16px;font-size:13px;" data-ja="例を開く" data-en="Open Example">例を開く</button>
+            </div>
         </div>
     </div>
 
@@ -1565,6 +1741,17 @@
     <div class="modal-overlay" id="imageModal" onclick="closeImageModal()">
         <div class="modal-close">&times;</div>
         <img class="modal-image" id="modalImage" src="">
+    </div>
+
+    <div class="modal-overlay modal-generic" id="genericModal">
+        <div class="modal-panel" role="dialog" aria-modal="true">
+            <div class="modal-header">
+                <div class="modal-title" id="genericModalTitle"></div>
+                <button class="modal-close-btn" type="button" onclick="closeGenericModal()">×</button>
+            </div>
+            <div class="modal-body" id="genericModalBody"></div>
+            <div class="modal-actions" id="genericModalActions"></div>
+        </div>
     </div>
 
     <script>
@@ -1581,6 +1768,20 @@
             bgmVolume: 0.25,
             seVolume: 0.6
         };
+
+        const defaultAudioManifest = {
+            bgm: {
+                mode: 'loop',
+                tracks: ['audio/bgm.mp3']
+            },
+            se: {
+                tap: 'audio/se_tap.mp3',
+                flip: 'audio/se_flip.mp3',
+                confirm: 'audio/se_confirm.mp3'
+            }
+        };
+
+        let audioManifest = { ...defaultAudioManifest };
 
         // ====== IndexedDB Storage Layer (OracleForgeDB) ======
         // DB名: OracleForgeDB
@@ -2442,19 +2643,87 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             title.classList.add('hidden');
         }
 
+        function normalizeAudioManifest(raw) {
+            if (!raw || typeof raw !== 'object') return { ...defaultAudioManifest };
+            const normalized = {
+                bgm: {
+                    mode: raw.bgm && typeof raw.bgm.mode === 'string' ? raw.bgm.mode : defaultAudioManifest.bgm.mode,
+                    tracks: Array.isArray(raw.bgm?.tracks) ? raw.bgm.tracks.filter(path => typeof path === 'string' && path.trim()) : defaultAudioManifest.bgm.tracks
+                },
+                se: {
+                    tap: typeof raw.se?.tap === 'string' ? raw.se.tap : defaultAudioManifest.se.tap,
+                    flip: typeof raw.se?.flip === 'string' ? raw.se.flip : defaultAudioManifest.se.flip,
+                    confirm: typeof raw.se?.confirm === 'string' ? raw.se.confirm : defaultAudioManifest.se.confirm
+                }
+            };
+
+            if (!['loop', 'random'].includes(normalized.bgm.mode)) {
+                normalized.bgm.mode = defaultAudioManifest.bgm.mode;
+            }
+
+            if (!normalized.bgm.tracks.length) {
+                normalized.bgm.tracks = [...defaultAudioManifest.bgm.tracks];
+            }
+
+            return normalized;
+        }
+
+        async function loadAudioManifest() {
+            try {
+                const response = await fetch('audio-manifest.json');
+                if (!response.ok) {
+                    console.warn('Audio manifest not found, using defaults.');
+                    return { ...defaultAudioManifest };
+                }
+                const data = await response.json();
+                return normalizeAudioManifest(data);
+            } catch (error) {
+                console.warn('Audio manifest load failed, using defaults:', error);
+                return { ...defaultAudioManifest };
+            }
+        }
+
         // ====== 音声管理システム (AudioManager) ======
         class AudioManager {
-            constructor() {
+            constructor(manifest) {
                 this.bgm = null;
-                this.bgmPath = 'audio/bgm.mp3';
-                this.sePaths = {
-                    tap: 'audio/se_tap.mp3',
-                    flip: 'audio/se_flip.mp3',
-                    confirm: 'audio/se_confirm.mp3'
-                };
+                this.bgmTracks = [];
+                this.bgmMode = 'loop';
+                this.sePaths = {};
                 this.seCache = {};
                 this.userInteracted = false;
                 this.bgmPlaying = false;
+                this.currentBgmTrack = null;
+                this.invalidAudioFiles = new Set();
+                this.applyManifest(manifest || defaultAudioManifest);
+            }
+
+            applyManifest(manifest) {
+                const normalized = normalizeAudioManifest(manifest);
+                this.bgmMode = normalized.bgm.mode;
+                this.bgmTracks = [...normalized.bgm.tracks];
+                this.sePaths = { ...normalized.se };
+            }
+
+            getValidBgmTracks() {
+                return this.bgmTracks.filter(track => !this.invalidAudioFiles.has(track));
+            }
+
+            pickBgmTrack() {
+                const validTracks = this.getValidBgmTracks();
+                if (!validTracks.length) return null;
+                if (this.bgmMode === 'random') {
+                    const available = validTracks.filter(track => track !== this.currentBgmTrack);
+                    const pool = available.length ? available : validTracks;
+                    return pool[Math.floor(Math.random() * pool.length)];
+                }
+                return validTracks[0];
+            }
+
+            markAudioInvalid(path) {
+                if (!path) return;
+                this.invalidAudioFiles.add(path);
+                console.warn(`Audio file missing or failed to load: ${path}`);
             }
 
             // 設定をlocalStorageから読み込み
@@ -2490,10 +2759,33 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                 if (!soundSettings.bgm || !this.userInteracted) return;
                 if (this.bgmPlaying) return;
 
-                if (!this.bgm) {
-                    this.bgm = new Audio(this.bgmPath);
-                    this.bgm.loop = true;
+                const nextTrack = this.pickBgmTrack();
+                if (!nextTrack) return;
+
+                if (!this.bgm || this.currentBgmTrack !== nextTrack) {
+                    if (this.bgm) {
+                        this.bgm.pause();
+                    }
+                    this.currentBgmTrack = nextTrack;
+                    this.bgm = new Audio(nextTrack);
+                    this.bgm.loop = this.bgmMode === 'loop';
+                    this.bgm.addEventListener('error', () => {
+                        this.markAudioInvalid(nextTrack);
+                        this.bgmPlaying = false;
+                        if (soundSettings.bgm) {
+                            this.startBGM();
+                        }
+                    }, { once: true });
+                    if (this.bgmMode === 'random') {
+                        this.bgm.addEventListener('ended', () => {
+                            this.bgmPlaying = false;
+                            if (soundSettings.bgm) {
+                                this.startBGM();
+                            }
+                        });
+                    }
                 }
+
                 this.bgm.volume = soundSettings.bgmVolume;
                 this.bgm.play().then(() => {
                     this.bgmPlaying = true;
@@ -2547,12 +2839,15 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             playSE(type) {
                 if (!soundSettings.se) return;
                 const path = this.sePaths[type];
-                if (!path) return;
+                if (!path || this.invalidAudioFiles.has(path)) return;
 
                 // キャッシュがあれば再利用、なければ新規作成
                 // 同時再生のため毎回新しいAudioを使う
                 const se = new Audio(path);
                 se.volume = soundSettings.seVolume;
+                se.addEventListener('error', () => {
+                    this.markAudioInvalid(path);
+                }, { once: true });
                 se.play().catch(e => {
                     // console.log('SE play failed:', e.message);
                 });
@@ -2583,6 +2878,12 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             const bgmLabel = document.getElementById('sound-bgm-volume-label');
             const seLabel = document.getElementById('sound-se-volume-label');
 
+            document.querySelectorAll('[data-sound-toggle="bgm"]').forEach((toggle) => {
+                toggle.checked = soundSettings.bgm;
+            });
+            document.querySelectorAll('[data-sound-toggle="se"]').forEach((toggle) => {
+                toggle.checked = soundSettings.se;
+            });
             if (bgmCheck) bgmCheck.checked = soundSettings.bgm;
             if (seCheck) seCheck.checked = soundSettings.se;
             if (bgmVolume) {
@@ -2622,7 +2923,8 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             }
 
             // 音声マネージャー初期化
-            audioManager = new AudioManager();
+            audioManifest = await loadAudioManifest();
+            audioManager = new AudioManager(audioManifest);
             audioManager.loadSettings();
             updateSoundSettingsUI();
 
@@ -4388,6 +4690,195 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
         
         function closeImageModal() {
             document.getElementById('imageModal').classList.remove('show');
+        }
+
+        let genericModalResolver = null;
+
+        function closeGenericModal(result = null) {
+            const modal = document.getElementById('genericModal');
+            if (!modal) return;
+            modal.classList.remove('show');
+            if (genericModalResolver) {
+                genericModalResolver(result);
+                genericModalResolver = null;
+            }
+        }
+
+        function showModal({ title = '', bodyHtml = '', buttons = [], closeOnBackdrop = true } = {}) {
+            const modal = document.getElementById('genericModal');
+            const titleEl = document.getElementById('genericModalTitle');
+            const bodyEl = document.getElementById('genericModalBody');
+            const actionsEl = document.getElementById('genericModalActions');
+
+            if (!modal || !titleEl || !bodyEl || !actionsEl) return Promise.resolve(null);
+
+            titleEl.textContent = title;
+            bodyEl.innerHTML = bodyHtml;
+            actionsEl.innerHTML = '';
+            modal.dataset.closeOnBackdrop = closeOnBackdrop ? 'true' : 'false';
+
+            const fallbackLabel = currentLang === 'ja' ? '閉じる' : 'Close';
+            const finalButtons = buttons.length ? buttons : [{ label: fallbackLabel, variant: 'primary' }];
+
+            finalButtons.forEach((btn, index) => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = `btn modal-btn ${btn.variant || 'primary'}`;
+                button.textContent = btn.label;
+                button.onclick = () => {
+                    const result = btn.value ?? index;
+                    if (btn.onClick) {
+                        btn.onClick(result);
+                    }
+                    if (btn.closeOnClick !== false) {
+                        closeGenericModal(result);
+                    }
+                };
+                actionsEl.appendChild(button);
+            });
+
+            modal.classList.add('show');
+            return new Promise((resolve) => {
+                genericModalResolver = resolve;
+            });
+        }
+
+        const genericModal = document.getElementById('genericModal');
+        if (genericModal) {
+            genericModal.addEventListener('click', (event) => {
+                if (event.target === genericModal && genericModal.dataset.closeOnBackdrop === 'true') {
+                    closeGenericModal();
+                }
+            });
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function showAlertModal(message, titleText) {
+            const title = titleText || (currentLang === 'ja' ? 'お知らせ' : 'Notice');
+            return showModal({
+                title,
+                bodyHtml: `<p>${escapeHtml(message)}</p>`,
+                closeOnBackdrop: true,
+                buttons: [{
+                    label: currentLang === 'ja' ? 'OK' : 'OK',
+                    variant: 'primary',
+                    value: 'ok'
+                }]
+            });
+        }
+
+        function showConfirmModal(message, titleText) {
+            const title = titleText || (currentLang === 'ja' ? '確認' : 'Confirm');
+            return showModal({
+                title,
+                bodyHtml: `<p>${escapeHtml(message)}</p>`,
+                closeOnBackdrop: false,
+                buttons: [
+                    {
+                        label: currentLang === 'ja' ? 'キャンセル' : 'Cancel',
+                        variant: 'ghost',
+                        value: 'cancel'
+                    },
+                    {
+                        label: currentLang === 'ja' ? 'OK' : 'OK',
+                        variant: 'primary',
+                        value: 'ok'
+                    }
+                ]
+            }).then(result => result === 'ok');
+        }
+
+        function renderCreditsList(items) {
+            if (!items.length) {
+                const emptyText = currentLang === 'ja' ? '現在登録されているクレジットはありません。' : 'No credits have been added yet.';
+                return `<p style="font-size:12px;color:#aaa;margin:0;">${emptyText}</p>`;
+            }
+
+            const labels = currentLang === 'ja'
+                ? { author: '作者', license: 'ライセンス', source: '出典', notes: '補足' }
+                : { author: 'Author', license: 'License', source: 'Source', notes: 'Notes' };
+            const cards = items.map((item) => {
+                const name = escapeHtml(item.name);
+                if (!name) return '';
+                const author = item.author ? `<div class="credits-field"><span>${labels.author}</span>${escapeHtml(item.author)}</div>` : '';
+                const license = item.license ? `<div class="credits-field"><span>${labels.license}</span>${escapeHtml(item.license)}</div>` : '';
+                const sourceUrl = item.sourceUrl ? `<div class="credits-field"><span>${labels.source}</span><a href="${escapeHtml(item.sourceUrl)}" target="_blank" rel="noopener" style="color:#9ad6ff;text-decoration:underline;">${escapeHtml(item.sourceUrl)}</a></div>` : '';
+                const notes = item.notes ? `<div class="credits-field"><span>${labels.notes}</span>${escapeHtml(item.notes)}</div>` : '';
+                return `
+                    <div class="credits-item">
+                        <h4>${name}</h4>
+                        ${author}${license}${sourceUrl}${notes}
+                    </div>
+                `;
+            }).join('');
+
+            return `<div class="credits-list">${cards}</div>`;
+        }
+
+        async function openCreditsModal() {
+            let credits = [];
+            try {
+                const response = await fetch('credits.json');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (Array.isArray(data)) {
+                        credits = data.filter(item => item && item.name);
+                    }
+                } else {
+                    console.warn('credits.json not found.');
+                }
+            } catch (error) {
+                console.warn('Failed to load credits:', error);
+            }
+
+            const title = currentLang === 'ja' ? 'ライセンス＆クレジット' : 'Licenses & Credits';
+            const bodyHtml = renderCreditsList(credits);
+            showModal({
+                title,
+                bodyHtml,
+                closeOnBackdrop: true,
+                buttons: [{
+                    label: currentLang === 'ja' ? '閉じる' : 'Close',
+                    variant: 'ghost'
+                }]
+            });
+        }
+
+        function showModalExample() {
+            const title = currentLang === 'ja' ? 'モーダル例' : 'Modal Example';
+            const bodyHtml = currentLang === 'ja'
+                ? '<p>課金ポップアップのように前面へ出す汎用モーダルです。<br>背景クリックで閉じる設定も可能です。</p>'
+                : '<p>This generic modal sits on top like a billing popup. You can also control backdrop closing.</p>';
+            showModal({
+                title,
+                bodyHtml,
+                closeOnBackdrop: false,
+                buttons: [
+                    {
+                        label: currentLang === 'ja' ? 'キャンセル' : 'Cancel',
+                        variant: 'ghost',
+                        value: 'cancel'
+                    },
+                    {
+                        label: currentLang === 'ja' ? 'OK' : 'OK',
+                        variant: 'primary',
+                        value: 'ok',
+                        onClick: () => {
+                            if (audioManager) {
+                                audioManager.playConfirm();
+                            }
+                        }
+                    }
+                ]
+            });
         }
         
         // 補足カード用

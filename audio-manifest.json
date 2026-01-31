@@ -1,0 +1,13 @@
+{
+  "bgm": {
+    "mode": "loop",
+    "tracks": [
+      "audio/bgm.mp3"
+    ]
+  },
+  "se": {
+    "tap": "audio/se_tap.mp3",
+    "flip": "audio/se_flip.mp3",
+    "confirm": "audio/se_confirm.mp3"
+  }
+}
