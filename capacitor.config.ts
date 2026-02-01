@@ -9,9 +9,9 @@ const config: CapacitorConfig = {
   },
   plugins: {
     AdMob: {
-      // Test mode for development
-      testingDevices: ['TEST_DEVICE_ID'],
-      initializeForTesting: true
+      // Production mode
+      testingDevices: [],
+      initializeForTesting: false
     }
   }
 };
