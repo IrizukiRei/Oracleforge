@@ -433,7 +433,7 @@
             background-position: center center;
             background-color: rgba(15, 32, 39, 0.5);
             z-index: 100;
-            opacity: 1;
+            opacity: 0.7;
             pointer-events: none;
             border-radius: 14px;
             transition: opacity 3s ease-out;
@@ -5604,18 +5604,21 @@
             // オーバーレイ演出（silentでない場合のみ）- 既存のオーバーレイをフェードアウト
             if (!silent) {
                 const spreadDisplay = document.querySelector('.spread-display');
-                if (spreadDisplay) {
-                    const overlay = spreadDisplay.querySelector('.spread-reveal-overlay');
-                    if (overlay) {
-                        // 即座にフェードアウト開始
-                        overlay.classList.add('fade-out');
-                        // フェードアウト完了後にSEを鳴らしてオーバーレイを削除
-                        setTimeout(() => {
-                            if (audioManager) {
-                                audioManager.playConfirm();
-                            }
-                            overlay.remove();
-                        }, 2500); // トランジション時間に合わせる
+                const overlay = spreadDisplay ? spreadDisplay.querySelector('.spread-reveal-overlay') : null;
+                if (overlay) {
+                    // 即座にフェードアウト開始
+                    overlay.classList.add('fade-out');
+                    // フェードアウト完了後にSEを鳴らしてオーバーレイを削除
+                    setTimeout(() => {
+                        if (audioManager) {
+                            audioManager.playConfirm();
+                        }
+                        overlay.remove();
+                    }, 2500); // トランジション時間に合わせる
+                } else {
+                    // オーバーレイがない場合（スキップ時など）は即座にSEを再生
+                    if (audioManager) {
+                        audioManager.playConfirm();
                     }
                 }
             }
