@@ -34,10 +34,10 @@
                 android:resource="@xml/file_paths"></meta-data>
         </provider>
 
-        <!-- AdMob App ID (Replace with your actual app ID for production) -->
+        <!-- AdMob App ID for Oracle Forge (Production) -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3940256099942544~3347511713"/>
+            android:value="ca-app-pub-3926825794244395~5978542681"/>
     </application>
 
     <!-- Permissions -->
