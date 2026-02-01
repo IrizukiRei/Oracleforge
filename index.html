@@ -1870,14 +1870,14 @@
                         <span style="font-size:13px;min-width:80px;" data-ja="BGM:" data-en="BGM:">BGM:</span>
                         <input type="range" id="sound-bgm-volume" min="0" max="100" value="25"
                                style="flex:1;max-width:160px;"
-                               onchange="audioManager.setBGMVolume(this.value/100)">
+                               oninput="updateBGMVolumeFromSlider(this)">
                         <span id="sound-bgm-volume-label" style="font-size:12px;width:35px;">25%</span>
                     </div>
                     <div style="display:flex;align-items:center;gap:8px;">
                         <span style="font-size:13px;min-width:80px;" data-ja="効果音:" data-en="SE:">効果音:</span>
                         <input type="range" id="sound-se-volume" min="0" max="100" value="60"
                                style="flex:1;max-width:160px;"
-                               onchange="audioManager.setSEVolume(this.value/100)">
+                               oninput="updateSEVolumeFromSlider(this)">
                         <span id="sound-se-volume-label" style="font-size:12px;width:35px;">60%</span>
                     </div>
                 </div>
@@ -3200,6 +3200,8 @@
                         el.id = el.id + '-drawer';
                     });
                 }
+                // スライダーの値を現在の設定に同期
+                updateSoundSettingsUI();
             }
 
             overlay.classList.add('open');
@@ -3539,33 +3541,66 @@
             }
         }
 
-        // 音声設定UIを更新
+        // BGMスライダーからの音量更新（ラベルも同時更新）
+        function updateBGMVolumeFromSlider(slider) {
+            const value = parseInt(slider.value);
+            // ラベルを更新（元のIDかドロワーのIDか判定）
+            const labelId = slider.id.endsWith('-drawer') ? 'sound-bgm-volume-label-drawer' : 'sound-bgm-volume-label';
+            const label = document.getElementById(labelId);
+            if (label) label.textContent = value + '%';
+            // 音量を設定
+            if (audioManager) {
+                audioManager.setBGMVolume(value / 100);
+            }
+            // 両方のスライダーを同期
+            syncVolumeSliders('bgm', value);
+        }
+
+        // SEスライダーからの音量更新（ラベルも同時更新）
+        function updateSEVolumeFromSlider(slider) {
+            const value = parseInt(slider.value);
+            // ラベルを更新（元のIDかドロワーのIDか判定）
+            const labelId = slider.id.endsWith('-drawer') ? 'sound-se-volume-label-drawer' : 'sound-se-volume-label';
+            const label = document.getElementById(labelId);
+            if (label) label.textContent = value + '%';
+            // 音量を設定
+            if (audioManager) {
+                audioManager.setSEVolume(value / 100);
+            }
+            // 両方のスライダーを同期
+            syncVolumeSliders('se', value);
+        }
+
+        // 両方のスライダー（設定画面とドロワー）を同期
+        function syncVolumeSliders(type, value) {
+            const originalId = type === 'bgm' ? 'sound-bgm-volume' : 'sound-se-volume';
+            const drawerId = originalId + '-drawer';
+            const originalLabelId = originalId + '-label';
+            const drawerLabelId = drawerId + '-label';
+
+            // 元のスライダー
+            const originalSlider = document.getElementById(originalId);
+            const originalLabel = document.getElementById(originalLabelId);
+            if (originalSlider && parseInt(originalSlider.value) !== value) {
+                originalSlider.value = value;
+            }
+            if (originalLabel) originalLabel.textContent = value + '%';
+
+            // ドロワーのスライダー
+            const drawerSlider = document.getElementById(drawerId);
+            const drawerLabel = document.getElementById(drawerLabelId);
+            if (drawerSlider && parseInt(drawerSlider.value) !== value) {
+                drawerSlider.value = value;
+            }
+            if (drawerLabel) drawerLabel.textContent = value + '%';
+        }
+
+        // 音声設定UIを更新（初期化時と設定読み込み後に呼ばれる）
         function updateSoundSettingsUI() {
-            const bgmVolume = document.getElementById('sound-bgm-volume');
-            const seVolume = document.getElementById('sound-se-volume');
-            const bgmLabel = document.getElementById('sound-bgm-volume-label');
-            const seLabel = document.getElementById('sound-se-volume-label');
-
-            if (bgmVolume) {
-                bgmVolume.value = Math.round(soundSettings.bgmVolume * 100);
-                if (bgmLabel) bgmLabel.textContent = bgmVolume.value + '%';
-            }
-            if (seVolume) {
-                seVolume.value = Math.round(soundSettings.seVolume * 100);
-                if (seLabel) seLabel.textContent = seVolume.value + '%';
-            }
-
-            // スライダーの変更でラベルも更新
-            if (bgmVolume) {
-                bgmVolume.addEventListener('input', function() {
-                    if (bgmLabel) bgmLabel.textContent = this.value + '%';
-                });
-            }
-            if (seVolume) {
-                seVolume.addEventListener('input', function() {
-                    if (seLabel) seLabel.textContent = this.value + '%';
-                });
-            }
+            const bgmValue = Math.round(soundSettings.bgmVolume * 100);
+            const seValue = Math.round(soundSettings.seVolume * 100);
+            syncVolumeSliders('bgm', bgmValue);
+            syncVolumeSliders('se', seValue);
         }
 
         // 初期化
