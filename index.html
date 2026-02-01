@@ -1864,25 +1864,17 @@
 
             <div class="info-box" id="sound-settings-box">
                 <h3>🔊 <span data-ja="サウンド設定" data-en="Sound Settings">サウンド設定</span></h3>
-                <p style="font-size:12px;color:#aaa;margin-bottom:10px;" data-ja="BGM/SEのON・音量を一括で調整できます" data-en="Adjust BGM/SE toggles and volume in one place.">BGM/SEのON・音量を一括で調整できます</p>
+                <p style="font-size:12px;color:#aaa;margin-bottom:10px;" data-ja="音量を調整できます（0で消音）" data-en="Adjust volume (0 to mute)">音量を調整できます（0で消音）</p>
                 <div class="sound-options" style="display:flex;flex-direction:column;gap:12px;">
-                    <label style="display:flex;align-items:center;gap:8px;">
-                        <input type="checkbox" id="sound-bgm" data-sound-toggle="bgm" onchange="audioManager.toggleBGM(this.checked)">
-                        <span data-ja="BGM（背景音楽）" data-en="BGM (Background Music)">BGM（背景音楽）</span>
-                    </label>
-                    <div style="display:flex;align-items:center;gap:8px;margin-left:24px;">
-                        <span style="font-size:12px;color:#888;" data-ja="音量:" data-en="Volume:">音量:</span>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <span style="font-size:13px;min-width:80px;" data-ja="BGM:" data-en="BGM:">BGM:</span>
                         <input type="range" id="sound-bgm-volume" min="0" max="100" value="25"
                                style="flex:1;max-width:160px;"
                                onchange="audioManager.setBGMVolume(this.value/100)">
                         <span id="sound-bgm-volume-label" style="font-size:12px;width:35px;">25%</span>
                     </div>
-                    <label style="display:flex;align-items:center;gap:8px;">
-                        <input type="checkbox" id="sound-se" data-sound-toggle="se" onchange="audioManager.toggleSE(this.checked)">
-                        <span data-ja="効果音（タップ・めくり音など）" data-en="Sound Effects (tap, flip, etc.)">効果音（タップ・めくり音など）</span>
-                    </label>
-                    <div style="display:flex;align-items:center;gap:8px;margin-left:24px;">
-                        <span style="font-size:12px;color:#888;" data-ja="音量:" data-en="Volume:">音量:</span>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <span style="font-size:13px;min-width:80px;" data-ja="効果音:" data-en="SE:">効果音:</span>
                         <input type="range" id="sound-se-volume" min="0" max="100" value="60"
                                style="flex:1;max-width:160px;"
                                onchange="audioManager.setSEVolume(this.value/100)">
@@ -3327,7 +3319,7 @@
 
             // BGM開始（1インスタンスで管理、二重再生防止）
             startBGM() {
-                if (!soundSettings.bgm || !this.userInteracted) return;
+                if (!soundSettings.bgm || soundSettings.bgmVolume <= 0 || !this.userInteracted) return;
                 if (this.bgmPlaying) return;
 
                 const nextTrack = this.pickBgmTrack();
@@ -3413,7 +3405,7 @@
             }
 
             playSEByPath(path, label = null) {
-                if (!soundSettings.se) return;
+                if (!soundSettings.se || soundSettings.seVolume <= 0) return;
                 if (!path || this.invalidAudioFiles.has(path)) return;
 
                 // キャッシュがあれば再利用、なければ新規作成
@@ -3497,7 +3489,7 @@
 
             // SE順次再生（オーバーラップ版: 前のSEの終了overlapSeconds秒前から次を再生）
             playSESequenceOverlap(paths, overlapSeconds = 0.2) {
-                if (!soundSettings.se || paths.length === 0) return;
+                if (!soundSettings.se || soundSettings.seVolume <= 0 || paths.length === 0) return;
 
                 const playNext = (index) => {
                     if (index >= paths.length) return;
@@ -3531,21 +3523,11 @@
 
         // 音声設定UIを更新
         function updateSoundSettingsUI() {
-            const bgmCheck = document.getElementById('sound-bgm');
-            const seCheck = document.getElementById('sound-se');
             const bgmVolume = document.getElementById('sound-bgm-volume');
             const seVolume = document.getElementById('sound-se-volume');
             const bgmLabel = document.getElementById('sound-bgm-volume-label');
             const seLabel = document.getElementById('sound-se-volume-label');
 
-            document.querySelectorAll('[data-sound-toggle="bgm"]').forEach((toggle) => {
-                toggle.checked = soundSettings.bgm;
-            });
-            document.querySelectorAll('[data-sound-toggle="se"]').forEach((toggle) => {
-                toggle.checked = soundSettings.se;
-            });
-            if (bgmCheck) bgmCheck.checked = soundSettings.bgm;
-            if (seCheck) seCheck.checked = soundSettings.se;
             if (bgmVolume) {
                 bgmVolume.value = Math.round(soundSettings.bgmVolume * 100);
                 if (bgmLabel) bgmLabel.textContent = bgmVolume.value + '%';
@@ -5265,12 +5247,24 @@
                     shuffleArea.remove();
                     inner.style.minHeight = '';
                     setupSpread(currentSpread, currentSpreadSize);
-                    
+
+                    // カードめくり開始前にオーバーレイを表示
+                    const spreadDisplay = document.querySelector('.spread-display');
+                    if (spreadDisplay) {
+                        const existingOverlay = spreadDisplay.querySelector('.spread-reveal-overlay');
+                        if (existingOverlay) existingOverlay.remove();
+                        const overlay = document.createElement('div');
+                        overlay.className = 'spread-reveal-overlay';
+                        spreadDisplay.appendChild(overlay);
+                    }
+
+                    // 3秒待ってからカードめくりを開始
                     drawnCards.forEach((card, i) => {
-                        setTimeout(() => drawCard(i, card, false, drawnCards.length), i * 400);
+                        setTimeout(() => drawCard(i, card, false, drawnCards.length), 3000 + i * 400);
                     });
-                    
-                    setTimeout(showResults, drawnCards.length * 400 + 800);
+
+                    // 全カードめくり完了後にshowResults（3秒の遅延 + カードめくり時間 + 少しの余裕）
+                    setTimeout(showResults, 3000 + drawnCards.length * 400 + 800);
                 }, 300);
             }
         }
@@ -5587,21 +5581,13 @@
             // スプレッド結果フラグを設定（インタースティシャル広告用）
             hasSpreadResult = true;
 
-            // オーバーレイ演出（silentでない場合のみ）
+            // オーバーレイ演出（silentでない場合のみ）- 既存のオーバーレイをフェードアウト
             if (!silent) {
                 const spreadDisplay = document.querySelector('.spread-display');
                 if (spreadDisplay) {
-                    // 既存のオーバーレイを削除
-                    const existingOverlay = spreadDisplay.querySelector('.spread-reveal-overlay');
-                    if (existingOverlay) existingOverlay.remove();
-
-                    // オーバーレイを作成・追加
-                    const overlay = document.createElement('div');
-                    overlay.className = 'spread-reveal-overlay';
-                    spreadDisplay.appendChild(overlay);
-
-                    // 少し待ってからフェードアウト開始
-                    setTimeout(() => {
+                    const overlay = spreadDisplay.querySelector('.spread-reveal-overlay');
+                    if (overlay) {
+                        // 即座にフェードアウト開始
                         overlay.classList.add('fade-out');
                         // フェードアウト完了後にSEを鳴らしてオーバーレイを削除
                         setTimeout(() => {
@@ -5610,7 +5596,7 @@
                             }
                             overlay.remove();
                         }, 2500); // トランジション時間に合わせる
-                    }, 100);
+                    }
                 }
             }
 
