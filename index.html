@@ -2750,6 +2750,7 @@
             38: ''
         };
         let lenormandDescEn = {...LENORMAND_DESC_EN};
+        let lenormandDescJa = {};
         let useSignificator = false; // シグニフィケーター使用フラグ
         let useReversal = true; // 正逆を取るかどうか
         let currentLang = 'ja'; // 言語設定
@@ -2882,7 +2883,8 @@
         function getDescriptionForLang(desc, cardId = null) {
             const normalized = normalizeDescription(desc);
             if (currentLang === 'ja') {
-                return normalized.ja || normalized.en || '';
+                const lenormandFallbackJa = cardId !== null ? lenormandDescJa[String(cardId)] : '';
+                return normalized.ja || lenormandFallbackJa || normalized.en || '';
             }
             const lenormandFallback = cardId !== null ? lenormandDescEn[String(cardId)] : '';
             return normalized.en || lenormandFallback || normalized.ja || '';
@@ -2919,6 +2921,22 @@
                 updateSignificatorDisplay();
             } catch (error) {
                 lenormandDescEn = {...LENORMAND_DESC_EN};
+            }
+        }
+
+        async function loadLenormandDescJa() {
+            try {
+                const response = await fetch('lenormand-desc-ja.json', {cache: 'no-store'});
+                if (!response.ok) {
+                    throw new Error('Failed to load lenormand-desc-ja.json');
+                }
+                const data = await response.json();
+                lenormandDescJa = {...data};
+                renderLenormandGrid();
+                renderSetsList();
+                updateSignificatorDisplay();
+            } catch (error) {
+                lenormandDescJa = {};
             }
         }
 
@@ -3767,6 +3785,7 @@
             updateSignificatorDisplay();
             updateBackPreview();
             loadLenormandDescEn();
+            loadLenormandDescJa();
         }
 
         // OracleForge custom storage fix: カード倉庫の永続保存
@@ -4545,6 +4564,7 @@
             return LENORMAND_PRESET.cards.map(c => {
                 const desc = normalizeDescription(c.desc);
                 desc.en = lenormandDescEn[String(c.id)] ?? desc.en;
+                desc.ja = lenormandDescJa[String(c.id)] ?? desc.ja;
                 return {
                     id: c.id,
                     name: currentLang === 'ja' ? c.nameJa : c.nameEn,
