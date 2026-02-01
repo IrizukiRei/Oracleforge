@@ -1726,7 +1726,6 @@
                                onchange="audioManager.setSEVolume(this.value/100)">
                         <span id="sound-se-volume-label" style="font-size:12px;width:35px;">60%</span>
                     </div>
-                    <p style="font-size:11px;color:#888;margin:0;" data-ja="※ブラウザ制限により、初回タップ後に音声が再生されます" data-en="* Audio plays after first tap (browser restriction)">※ブラウザ制限により、初回タップ後に音声が再生されます</p>
                 </div>
             </div>
 
@@ -3022,13 +3021,10 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
                     return;
                 }
                 if (isGrandTableau) {
-                    // グランタブロー用: flipHeavy×3 + flip×1
+                    // グランタブロー用: flipHeavy×3 + flip×1（順次再生）
                     const heavyPath = this.sePaths.flipHeavy || this.sePaths.flip;
                     const flipPath = this.sePaths.flip;
-                    this.playSEByPath(heavyPath, 'flipHeavy');
-                    setTimeout(() => this.playSEByPath(heavyPath, 'flipHeavy'), 300);
-                    setTimeout(() => this.playSEByPath(heavyPath, 'flipHeavy'), 600);
-                    setTimeout(() => this.playSEByPath(flipPath, 'flip'), 900);
+                    this.playSESequence([heavyPath, heavyPath, heavyPath, flipPath]);
                     return;
                 }
                 if (shouldUseHeavy) {
@@ -3053,6 +3049,24 @@ window.__LENORMAND_EMBEDDED_CARDS__ = [{"id":0,"name":"1. 騎士","description":
             playShuffleTap() {
                 const shufflePath = this.sePaths.shuffle || this.sePaths.shuffleAnimation || this.sePaths.flip;
                 this.playSEByPath(shufflePath, 'shuffle');
+            }
+
+            // SE順次再生（前のSEが終わってから次を再生）
+            playSESequence(paths, index = 0) {
+                if (index >= paths.length || !this.seEnabled) return;
+
+                const audio = new Audio(paths[index]);
+                audio.volume = this.seVolume;
+                audio.onended = () => {
+                    this.playSESequence(paths, index + 1);
+                };
+                audio.onerror = () => {
+                    // エラー時は次へ進む
+                    this.playSESequence(paths, index + 1);
+                };
+                audio.play().catch(() => {
+                    this.playSESequence(paths, index + 1);
+                });
             }
         }
 
