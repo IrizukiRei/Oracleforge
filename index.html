@@ -102,10 +102,10 @@
             }
         }
         
-        /* 左サイドバー（ホーム・設定ボタン） */
+        /* 右サイドバー（ホーム・設定ボタン） */
         .side-buttons {
             position: fixed;
-            left: 8px;
+            right: 8px;
             top: 50%;
             transform: translateY(-50%);
             display: flex;
@@ -132,7 +132,7 @@
         }
         @media (min-width: 768px) {
             .side-buttons {
-                left: 12px;
+                right: 12px;
             }
             .side-buttons button {
                 width: 52px;
@@ -4056,6 +4056,14 @@
 
         function toggleReversal() {
             useReversal = document.getElementById('use-reversal-toggle').checked;
+            // 既に引かれたカードの正逆も更新する
+            if (!useReversal && drawnCards.length > 0) {
+                drawnCards.forEach(card => {
+                    card.isReversed = false;
+                });
+                // 表示を更新
+                refreshSpreadLayout();
+            }
         }
 
         // OracleForge custom storage fix: 画像をBase64に変換（自動軽量化）
@@ -6129,6 +6137,20 @@
             reader.readAsText(file);
             input.value = '';
         }
+
+        // 画面回転・リサイズ対応
+        let resizeTimeout;
+        function handleOrientationChange() {
+            // デバウンス処理（連続呼び出しを防ぐ）
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                if (currentSpread && drawnCards.length > 0) {
+                    refreshSpreadLayout();
+                }
+            }, 100);
+        }
+        window.addEventListener('resize', handleOrientationChange);
+        window.addEventListener('orientationchange', handleOrientationChange);
     </script>
 </body>
 </html>
