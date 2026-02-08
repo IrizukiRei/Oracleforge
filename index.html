@@ -449,7 +449,7 @@
            Layer 3: .reading-phase-banner — フェーズ別テキスト誘導
            Layer 4: .spread-reveal-overlay — カード回収・完了演出
            Layer 5: .side-buttons — ホーム・設定
-           Layer 6: .reading-guide-overlay — 操作ガイド
+           Layer 6: #app-guide-overlay — 操作ガイド（全画面共通）
            Layer 7: モーダル（既存）
            ============================================ */
 
@@ -458,7 +458,7 @@
             position: relative;
             z-index: 3;
             text-align: center;
-            padding: 10px 16px;
+            padding: 10px 36px 10px 16px;
             margin-bottom: 8px;
             background: rgba(15, 32, 39, 0.85);
             border: 1px solid rgba(100, 200, 255, 0.35);
@@ -467,11 +467,11 @@
             color: #c8e8ff;
             letter-spacing: 0.06em;
             line-height: 1.6;
-            transition: opacity 0.4s, transform 0.4s;
+            transition: opacity 0.4s, transform 0.4s, max-height 0.4s;
             backdrop-filter: blur(4px);
             -webkit-backdrop-filter: blur(4px);
         }
-        .reading-phase-banner[hidden] {
+        .reading-phase-banner.dismissed {
             display: none;
         }
         .reading-phase-banner .phase-icon {
@@ -490,6 +490,32 @@
             color: #64c8ff;
             margin-bottom: 4px;
             letter-spacing: 0.1em;
+        }
+        .phase-dismiss-btn {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(100, 200, 255, 0.15);
+            border: 1px solid rgba(100, 200, 255, 0.3);
+            color: #8ab8d0;
+            font-size: 14px;
+            line-height: 1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            padding: 0;
+        }
+        .phase-dismiss-btn:active {
+            background: rgba(100, 200, 255, 0.3);
+            color: #fff;
+        }
+        .reading-step-indicator.dismissed {
+            display: none;
         }
 
         /* --- ステップインジケーター --- */
@@ -529,8 +555,8 @@
             background: rgba(100, 200, 255, 0.5);
         }
 
-        /* --- 操作ガイドボタン --- */
-        .reading-guide-btn {
+        /* --- 操作ガイドボタン（全画面共通） --- */
+        .app-guide-btn {
             position: fixed;
             right: 8px;
             bottom: 70px;
@@ -546,18 +572,15 @@
             z-index: 55;
             box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
             transition: all 0.3s;
-            display: none;
+            display: flex;
             align-items: center;
             justify-content: center;
         }
-        .reading-guide-btn.visible {
-            display: flex;
-        }
-        .reading-guide-btn:active {
+        .app-guide-btn:active {
             background: rgba(100, 200, 255, 0.3);
             transform: scale(1.1);
         }
-        body.has-banner-ad .reading-guide-btn {
+        body.has-banner-ad .app-guide-btn {
             bottom: 120px;
         }
 
@@ -659,6 +682,50 @@
             font-weight: 600;
             margin-bottom: 4px;
             font-size: 12.5px;
+        }
+        .guide-section-title {
+            font-size: 13px;
+            color: #64c8ff;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid rgba(100, 200, 255, 0.2);
+        }
+        .guide-section-title:first-child {
+            margin-top: 0;
+        }
+        .guide-flow-arrow {
+            text-align: center;
+            color: rgba(100, 200, 255, 0.4);
+            font-size: 18px;
+            margin: 6px 0;
+            letter-spacing: 0.3em;
+        }
+        .guide-connection {
+            padding: 10px 14px;
+            background: rgba(100, 200, 255, 0.06);
+            border: 1px dashed rgba(100, 200, 255, 0.25);
+            border-radius: 10px;
+            font-size: 12px;
+            color: #8ab8d0;
+            line-height: 1.6;
+            margin: 8px 0;
+        }
+        .guide-connection strong {
+            color: #c8e8ff;
+        }
+        .guide-tab-badge {
+            display: inline-block;
+            background: rgba(100, 200, 255, 0.2);
+            border: 1px solid rgba(100, 200, 255, 0.4);
+            border-radius: 4px;
+            padding: 1px 6px;
+            font-size: 11px;
+            color: #64c8ff;
+            vertical-align: middle;
+            margin: 0 2px;
         }
         .guide-close-btn {
             display: block;
@@ -2022,6 +2089,7 @@
                 <div class="step-dot" data-step="3"></div>
             </div>
             <div id="reading-phase-banner" class="reading-phase-banner">
+                <button class="phase-dismiss-btn" onclick="dismissPhaseBanner()" title="閉じる">&times;</button>
                 <span class="phase-step" data-ja="STEP 1 / 4" data-en="STEP 1 / 4">STEP 1 / 4</span><br>
                 <span class="phase-icon">🃏</span>
                 <span id="phase-text" data-ja="「シャッフル」を押してカードを混ぜましょう" data-en="Press &quot;Shuffle&quot; to mix the cards">「シャッフル」を押してカードを混ぜましょう</span>
@@ -2052,50 +2120,125 @@
             <div class="reading-ad-slot" id="reading-ad-slot"></div>
         </div>
 
-        <!-- Layer 6: 操作ガイドオーバーレイ -->
-        <div id="reading-guide-overlay" class="reading-guide-overlay">
+        <!-- 操作ガイドオーバーレイ（全画面共通） -->
+        <div id="app-guide-overlay" class="reading-guide-overlay">
             <div class="reading-guide-panel">
-                <div class="guide-title" data-ja="占いの流れ" data-en="How to Read">占いの流れ</div>
+                <div class="guide-title" data-ja="使い方ガイド" data-en="App Guide">使い方ガイド</div>
+
+                <!-- ===== 画面の全体像 ===== -->
+                <div class="guide-section-title" data-ja="画面の役割" data-en="Screen Overview">画面の役割</div>
+                <div class="guide-step-list">
+                    <div class="guide-step">
+                        <div class="guide-step-num" style="font-size:12px;">編集</div>
+                        <div class="guide-step-body">
+                            <h4 data-ja="カード管理" data-en="Card Management">カード管理</h4>
+                            <p data-ja="カスタムカードの名前・画像・説明を編集。裏面画像やシグニフィケーターもここで設定します。" data-en="Edit custom card names, images, and descriptions. Also configure back image and significators here.">カスタムカードの名前・画像・説明を編集。裏面画像やシグニフィケーターもここで設定します。</p>
+                        </div>
+                    </div>
+                    <div class="guide-step">
+                        <div class="guide-step-num" style="font-size:10px;">セット</div>
+                        <div class="guide-step-body">
+                            <h4 data-ja="セット切替" data-en="Switch Card Sets">セット切替</h4>
+                            <p data-ja="使うカードデッキを選びます。ルノルマン39枚のプリセットがすぐに使えます。カスタムセットも作成可能。" data-en="Choose which card deck to use. A 39-card Lenormand preset is ready to use. You can also create custom sets.">使うカードデッキを選びます。ルノルマン39枚のプリセットがすぐに使えます。カスタムセットも作成可能。</p>
+                        </div>
+                    </div>
+                    <div class="guide-step">
+                        <div class="guide-step-num" style="font-size:12px;">展開</div>
+                        <div class="guide-step-body">
+                            <h4 data-ja="スプレッド選択" data-en="Choose Spread">スプレッド選択</h4>
+                            <p data-ja="1枚引きからグランタブローまで14種類。選ぶと占い画面に自動で移動します。正逆の設定もここ。" data-en="14 layouts from One Card to Grand Tableau. Selecting one takes you to the reading screen. Reversal settings are here too.">1枚引きからグランタブローまで14種類。選ぶと占い画面に自動で移動します。正逆の設定もここ。</p>
+                        </div>
+                    </div>
+                    <div class="guide-step">
+                        <div class="guide-step-num" style="font-size:12px;">くじ</div>
+                        <div class="guide-step-body">
+                            <h4 data-ja="くじ引き" data-en="Random Draw">くじ引き</h4>
+                            <p data-ja="好きな枚数をランダムに引けます。リセットするまで同じカードは出ません。" data-en="Draw any number of random cards. Same card won't appear again until you reset.">好きな枚数をランダムに引けます。リセットするまで同じカードは出ません。</p>
+                        </div>
+                    </div>
+                    <div class="guide-step">
+                        <div class="guide-step-num" style="font-size:12px;">記録</div>
+                        <div class="guide-step-body">
+                            <h4 data-ja="儀式と記録" data-en="Ritual & Notes">儀式と記録</h4>
+                            <p data-ja="占い前の深呼吸・問いの入力ができます。入力した問いは占い画面に引き継がれます。リーディング後の振り返りメモもここに保存されます。" data-en="Breathing exercises and question input before readings. Your question carries over to the reading screen. Post-reading reflections are also saved here.">占い前の深呼吸・問いの入力ができます。入力した問いは占い画面に引き継がれます。リーディング後の振り返りメモもここに保存されます。</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== 画面間のつながり ===== -->
+                <div class="guide-section-title" data-ja="画面間のつながり" data-en="How Screens Connect">画面間のつながり</div>
+                <div class="guide-connection">
+                    <strong>★ </strong>
+                    <span class="guide-tab-badge">記録</span> <span data-ja="で問いを入力 →「展開画面へ」ボタン →" data-en="enter question → &quot;Go to Spreads&quot; button →">で問いを入力 →「展開画面へ」ボタン →</span>
+                    <span class="guide-tab-badge">展開</span> <span data-ja="でスプレッドを選択 →" data-en="choose spread →">でスプレッドを選択 →</span>
+                    <span class="guide-tab-badge">占う</span> <span data-ja="に自動遷移" data-en="auto-navigates">に自動遷移</span>
+                </div>
+                <div class="guide-connection">
+                    <strong data-ja="問いの引き継ぎ:" data-en="Question carry-over:">問いの引き継ぎ:</strong><br>
+                    <span data-ja="「記録」で入力した問いは、占い画面の上部に自動表示されます。リセットすると消えるので、再度入力が必要です。" data-en="Questions entered in &quot;Notes&quot; appear at the top of the reading screen. They are cleared on reset.">「記録」で入力した問いは、占い画面の上部に自動表示されます。リセットすると消えるので、再度入力が必要です。</span>
+                </div>
+                <div class="guide-connection">
+                    <strong data-ja="セットの反映:" data-en="Set effects:">セットの反映:</strong><br>
+                    <span data-ja="「セット」で切り替えたデッキが、展開・占い・くじ すべてに反映されます。" data-en="The deck selected in &quot;Sets&quot; applies to Spread, Reading, and Draw screens.">「セット」で切り替えたデッキが、展開・占い・くじ すべてに反映されます。</span>
+                </div>
+
+                <!-- ===== 占いの操作手順 ===== -->
+                <div class="guide-section-title" data-ja="占い画面の操作" data-en="Reading Screen Steps">占い画面の操作</div>
                 <div class="guide-step-list">
                     <div class="guide-step">
                         <div class="guide-step-num">1</div>
                         <div class="guide-step-body">
                             <h4 data-ja="シャッフル" data-en="Shuffle">シャッフル</h4>
-                            <p data-ja="「シャッフル」ボタンでカードを混ぜます。心を落ち着けて質問に集中しましょう。" data-en="Press the &quot;Shuffle&quot; button to mix the cards. Calm your mind and focus on your question.">「シャッフル」ボタンでカードを混ぜます。心を落ち着けて質問に集中しましょう。</p>
+                            <p data-ja="「シャッフル」ボタンでカードを混ぜます。「スキップ」で演出を飛ばすこともできます。" data-en="Press &quot;Shuffle&quot; to mix cards. Use &quot;Skip&quot; to bypass the animation.">「シャッフル」ボタンでカードを混ぜます。「スキップ」で演出を飛ばすこともできます。</p>
                         </div>
                     </div>
                     <div class="guide-step">
                         <div class="guide-step-num">2</div>
                         <div class="guide-step-body">
                             <h4 data-ja="カードを集める" data-en="Collect Cards">カードを集める</h4>
-                            <p data-ja="散らばったカードをタップして1枚ずつ集めます。「まとめて集める」で一括回収もできます。" data-en="Tap scattered cards to collect them one by one. Use &quot;Collect All&quot; to gather them at once.">散らばったカードをタップして1枚ずつ集めます。「まとめて集める」で一括回収もできます。</p>
+                            <p data-ja="散らばったカードをタップして1枚ずつ集めます。「まとめて集める」で一括回収も可能。" data-en="Tap scattered cards to collect them one by one, or use &quot;Collect All&quot;.">散らばったカードをタップして1枚ずつ集めます。「まとめて集める」で一括回収も可能。</p>
                         </div>
                     </div>
                     <div class="guide-step">
                         <div class="guide-step-num">3</div>
                         <div class="guide-step-body">
                             <h4 data-ja="カードが開く" data-en="Cards Reveal">カードが開く</h4>
-                            <p data-ja="全カード回収後、演出とともにカードが順番にめくられます。" data-en="After collecting all cards, they will be revealed one by one with an animation.">全カード回収後、演出とともにカードが順番にめくられます。</p>
+                            <p data-ja="全カード回収後、演出とともにカードが順番にめくられます。" data-en="After collecting all cards, they reveal one by one with an animation.">全カード回収後、演出とともにカードが順番にめくられます。</p>
                         </div>
                     </div>
                     <div class="guide-step">
                         <div class="guide-step-num">4</div>
                         <div class="guide-step-body">
                             <h4 data-ja="結果を見る" data-en="View Results">結果を見る</h4>
-                            <p data-ja="カードをタップすると拡大表示。下にスクロールでカードの意味を確認できます。補足カードも引けます。" data-en="Tap a card to zoom in. Scroll down to see card meanings. You can also draw supplement cards.">カードをタップすると拡大表示。下にスクロールでカードの意味を確認できます。補足カードも引けます。</p>
+                            <p data-ja="カードをタップで拡大。下にスクロールでカードの意味と補足カード（最大3枚追加可）。" data-en="Tap cards to zoom in. Scroll down for meanings and supplement cards (up to 3 extra).">カードをタップで拡大。下にスクロールでカードの意味と補足カード（最大3枚追加可）。</p>
                         </div>
                     </div>
                 </div>
+
+                <!-- ===== 設定 ===== -->
+                <div class="guide-section-title" data-ja="設定（⚙️ボタン）" data-en="Settings (⚙️ button)">設定（⚙️ボタン）</div>
+                <div class="guide-step-list">
+                    <div class="guide-step">
+                        <div class="guide-step-num" style="font-size:14px;">⚙️</div>
+                        <div class="guide-step-body">
+                            <p data-ja="右上の⚙️ボタンから開きます。音量調整、データのエクスポート／インポート（機種変更時に便利）、広告削除の購入ができます。" data-en="Open via the ⚙️ button at top-right. Adjust volume, export/import data (useful for device transfers), and purchase ad removal.">右上の⚙️ボタンから開きます。音量調整、データのエクスポート／インポート（機種変更時に便利）、広告削除の購入ができます。</p>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="guide-note">
                     <div class="guide-note-title" data-ja="このアプリについて" data-en="About This App">このアプリについて</div>
-                    <span data-ja="ルノルマンカードはプリセットのため編集できません。すべてのデータはお使いの端末にローカル保存されます。" data-en="Lenormand cards are preset and cannot be edited. All data is saved locally on your device.">ルノルマンカードはプリセットのため編集できません。すべてのデータはお使いの端末にローカル保存されます。</span>
+                    <span data-ja="ルノルマンカードはプリセットのため編集できません。すべてのデータはお使いの端末にローカル保存されます（サーバーへの送信なし）。" data-en="Lenormand cards are preset and cannot be edited. All data is saved locally on your device (nothing sent to servers).">ルノルマンカードはプリセットのため編集できません。すべてのデータはお使いの端末にローカル保存されます（サーバーへの送信なし）。</span>
                 </div>
-                <button class="guide-close-btn" onclick="closeReadingGuide()" data-ja="閉じる" data-en="Close">閉じる</button>
+                <div id="guide-banner-restore" style="text-align:center;margin-top:14px;">
+                    <button class="guide-close-btn" style="margin:0;display:inline-block;padding:8px 18px;font-size:12px;background:rgba(255,200,100,0.15);border-color:rgba(255,200,100,0.4);color:#ffcc66;" onclick="restorePhaseBanner();this.parentElement.innerHTML='<span style=\'color:#ffcc66;font-size:12px;\'>✓</span>';" data-ja="占い画面のステップ表示を再表示" data-en="Show reading screen step banner">占い画面のステップ表示を再表示</button>
+                </div>
+                <button class="guide-close-btn" onclick="closeAppGuide()" data-ja="閉じる" data-en="Close">閉じる</button>
             </div>
         </div>
 
-        <!-- 操作ガイドボタン（?） -->
-        <button id="reading-guide-btn" class="reading-guide-btn" onclick="openReadingGuide()" title="Guide">?</button>
+        <!-- 操作ガイドボタン（?）- 全画面共通 -->
+        <button id="app-guide-btn" class="app-guide-btn" onclick="openAppGuide()" title="Guide">?</button>
 
         <!-- くじ引き画面 -->
         <div id="lottery-screen" class="screen">
@@ -4168,6 +4311,9 @@
             loadLenormandDescEn();
             loadLenormandDescJa();
 
+            // フェーズバナー非表示設定を復元
+            applyPhaseBannerPref();
+
             // 画像プリロード（バックグラウンドでキャッシュに読み込み）
             preloadImages();
         }
@@ -4690,9 +4836,6 @@
                 hasSpreadResult = false;
             }
             currentScreen = screen;
-
-            // 操作ガイドボタンの表示制御
-            updateGuideButtonVisibility(screen);
 
             // AdMobバナー表示制御
             if (adMobManager) {
@@ -5313,28 +5456,40 @@
             banner.hidden = false;
         }
 
-        function openReadingGuide() {
-            const overlay = document.getElementById('reading-guide-overlay');
-            if (overlay) {
-                overlay.classList.add('show');
-                // 言語を反映
-                if (typeof applyLanguage === 'function') applyLanguage(currentLang);
-            }
+        // --- アプリ全体ガイド ---
+        function openAppGuide() {
+            const overlay = document.getElementById('app-guide-overlay');
+            if (overlay) overlay.classList.add('show');
         }
 
-        function closeReadingGuide() {
-            const overlay = document.getElementById('reading-guide-overlay');
+        function closeAppGuide() {
+            const overlay = document.getElementById('app-guide-overlay');
             if (overlay) overlay.classList.remove('show');
         }
 
-        function updateGuideButtonVisibility(screen) {
-            const btn = document.getElementById('reading-guide-btn');
-            if (!btn) return;
-            if (screen === 'reading') {
-                btn.classList.add('visible');
-            } else {
-                btn.classList.remove('visible');
-                closeReadingGuide();
+        // --- フェーズバナー非表示（localStorage保持） ---
+        function dismissPhaseBanner() {
+            const banner = document.getElementById('reading-phase-banner');
+            const indicator = document.getElementById('reading-step-indicator');
+            if (banner) banner.classList.add('dismissed');
+            if (indicator) indicator.classList.add('dismissed');
+            localStorage.setItem('oraclePhaseBannerDismissed', 'true');
+        }
+
+        function restorePhaseBanner() {
+            const banner = document.getElementById('reading-phase-banner');
+            const indicator = document.getElementById('reading-step-indicator');
+            if (banner) banner.classList.remove('dismissed');
+            if (indicator) indicator.classList.remove('dismissed');
+            localStorage.removeItem('oraclePhaseBannerDismissed');
+        }
+
+        function applyPhaseBannerPref() {
+            if (localStorage.getItem('oraclePhaseBannerDismissed') === 'true') {
+                const banner = document.getElementById('reading-phase-banner');
+                const indicator = document.getElementById('reading-step-indicator');
+                if (banner) banner.classList.add('dismissed');
+                if (indicator) indicator.classList.add('dismissed');
             }
         }
 
