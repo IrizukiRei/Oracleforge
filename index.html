@@ -441,6 +441,261 @@
             opacity: 0;
         }
 
+        /* ============================================
+           占い画面レイヤー設計
+           Layer 0: body背景（変更なし）
+           Layer 1: .reading-layer-stage  — カード表示エリア
+           Layer 2: .reading-layer-controls — 操作ボタン群
+           Layer 3: .reading-phase-banner — フェーズ別テキスト誘導
+           Layer 4: .spread-reveal-overlay — カード回収・完了演出
+           Layer 5: .side-buttons — ホーム・設定
+           Layer 6: .reading-guide-overlay — 操作ガイド
+           Layer 7: モーダル（既存）
+           ============================================ */
+
+        /* --- フェーズバナー（テキスト誘導） --- */
+        .reading-phase-banner {
+            position: relative;
+            z-index: 3;
+            text-align: center;
+            padding: 10px 16px;
+            margin-bottom: 8px;
+            background: rgba(15, 32, 39, 0.85);
+            border: 1px solid rgba(100, 200, 255, 0.35);
+            border-radius: 10px;
+            font-size: clamp(12px, 3.2vw, 15px);
+            color: #c8e8ff;
+            letter-spacing: 0.06em;
+            line-height: 1.6;
+            transition: opacity 0.4s, transform 0.4s;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+        }
+        .reading-phase-banner[hidden] {
+            display: none;
+        }
+        .reading-phase-banner .phase-icon {
+            display: inline-block;
+            margin-right: 6px;
+            font-size: 1.15em;
+            vertical-align: middle;
+        }
+        .reading-phase-banner .phase-step {
+            display: inline-block;
+            background: rgba(100, 200, 255, 0.2);
+            border: 1px solid rgba(100, 200, 255, 0.4);
+            border-radius: 999px;
+            padding: 2px 10px;
+            font-size: 11px;
+            color: #64c8ff;
+            margin-bottom: 4px;
+            letter-spacing: 0.1em;
+        }
+
+        /* --- ステップインジケーター --- */
+        .reading-step-indicator {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+        .reading-step-indicator .step-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(100, 200, 255, 0.2);
+            border: 1px solid rgba(100, 200, 255, 0.3);
+            transition: all 0.3s;
+        }
+        .reading-step-indicator .step-dot.active {
+            background: #64c8ff;
+            border-color: #64c8ff;
+            box-shadow: 0 0 6px rgba(100, 200, 255, 0.6);
+            width: 10px;
+            height: 10px;
+        }
+        .reading-step-indicator .step-dot.done {
+            background: rgba(100, 200, 255, 0.5);
+            border-color: rgba(100, 200, 255, 0.6);
+        }
+        .reading-step-indicator .step-line {
+            width: 16px;
+            height: 2px;
+            background: rgba(100, 200, 255, 0.2);
+            border-radius: 1px;
+        }
+        .reading-step-indicator .step-line.done {
+            background: rgba(100, 200, 255, 0.5);
+        }
+
+        /* --- 操作ガイドボタン --- */
+        .reading-guide-btn {
+            position: fixed;
+            right: 8px;
+            bottom: 70px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(20, 40, 50, 0.9);
+            border: 2px solid rgba(100, 200, 255, 0.4);
+            color: #64c8ff;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            z-index: 55;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+            transition: all 0.3s;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .reading-guide-btn.visible {
+            display: flex;
+        }
+        .reading-guide-btn:active {
+            background: rgba(100, 200, 255, 0.3);
+            transform: scale(1.1);
+        }
+        body.has-banner-ad .reading-guide-btn {
+            bottom: 120px;
+        }
+
+        /* --- 操作ガイドオーバーレイ --- */
+        .reading-guide-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(5, 15, 20, 0.92);
+            z-index: 9000;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+        }
+        .reading-guide-overlay.show {
+            display: flex;
+        }
+        .reading-guide-panel {
+            width: min(420px, 90vw);
+            max-height: 80vh;
+            overflow-y: auto;
+            background: rgba(15, 32, 39, 0.97);
+            border: 2px solid rgba(100, 200, 255, 0.4);
+            border-radius: 16px;
+            padding: 24px 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+        .reading-guide-panel::-webkit-scrollbar {
+            width: 4px;
+        }
+        .reading-guide-panel::-webkit-scrollbar-thumb {
+            background: rgba(100, 200, 255, 0.3);
+            border-radius: 2px;
+        }
+        .guide-title {
+            text-align: center;
+            color: #64c8ff;
+            font-size: clamp(16px, 4vw, 20px);
+            margin-bottom: 20px;
+            font-weight: 600;
+            letter-spacing: 0.15em;
+        }
+        .guide-step-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .guide-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 14px;
+            background: rgba(100, 200, 255, 0.06);
+            border: 1px solid rgba(100, 200, 255, 0.15);
+            border-radius: 12px;
+            transition: all 0.3s;
+        }
+        .guide-step-num {
+            flex-shrink: 0;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(100, 200, 255, 0.2);
+            border: 2px solid rgba(100, 200, 255, 0.5);
+            color: #64c8ff;
+            font-size: 14px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .guide-step-body h4 {
+            color: #e0f0ff;
+            font-size: 14px;
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+        .guide-step-body p {
+            color: #8ab8d0;
+            font-size: 12.5px;
+            line-height: 1.6;
+            margin: 0;
+        }
+        .guide-note {
+            margin-top: 18px;
+            padding: 12px 14px;
+            background: rgba(255, 200, 100, 0.08);
+            border: 1px solid rgba(255, 200, 100, 0.25);
+            border-radius: 10px;
+            font-size: 12px;
+            color: #c8a86e;
+            line-height: 1.6;
+        }
+        .guide-note-title {
+            color: #ffcc66;
+            font-weight: 600;
+            margin-bottom: 4px;
+            font-size: 12.5px;
+        }
+        .guide-close-btn {
+            display: block;
+            margin: 20px auto 0;
+            padding: 10px 32px;
+            background: rgba(100, 200, 255, 0.2);
+            border: 2px solid rgba(100, 200, 255, 0.5);
+            color: #fff;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            letter-spacing: 0.1em;
+        }
+        .guide-close-btn:active {
+            background: rgba(100, 200, 255, 0.4);
+        }
+
+        /* --- 広告スロット余白 --- */
+        .reading-ad-slot {
+            min-height: 0;
+            transition: min-height 0.3s;
+            margin-top: 12px;
+        }
+        body.has-banner-ad .reading-ad-slot {
+            min-height: 60px;
+        }
+
+        /* --- reading画面内のレイヤー順序 --- */
+        #reading-screen .controls {
+            position: relative;
+            z-index: 2;
+        }
+        #reading-screen .spread-display {
+            z-index: 1;
+        }
+
         .spread-inner {
             position: relative;
             min-width: clamp(600px, 85vw, 820px);
@@ -1746,7 +2001,8 @@
 
         <!-- リーディング画面 -->
         <div id="reading-screen" class="screen">
-            <!-- 問い表示エリア -->
+
+            <!-- Layer 0: 問い表示（折りたたみ） -->
             <div id="question-display" class="question-display collapsed" style="display:none;">
                 <div class="question-header">
                     <div class="question-title" data-ja="📝 問い" data-en="📝 Question">📝 問い</div>
@@ -1754,25 +2010,92 @@
                 </div>
                 <div id="question-text" style="font-size:14px;color:#fff;"></div>
             </div>
-            
+
+            <!-- Layer 3: フェーズ別テキスト誘導バナー -->
+            <div id="reading-step-indicator" class="reading-step-indicator">
+                <div class="step-dot active" data-step="0"></div>
+                <div class="step-line" data-line="0"></div>
+                <div class="step-dot" data-step="1"></div>
+                <div class="step-line" data-line="1"></div>
+                <div class="step-dot" data-step="2"></div>
+                <div class="step-line" data-line="2"></div>
+                <div class="step-dot" data-step="3"></div>
+            </div>
+            <div id="reading-phase-banner" class="reading-phase-banner">
+                <span class="phase-step" data-ja="STEP 1 / 4" data-en="STEP 1 / 4">STEP 1 / 4</span><br>
+                <span class="phase-icon">🃏</span>
+                <span id="phase-text" data-ja="「シャッフル」を押してカードを混ぜましょう" data-en="Press &quot;Shuffle&quot; to mix the cards">「シャッフル」を押してカードを混ぜましょう</span>
+            </div>
+
+            <!-- Layer 2: 操作ボタン群 -->
             <div class="controls">
                 <button class="btn" onclick="shuffleAndDraw()" data-ja="シャッフル" data-en="Shuffle">シャッフル</button>
                 <button class="btn" onclick="skipShuffle()" data-ja="スキップ" data-en="Skip">スキップ</button>
                 <button class="btn" onclick="resetReading()" data-ja="リセット" data-en="Reset">リセット</button>
             </div>
-            
+
+            <!-- Layer 1: カード表示エリア -->
             <div id="spread-display" class="spread-display">
                 <div id="spread-inner" class="spread-inner"></div>
             </div>
-            
+
             <!-- 補足カード表示エリア -->
             <div id="supplement-area" style="display:none;margin-top:20px;padding:15px;background:rgba(255,200,100,0.1);border:2px solid rgba(255,200,100,0.5);border-radius:12px;">
                 <h4 style="color:#ffcc66;margin-bottom:10px;font-size:14px;" data-ja="補足カード" data-en="Supplement Cards">補足カード</h4>
                 <div id="supplement-cards" style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;"></div>
             </div>
-            
+
+            <!-- 結果表示エリア -->
             <div id="result-info" class="result-info" style="display:none;"></div>
+
+            <!-- 広告スロット余白（将来の広告・課金・ガイド導線用） -->
+            <div class="reading-ad-slot" id="reading-ad-slot"></div>
         </div>
+
+        <!-- Layer 6: 操作ガイドオーバーレイ -->
+        <div id="reading-guide-overlay" class="reading-guide-overlay">
+            <div class="reading-guide-panel">
+                <div class="guide-title" data-ja="占いの流れ" data-en="How to Read">占いの流れ</div>
+                <div class="guide-step-list">
+                    <div class="guide-step">
+                        <div class="guide-step-num">1</div>
+                        <div class="guide-step-body">
+                            <h4 data-ja="シャッフル" data-en="Shuffle">シャッフル</h4>
+                            <p data-ja="「シャッフル」ボタンでカードを混ぜます。心を落ち着けて質問に集中しましょう。" data-en="Press the &quot;Shuffle&quot; button to mix the cards. Calm your mind and focus on your question.">「シャッフル」ボタンでカードを混ぜます。心を落ち着けて質問に集中しましょう。</p>
+                        </div>
+                    </div>
+                    <div class="guide-step">
+                        <div class="guide-step-num">2</div>
+                        <div class="guide-step-body">
+                            <h4 data-ja="カードを集める" data-en="Collect Cards">カードを集める</h4>
+                            <p data-ja="散らばったカードをタップして1枚ずつ集めます。「まとめて集める」で一括回収もできます。" data-en="Tap scattered cards to collect them one by one. Use &quot;Collect All&quot; to gather them at once.">散らばったカードをタップして1枚ずつ集めます。「まとめて集める」で一括回収もできます。</p>
+                        </div>
+                    </div>
+                    <div class="guide-step">
+                        <div class="guide-step-num">3</div>
+                        <div class="guide-step-body">
+                            <h4 data-ja="カードが開く" data-en="Cards Reveal">カードが開く</h4>
+                            <p data-ja="全カード回収後、演出とともにカードが順番にめくられます。" data-en="After collecting all cards, they will be revealed one by one with an animation.">全カード回収後、演出とともにカードが順番にめくられます。</p>
+                        </div>
+                    </div>
+                    <div class="guide-step">
+                        <div class="guide-step-num">4</div>
+                        <div class="guide-step-body">
+                            <h4 data-ja="結果を見る" data-en="View Results">結果を見る</h4>
+                            <p data-ja="カードをタップすると拡大表示。下にスクロールでカードの意味を確認できます。補足カードも引けます。" data-en="Tap a card to zoom in. Scroll down to see card meanings. You can also draw supplement cards.">カードをタップすると拡大表示。下にスクロールでカードの意味を確認できます。補足カードも引けます。</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="guide-note">
+                    <div class="guide-note-title" data-ja="このアプリについて" data-en="About This App">このアプリについて</div>
+                    <span data-ja="ルノルマンカードはプリセットのため編集できません。すべてのデータはお使いの端末にローカル保存されます。" data-en="Lenormand cards are preset and cannot be edited. All data is saved locally on your device.">ルノルマンカードはプリセットのため編集できません。すべてのデータはお使いの端末にローカル保存されます。</span>
+                </div>
+                <button class="guide-close-btn" onclick="closeReadingGuide()" data-ja="閉じる" data-en="Close">閉じる</button>
+            </div>
+        </div>
+
+        <!-- 操作ガイドボタン（?） -->
+        <button id="reading-guide-btn" class="reading-guide-btn" onclick="openReadingGuide()" title="Guide">?</button>
 
         <!-- くじ引き画面 -->
         <div id="lottery-screen" class="screen">
@@ -2849,6 +3172,11 @@
             updateStorageInfo();
             updateSignificatorDisplay();
             updateQuestionToggleLabel();
+
+            // フェーズバナーのテキストも言語に合わせて更新
+            if (typeof setReadingPhase === 'function') {
+                setReadingPhase(readingPhase || 'ready');
+            }
         }
         
         // 言語に応じたテキスト取得
@@ -4363,6 +4691,9 @@
             }
             currentScreen = screen;
 
+            // 操作ガイドボタンの表示制御
+            updateGuideButtonVisibility(screen);
+
             // AdMobバナー表示制御
             if (adMobManager) {
                 adMobManager.onScreenChange(screen);
@@ -4911,6 +5242,102 @@
             if (modal) modal.remove();
         }
         
+        // ============================================
+        // 占い画面フェーズ管理・操作ガイド
+        // ============================================
+        let readingPhase = 'ready'; // ready | shuffling | collecting | revealing | complete
+
+        function setReadingPhase(phase) {
+            readingPhase = phase;
+            const banner = document.getElementById('reading-phase-banner');
+            const phaseText = document.getElementById('phase-text');
+            const stepIndicator = document.getElementById('reading-step-indicator');
+            if (!banner || !phaseText || !stepIndicator) return;
+
+            const phases = {
+                ready: {
+                    step: 0,
+                    icon: '🃏',
+                    ja: '「シャッフル」を押してカードを混ぜましょう',
+                    en: 'Press "Shuffle" to mix the cards',
+                    stepLabel: { ja: 'STEP 1 / 4', en: 'STEP 1 / 4' }
+                },
+                shuffling: {
+                    step: 1,
+                    icon: '🌀',
+                    ja: 'カードを混ぜています...',
+                    en: 'Shuffling cards...',
+                    stepLabel: { ja: 'STEP 1 / 4', en: 'STEP 1 / 4' }
+                },
+                collecting: {
+                    step: 1,
+                    icon: '👆',
+                    ja: 'カードをタップして集めてください',
+                    en: 'Tap cards to collect them',
+                    stepLabel: { ja: 'STEP 2 / 4', en: 'STEP 2 / 4' }
+                },
+                revealing: {
+                    step: 2,
+                    icon: '✨',
+                    ja: 'カードが開きます...',
+                    en: 'Revealing cards...',
+                    stepLabel: { ja: 'STEP 3 / 4', en: 'STEP 3 / 4' }
+                },
+                complete: {
+                    step: 3,
+                    icon: '🔮',
+                    ja: 'カードをタップで拡大 ／ 下にスクロールで結果',
+                    en: 'Tap cards to zoom / Scroll down for results',
+                    stepLabel: { ja: 'STEP 4 / 4', en: 'STEP 4 / 4' }
+                }
+            };
+
+            const p = phases[phase] || phases.ready;
+            const lang = currentLang || 'ja';
+            phaseText.textContent = p[lang] || p.ja;
+            banner.querySelector('.phase-icon').textContent = p.icon;
+            const stepLabel = banner.querySelector('.phase-step');
+            if (stepLabel) stepLabel.textContent = p.stepLabel[lang] || p.stepLabel.ja;
+
+            // ステップインジケーター更新
+            stepIndicator.querySelectorAll('.step-dot').forEach(dot => {
+                const s = parseInt(dot.dataset.step, 10);
+                dot.classList.toggle('active', s === p.step);
+                dot.classList.toggle('done', s < p.step);
+            });
+            stepIndicator.querySelectorAll('.step-line').forEach(line => {
+                const l = parseInt(line.dataset.line, 10);
+                line.classList.toggle('done', l < p.step);
+            });
+
+            banner.hidden = false;
+        }
+
+        function openReadingGuide() {
+            const overlay = document.getElementById('reading-guide-overlay');
+            if (overlay) {
+                overlay.classList.add('show');
+                // 言語を反映
+                if (typeof applyLanguage === 'function') applyLanguage(currentLang);
+            }
+        }
+
+        function closeReadingGuide() {
+            const overlay = document.getElementById('reading-guide-overlay');
+            if (overlay) overlay.classList.remove('show');
+        }
+
+        function updateGuideButtonVisibility(screen) {
+            const btn = document.getElementById('reading-guide-btn');
+            if (!btn) return;
+            if (screen === 'reading') {
+                btn.classList.add('visible');
+            } else {
+                btn.classList.remove('visible');
+                closeReadingGuide();
+            }
+        }
+
         // スプレッド
         function selectSpread(type, size) {
             const activeCards = getCurrentCards();
@@ -4927,6 +5354,7 @@
             
             showScreen('reading');
             setupSpread(type, size);
+            setReadingPhase('ready');
         }
         
         function setupSpread(type, size) {
@@ -5170,6 +5598,9 @@
         }
         
         function shuffleAndDraw() {
+            // フェーズ：シャッフル中
+            setReadingPhase('shuffling');
+
             // タップSE再生
             if (audioManager) {
                 audioManager.onUserInteraction();
@@ -5271,6 +5702,9 @@
                     card.style.zIndex = 10 + i;
                 });
                 
+                // フェーズ：カード回収中
+                setReadingPhase('collecting');
+
                 // 説明テキスト（上部に配置してカードに隠れないようにする）
                 const hint = document.createElement('div');
                 hint.id = 'collect-hint';
@@ -5331,6 +5765,9 @@
             
             // カードを引く処理
             function finishShuffle() {
+                // フェーズ：カード表示中
+                setReadingPhase('revealing');
+
                 const shuffled = [...shufflePool].sort(() => Math.random() - 0.5);
                 
                 drawnCards = shuffled.slice(0, currentSpreadSize).map(card => ({
@@ -5675,6 +6112,9 @@
         const MAX_SUPPLEMENT = 3;
         
         function showResults(silent = false) {
+            // フェーズ：完了
+            setReadingPhase('complete');
+
             // スプレッド結果フラグを設定（インタースティシャル広告用）
             hasSpreadResult = true;
 
@@ -5835,21 +6275,24 @@
         function resetReading() {
             drawnCards = [];
             supplementCards = []; // 補足カードもリセット
-            
+
             // 補足カード表示エリアもクリア
             const supArea = document.getElementById('supplement-area');
             const supCards = document.getElementById('supplement-cards');
             if (supArea) supArea.style.display = 'none';
             if (supCards) supCards.innerHTML = '';
-            
+
             // 問いもクリア
             localStorage.removeItem('oracleQuestion');
             const qDisplay = document.getElementById('question-display');
             if (qDisplay) qDisplay.style.display = 'none';
-            
+
             if (currentSpread && currentSpreadSize) {
                 setupSpread(currentSpread, currentSpreadSize);
             }
+
+            // フェーズ：初期状態に戻す
+            setReadingPhase('ready');
         }
         
         // 儀式
