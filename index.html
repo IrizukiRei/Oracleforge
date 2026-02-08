@@ -3317,9 +3317,11 @@
             updateQuestionToggleLabel();
 
             // フェーズバナーのテキストも言語に合わせて更新
-            if (typeof setReadingPhase === 'function') {
-                setReadingPhase(readingPhase || 'ready');
-            }
+            try {
+                if (typeof setReadingPhase === 'function' && typeof readingPhase !== 'undefined') {
+                    setReadingPhase(readingPhase || 'ready');
+                }
+            } catch(e) { /* readingPhase not yet initialized during early init */ }
         }
         
         // 言語に応じたテキスト取得
