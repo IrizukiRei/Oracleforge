@@ -1800,6 +1800,71 @@
     <button id="app-guide-btn" class="app-guide-btn" onclick="openAppGuide()" title="Guide">?</button>
 
 
+    <!-- 操作ガイドオーバーレイ（全画面共通） -->
+    <div id="app-guide-overlay" class="reading-guide-overlay">
+        <div class="reading-guide-panel">
+            <div class="guide-title" data-ja="使い方ガイド" data-en="App Guide">使い方ガイド</div>
+
+            <!-- ===== 基本の4画面 ===== -->
+            <div class="guide-section-title" data-ja="基本の使い方" data-en="Core Screens">基本の使い方</div>
+            <div class="guide-step-list">
+                <div class="guide-step">
+                    <div class="guide-step-num" style="font-size:12px;" data-ja="編集" data-en="Edit">編集</div>
+                    <div class="guide-step-body">
+                        <h4 data-ja="カード管理" data-en="Card Management">カード管理</h4>
+                        <p data-ja="カードの名前・画像・説明を編集。裏面画像やシグニフィケーターもここで設定します。" data-en="Edit card names, images, and descriptions. Also configure back image and significators here.">カードの名前・画像・説明を編集。裏面画像やシグニフィケーターもここで設定します。</p>
+                    </div>
+                </div>
+                <div class="guide-step">
+                    <div class="guide-step-num" style="font-size:12px;" data-ja="セット" data-en="Sets">セット</div>
+                    <div class="guide-step-body">
+                        <h4 data-ja="デッキ管理" data-en="Deck Management">デッキ管理</h4>
+                        <p data-ja="使うカードデッキを選択・作成します。ここで選んだセットが展開・占い・くじ すべてに反映されます。" data-en="Select or create card decks. The chosen set applies to Spread, Reading, and Draw screens.">使うカードデッキを選択・作成します。ここで選んだセットが展開・占い・くじ すべてに反映されます。</p>
+                    </div>
+                </div>
+                <div class="guide-step">
+                    <div class="guide-step-num" style="font-size:12px;" data-ja="記録" data-en="Notes">記録</div>
+                    <div class="guide-step-body">
+                        <h4 data-ja="問い・メモ" data-en="Questions & Notes">問い・メモ</h4>
+                        <p data-ja="占い前の深呼吸・問いの入力。ここで入力した問いは展開・占い画面に自動で引き継がれます。リーディング後のメモもここに保存。" data-en="Breathing and question input before readings. Questions entered here automatically carry over to Spread and Reading screens. Post-reading notes are also saved here.">占い前の深呼吸・問いの入力。ここで入力した問いは展開・占い画面に自動で引き継がれます。リーディング後のメモもここに保存。</p>
+                    </div>
+                </div>
+                <div class="guide-step">
+                    <div class="guide-step-num" style="font-size:14px;">⚙️</div>
+                    <div class="guide-step-body">
+                        <h4 data-ja="設定" data-en="Settings">設定</h4>
+                        <p data-ja="右上の⚙️ボタンから。音量調整、データのエクスポート／インポート（機種変更時に便利）、広告削除の購入ができます。" data-en="Via the ⚙️ button at top-right. Adjust volume, export/import data (useful for device transfers), and purchase ad removal.">右上の⚙️ボタンから。音量調整、データのエクスポート／インポート（機種変更時に便利）、広告削除の購入ができます。</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== 占いの流れ ===== -->
+            <div class="guide-section-title" data-ja="占いの流れ" data-en="Reading Flow">占いの流れ</div>
+            <div class="guide-connection">
+                <strong>★ </strong>
+                <span class="guide-tab-badge" data-ja="記録" data-en="Notes">記録</span> <span data-ja="で問いを入力 →" data-en="enter question →">で問いを入力 →</span>
+                <span class="guide-tab-badge" data-ja="展開" data-en="Spread">展開</span> <span data-ja="でスプレッドを選択（14種類） →" data-en="choose spread (14 types) →">でスプレッドを選択（14種類） →</span>
+                <span class="guide-tab-badge" data-ja="占う" data-en="Read">占う</span> <span data-ja="に自動遷移" data-en="auto-navigates">に自動遷移</span>
+            </div>
+            <div class="guide-connection">
+                <strong data-ja="占い画面の手順:" data-en="Reading steps:">占い画面の手順:</strong><br>
+                <span data-ja="❶ シャッフル → ❷ カードを集める → ❸ カードが開く → ❹ 結果を見る（タップで拡大・下スクロールで意味表示）" data-en="❶ Shuffle → ❷ Collect cards → ❸ Cards reveal → ❹ View results (tap to zoom, scroll for meanings)">❶ シャッフル → ❷ カードを集める → ❸ カードが開く → ❹ 結果を見る（タップで拡大・下スクロールで意味表示）</span>
+            </div>
+            <div class="guide-connection">
+                <span class="guide-tab-badge" data-ja="くじ" data-en="Draw">くじ</span>
+                <span data-ja="好きな枚数をランダムに引けます。リセットまで同じカードは出ません。" data-en="Draw any number of random cards. Same card won't appear again until reset.">好きな枚数をランダムに引けます。リセットまで同じカードは出ません。</span>
+            </div>
+
+            <div class="guide-note">
+                <div class="guide-note-title" data-ja="このアプリについて" data-en="About This App">このアプリについて</div>
+                <span data-ja="ルノルマンカードはプリセットのため編集できません。すべてのデータはお使いの端末にローカル保存されます（サーバーへの送信なし）。" data-en="Lenormand cards are preset and cannot be edited. All data is saved locally on your device (nothing sent to servers).">ルノルマンカードはプリセットのため編集できません。すべてのデータはお使いの端末にローカル保存されます（サーバーへの送信なし）。</span>
+            </div>
+            <button class="guide-close-btn" onclick="closeAppGuide()" data-ja="閉じる" data-en="Close">閉じる</button>
+            <button class="guide-close-btn" style="margin-top:8px;font-size:12px;padding:8px 24px;background:rgba(255,100,100,0.1);border-color:rgba(255,100,100,0.3);color:#ff9999;" onclick="hideGuideButton()" data-ja="このボタン（?）を非表示にする" data-en="Hide this (?) button">このボタン（?）を非表示にする</button>
+        </div>
+    </div>
+
+
     <!-- 設定ドロワー -->
     <div class="settings-drawer-overlay" id="settingsOverlay" onclick="closeSettingsDrawer()"></div>
     <div class="settings-drawer" id="settingsDrawer">
