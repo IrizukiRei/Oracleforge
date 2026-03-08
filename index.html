@@ -747,6 +747,46 @@
             background: rgba(100, 200, 255, 0.4);
         }
 
+        .lenormand-intro-card {
+            margin-top: 12px;
+            padding: 14px;
+            background: linear-gradient(135deg, rgba(255, 166, 215, 0.16), rgba(122, 209, 255, 0.14));
+            border: 1px solid rgba(255, 185, 232, 0.45);
+            border-radius: 12px;
+        }
+        .lenormand-intro-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #ffd7ef;
+            font-weight: 700;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+        .lenormand-intro-body {
+            color: #d7efff;
+            font-size: 12.5px;
+            line-height: 1.7;
+            margin: 0;
+        }
+        .lenormand-chip-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 10px;
+        }
+        .lenormand-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            color: #f6fbff;
+            font-size: 11px;
+        }
+
         /* --- 広告スロット余白 --- */
         .reading-ad-slot {
             min-height: 0;
@@ -1855,6 +1895,27 @@
                 <span data-ja="好きな枚数をランダムに引けます。リセットまで同じカードは出ません。" data-en="Draw any number of random cards. Same card won't appear again until reset.">好きな枚数をランダムに引けます。リセットまで同じカードは出ません。</span>
             </div>
 
+
+            <div class="guide-section-title" data-ja="ルノルマンって？" data-en="What is Lenormand?">ルノルマンって？</div>
+            <div class="lenormand-intro-card">
+                <div class="lenormand-intro-title">
+                    <span>🩷🃏</span>
+                    <span data-ja="シンプルで現実的なメッセージを読むカード" data-en="A sweet, practical oracle style">シンプルで現実的なメッセージを読むカード</span>
+                </div>
+                <p class="lenormand-intro-body" data-ja="ルノルマンは、日常に寄り添う具体的なヒントを読み解く占術です。
+このアプリでは通常36枚に加え、あなたの構成に合わせた39枚版デッキをプリセットしています。
+1枚で『今日のテーマ』、3枚で『流れ』、多枚数で『全体像』を見るのがおすすめです。"
+                   data-en="Lenormand is an oracle system known for clear, down-to-earth guidance.
+In this app, your preset uses a 39-card Lenormand deck (including your extra cards) instead of only the classic 36.
+Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigger picture.">ルノルマンは、日常に寄り添う具体的なヒントを読み解く占術です。
+このアプリでは通常36枚に加え、あなたの構成に合わせた39枚版デッキをプリセットしています。
+1枚で『今日のテーマ』、3枚で『流れ』、多枚数で『全体像』を見るのがおすすめです。</p>
+                <div class="lenormand-chip-row">
+                    <span class="lenormand-chip" data-ja="✨ 全39枚" data-en="✨ Full 39 cards">✨ 全39枚</span>
+                    <span class="lenormand-chip" data-ja="🌿 日常の問い向き" data-en="🌿 Great for daily questions">🌿 日常の問い向き</span>
+                    <span class="lenormand-chip" data-ja="🔎 具体的で読みやすい" data-en="🔎 Concrete & easy to read">🔎 具体的で読みやすい</span>
+                </div>
+            </div>
             <div class="guide-note">
                 <div class="guide-note-title" data-ja="このアプリについて" data-en="About This App">このアプリについて</div>
                 <span data-ja="ルノルマンカードはプリセットのため編集できません。すべてのデータはお使いの端末にローカル保存されます（サーバーへの送信なし）。" data-en="Lenormand cards are preset and cannot be edited. All data is saved locally on your device (nothing sent to servers).">ルノルマンカードはプリセットのため編集できません。すべてのデータはお使いの端末にローカル保存されます（サーバーへの送信なし）。</span>
