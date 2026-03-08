@@ -17,6 +17,7 @@ const files = [
     'index.html',
     'overlay.webp',
     'assetsback-lenormand.webp',
+    'card-back-default.jpg',
     'icon.png',
     'lenormand-desc-en.json',
     'lenormand-desc-ja.json',
