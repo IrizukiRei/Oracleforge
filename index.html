@@ -5231,7 +5231,40 @@
             }
             presetCard.innerHTML = presetHtml;
             list.appendChild(presetCard);
-            
+
+            // ルノルマンカードの説明（プリセット使用中のみ表示）
+            if (isUsingPreset && currentSetName === (currentLang === 'ja' ? 'ルノルマン' : 'Lenormand')) {
+                const aboutBox = document.createElement('div');
+                aboutBox.className = 'info-box';
+                aboutBox.style.cssText = 'margin:12px 0;padding:14px;border-color:rgba(255,200,100,0.4);background:rgba(255,200,100,0.08);text-align:center;';
+                if (currentLang === 'ja') {
+                    aboutBox.innerHTML = `
+                        <p style="font-size:13px;line-height:1.7;margin:0;color:#ffe0a0;">
+                            🌙 <strong>ルノルマンカードって？</strong><br>
+                            <span style="font-size:12px;color:#ccc;">
+                                19世紀の有名な占い師マダム・ルノルマンにちなんで名づけられた、<br>
+                                36枚の絵柄カードによる占いです。<br>
+                                タロットよりシンプルで読みやすく、<br>
+                                日常の悩みにやさしく寄り添ってくれます ✨<br>
+                                カード同士の組み合わせで物語を紡ぐのが特徴です 🌷
+                            </span>
+                        </p>`;
+                } else {
+                    aboutBox.innerHTML = `
+                        <p style="font-size:13px;line-height:1.7;margin:0;color:#ffe0a0;">
+                            🌙 <strong>What are Lenormand Cards?</strong><br>
+                            <span style="font-size:12px;color:#ccc;">
+                                Named after the famous 19th-century fortune teller Madame Lenormand,<br>
+                                this is a divination system using 36 illustrated cards.<br>
+                                Simpler and easier to read than Tarot,<br>
+                                they gently guide you through everyday questions ✨<br>
+                                The magic is in how cards combine to tell a story 🌷
+                            </span>
+                        </p>`;
+                }
+                list.appendChild(aboutBox);
+            }
+
             // ユーザーのカスタムセット
             Object.keys(cardSets).forEach(setName => {
                 const setCard = document.createElement('div');
