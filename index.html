@@ -719,6 +719,10 @@
         .guide-connection strong {
             color: #c8e8ff;
         }
+        .guide-reading-steps {
+            white-space: pre-line;
+            display: inline-block;
+        }
         .guide-tab-badge {
             display: inline-block;
             background: rgba(100, 200, 255, 0.2);
@@ -750,9 +754,10 @@
         .lenormand-intro-card {
             margin-top: 12px;
             padding: 14px;
-            background: linear-gradient(135deg, rgba(255, 166, 215, 0.16), rgba(122, 209, 255, 0.14));
-            border: 1px solid rgba(255, 185, 232, 0.45);
+            background: linear-gradient(145deg, rgba(255, 170, 220, 0.24), rgba(122, 209, 255, 0.16));
+            border: 1px solid rgba(255, 205, 238, 0.52);
             border-radius: 12px;
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.25);
         }
         .lenormand-intro-title {
             display: flex;
@@ -785,6 +790,14 @@
             border: 1px solid rgba(255, 255, 255, 0.22);
             color: #f6fbff;
             font-size: 11px;
+        }
+        .lenormand-hero-card {
+            margin: 10px 0 14px;
+            padding: 14px;
+            background: linear-gradient(145deg, rgba(255, 170, 220, 0.28), rgba(122, 209, 255, 0.18));
+            border: 1px solid rgba(255, 205, 238, 0.55);
+            border-radius: 14px;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.28);
         }
 
         /* --- 広告スロット余白 --- */
@@ -1849,28 +1862,28 @@
             <div class="guide-section-title" data-ja="基本の使い方" data-en="Core Screens">基本の使い方</div>
             <div class="guide-step-list">
                 <div class="guide-step">
-                    <div class="guide-step-num" style="font-size:12px;" data-ja="編集" data-en="Edit">編集</div>
+                    <div class="guide-step-num">1</div>
                     <div class="guide-step-body">
                         <h4 data-ja="カード管理" data-en="Card Management">カード管理</h4>
                         <p data-ja="カードの名前・画像・説明を編集。裏面画像やシグニフィケーターもここで設定します。" data-en="Edit card names, images, and descriptions. Also configure back image and significators here.">カードの名前・画像・説明を編集。裏面画像やシグニフィケーターもここで設定します。</p>
                     </div>
                 </div>
                 <div class="guide-step">
-                    <div class="guide-step-num" style="font-size:12px;" data-ja="セット" data-en="Sets">セット</div>
+                    <div class="guide-step-num">2</div>
                     <div class="guide-step-body">
                         <h4 data-ja="デッキ管理" data-en="Deck Management">デッキ管理</h4>
                         <p data-ja="使うカードデッキを選択・作成します。ここで選んだセットが展開・占い・くじ すべてに反映されます。" data-en="Select or create card decks. The chosen set applies to Spread, Reading, and Draw screens.">使うカードデッキを選択・作成します。ここで選んだセットが展開・占い・くじ すべてに反映されます。</p>
                     </div>
                 </div>
                 <div class="guide-step">
-                    <div class="guide-step-num" style="font-size:12px;" data-ja="記録" data-en="Notes">記録</div>
+                    <div class="guide-step-num">3</div>
                     <div class="guide-step-body">
                         <h4 data-ja="問い・メモ" data-en="Questions & Notes">問い・メモ</h4>
                         <p data-ja="占い前の深呼吸・問いの入力。ここで入力した問いは展開・占い画面に自動で引き継がれます。リーディング後のメモもここに保存。" data-en="Breathing and question input before readings. Questions entered here automatically carry over to Spread and Reading screens. Post-reading notes are also saved here.">占い前の深呼吸・問いの入力。ここで入力した問いは展開・占い画面に自動で引き継がれます。リーディング後のメモもここに保存。</p>
                     </div>
                 </div>
                 <div class="guide-step">
-                    <div class="guide-step-num" style="font-size:14px;">⚙️</div>
+                    <div class="guide-step-num">4</div>
                     <div class="guide-step-body">
                         <h4 data-ja="設定" data-en="Settings">設定</h4>
                         <p data-ja="右上の⚙️ボタンから。音量調整、データのエクスポート／インポート（機種変更時に便利）、広告削除の購入ができます。" data-en="Via the ⚙️ button at top-right. Adjust volume, export/import data (useful for device transfers), and purchase ad removal.">右上の⚙️ボタンから。音量調整、データのエクスポート／インポート（機種変更時に便利）、広告削除の購入ができます。</p>
@@ -1888,7 +1901,16 @@
             </div>
             <div class="guide-connection">
                 <strong data-ja="占い画面の手順:" data-en="Reading steps:">占い画面の手順:</strong><br>
-                <span data-ja="❶ シャッフル → ❷ カードを集める → ❸ カードが開く → ❹ 結果を見る（タップで拡大・下スクロールで意味表示）" data-en="❶ Shuffle → ❷ Collect cards → ❸ Cards reveal → ❹ View results (tap to zoom, scroll for meanings)">❶ シャッフル → ❷ カードを集める → ❸ カードが開く → ❹ 結果を見る（タップで拡大・下スクロールで意味表示）</span>
+                <span class="guide-reading-steps" data-ja="❶ シャッフル
+❷ カードを集める
+❸ カードが開く
+❹ 結果を見る（タップで拡大・下スクロールで意味表示）" data-en="❶ Shuffle
+❷ Collect cards
+❸ Cards reveal
+❹ View results (tap to zoom, scroll for meanings)">❶ シャッフル
+❷ カードを集める
+❸ カードが開く
+❹ 結果を見る（タップで拡大・下スクロールで意味表示）</span>
             </div>
             <div class="guide-connection">
                 <span class="guide-tab-badge" data-ja="くじ" data-en="Draw">くじ</span>
@@ -1896,26 +1918,6 @@
             </div>
 
 
-            <div class="guide-section-title" data-ja="ルノルマンって？" data-en="What is Lenormand?">ルノルマンって？</div>
-            <div class="lenormand-intro-card">
-                <div class="lenormand-intro-title">
-                    <span>🩷🃏</span>
-                    <span data-ja="シンプルで現実的なメッセージを読むカード" data-en="A sweet, practical oracle style">シンプルで現実的なメッセージを読むカード</span>
-                </div>
-                <p class="lenormand-intro-body" data-ja="ルノルマンは、日常に寄り添う具体的なヒントを読み解く占術です。
-このアプリでは通常36枚に加え、あなたの構成に合わせた39枚版デッキをプリセットしています。
-1枚で『今日のテーマ』、3枚で『流れ』、多枚数で『全体像』を見るのがおすすめです。"
-                   data-en="Lenormand is an oracle system known for clear, down-to-earth guidance.
-In this app, your preset uses a 39-card Lenormand deck (including your extra cards) instead of only the classic 36.
-Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigger picture.">ルノルマンは、日常に寄り添う具体的なヒントを読み解く占術です。
-このアプリでは通常36枚に加え、あなたの構成に合わせた39枚版デッキをプリセットしています。
-1枚で『今日のテーマ』、3枚で『流れ』、多枚数で『全体像』を見るのがおすすめです。</p>
-                <div class="lenormand-chip-row">
-                    <span class="lenormand-chip" data-ja="✨ 全39枚" data-en="✨ Full 39 cards">✨ 全39枚</span>
-                    <span class="lenormand-chip" data-ja="🌿 日常の問い向き" data-en="🌿 Great for daily questions">🌿 日常の問い向き</span>
-                    <span class="lenormand-chip" data-ja="🔎 具体的で読みやすい" data-en="🔎 Concrete & easy to read">🔎 具体的で読みやすい</span>
-                </div>
-            </div>
             <div class="guide-note">
                 <div class="guide-note-title" data-ja="このアプリについて" data-en="About This App">このアプリについて</div>
                 <span data-ja="ルノルマンカードはプリセットのため編集できません。すべてのデータはお使いの端末にローカル保存されます（サーバーへの送信なし）。" data-en="Lenormand cards are preset and cannot be edited. All data is saved locally on your device (nothing sent to servers).">ルノルマンカードはプリセットのため編集できません。すべてのデータはお使いの端末にローカル保存されます（サーバーへの送信なし）。</span>
@@ -1952,8 +1954,21 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
 
         <!-- カード編集画面 -->
         <div id="edit-screen" class="screen active">
-            <div class="info-box" style="background:rgba(255,200,100,0.15);border-color:rgba(255,200,100,0.4);">
-                <p style="margin:0;" data-ja="🃏 ルノルマン39枚のプリセットが「セット」タブにあります。すぐに占いを始められます！" data-en="🃏 A 39-card Lenormand preset is available in the 'Sets' tab. Ready to read immediately!">🃏 ルノルマン39枚のプリセットが「セット」タブにあります。すぐに占いを始められます！</p>
+            <div class="lenormand-hero-card">
+                <div class="lenormand-intro-title">
+                    <span>💗🃏</span>
+                    <span data-ja="シンプルで現実的なメッセージを読むカード" data-en="A sweet, practical oracle style">シンプルで現実的なメッセージを読むカード</span>
+                </div>
+                <p class="lenormand-intro-body" data-ja="ルノルマンは、日常に寄り添う具体的なヒントを読み解く占術です。
+このアプリでは通常36枚に加え、あなたの構成に合わせた39枚版デッキをプリセットしています。
+1枚で『今日のテーマ』、3枚で『流れ』、多枚数で『全体像』を見るのがおすすめです。" data-en="Lenormand is an oracle system known for clear, down-to-earth guidance.
+In this app, your preset uses a 39-card Lenormand deck (including your extra cards) instead of only the classic 36.
+Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigger picture.">ルノルマンは、日常に寄り添う具体的なヒントを読み解く占術です。<br>このアプリでは通常36枚に加え、あなたの構成に合わせた39枚版デッキをプリセットしています。<br>1枚で『今日のテーマ』、3枚で『流れ』、多枚数で『全体像』を見るのがおすすめです。</p>
+                <div class="lenormand-chip-row">
+                    <span class="lenormand-chip" data-ja="✨ 全39枚" data-en="✨ Full 39 cards">✨ 全39枚</span>
+                    <span class="lenormand-chip" data-ja="🌿 日常の問い向き" data-en="🌿 Great for daily questions">🌿 日常の問い向き</span>
+                    <span class="lenormand-chip" data-ja="🔎 具体的で読みやすい" data-en="🔎 Concrete & easy to read">🔎 具体的で読みやすい</span>
+                </div>
             </div>
 
             <div id="storage-warning" class="storage-warning compact" style="display:none;">
@@ -2367,7 +2382,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
 
             <div class="info-box" id="ads-removal-section" style="background:rgba(100,200,100,0.1);border-color:rgba(100,200,100,0.3);">
                 <h3>🚫 <span data-ja="課金プラン" data-en="Billing Plans">課金プラン</span></h3>
-                <p style="font-size:12px;color:#aaa;margin-bottom:10px;" data-ja="Google Play Billing v6で管理対象商品（remove_ads / save_pluss、互換ID: save_plus）を取得・購入・復元します" data-en="Managed products (remove_ads / save_pluss, compatible with save_plus) are fetched, purchased, and restored via Google Play Billing v6.">Google Play Billing v6で管理対象商品（remove_ads / save_pluss、互換ID: save_plus）を取得・購入・復元します</p>
+                <p style="font-size:12px;color:#aaa;margin-bottom:10px;" data-ja="広告を消すプランと、保存無制限＋広告削除プランを購入・復元できます。" data-en="You can purchase or restore two plans: Remove Ads, and Unlimited Saves + Remove Ads.">広告を消すプランと、保存無制限＋広告削除プランを購入・復元できます。</p>
                 <p id="ads-status" style="font-size:13px;color:#64c8ff;margin-bottom:6px;"></p>
                 <p id="save-plus-status" style="font-size:13px;color:#64c8ff;margin-bottom:10px;"></p>
                 <div style="display:flex;gap:10px;flex-wrap:wrap;">
@@ -2710,15 +2725,15 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
 
                 if (adsStatusText) {
                     adsStatusText.textContent = this.entitlements.ads_removed
-                        ? (currentLang === 'ja' ? '✓ app_entitlements.ads_removed = true' : '✓ app_entitlements.ads_removed = true')
-                        : (currentLang === 'ja' ? '・app_entitlements.ads_removed = false' : '• app_entitlements.ads_removed = false');
+                        ? (currentLang === 'ja' ? '✓ 広告は非表示です' : '✓ Ads are hidden')
+                        : (currentLang === 'ja' ? '・広告を表示中です' : '• Ads are currently shown');
                     adsStatusText.style.color = this.entitlements.ads_removed ? '#4CAF50' : '#64c8ff';
                 }
 
                 if (savePlusStatusText) {
                     savePlusStatusText.textContent = this.entitlements.save_plus
-                        ? (currentLang === 'ja' ? '✓ app_entitlements.save_plus = true' : '✓ app_entitlements.save_plus = true')
-                        : (currentLang === 'ja' ? '・app_entitlements.save_plus = false' : '• app_entitlements.save_plus = false');
+                        ? (currentLang === 'ja' ? '✓ 保存は無制限です（広告非表示）' : '✓ Unlimited saves enabled (ads removed)')
+                        : (currentLang === 'ja' ? '・通常の保存モードです' : '• Standard save mode');
                     savePlusStatusText.style.color = this.entitlements.save_plus ? '#4CAF50' : '#64c8ff';
                 }
             }
