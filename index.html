@@ -754,14 +754,36 @@
         }
 
         .lenormand-intro-card {
+            position: relative;
+            overflow: hidden;
             margin-top: 12px;
             padding: 14px;
             background: linear-gradient(135deg, rgba(255, 166, 215, 0.16), rgba(122, 209, 255, 0.14));
             border: 1px solid rgba(255, 185, 232, 0.45);
             border-radius: 12px;
-            box-shadow: 0 10px 22px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+            box-shadow: 0 10px 22px rgba(0, 0, 0, 0.28), 0 0 0 1px rgba(255, 160, 220, 0.2), 0 18px 34px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+            animation: lenormandFloat 4.2s ease-in-out infinite;
+        }
+        .lenormand-intro-card::before {
+            content: "";
+            position: absolute;
+            inset: -35% -65%;
+            background: linear-gradient(110deg, rgba(255, 255, 255, 0) 35%, rgba(255, 232, 245, 0.28) 49%, rgba(110, 220, 255, 0.15) 55%, rgba(255, 255, 255, 0) 65%);
+            transform: translateX(-55%) rotate(-8deg);
+            animation: lenormandSheen 4.8s ease-in-out infinite;
+            pointer-events: none;
+        }
+        .lenormand-intro-card::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            box-shadow: inset 0 0 28px rgba(255, 170, 227, 0.16), inset 0 0 54px rgba(110, 220, 255, 0.14);
+            pointer-events: none;
         }
         .lenormand-intro-title {
+            position: relative;
+            z-index: 1;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -770,13 +792,32 @@
             font-size: 13px;
             margin-bottom: 8px;
         }
+        .lenormand-intro-icon {
+            display: inline-flex;
+            animation: lenormandIconBob 2.4s ease-in-out infinite;
+        }
+        .lenormand-intro-badge {
+            margin-left: auto;
+            padding: 2px 8px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 210, 235, 0.5);
+            background: rgba(255, 206, 234, 0.14);
+            color: #ffe8f5;
+            font-size: 10px;
+            letter-spacing: 0.08em;
+            box-shadow: 0 4px 10px rgba(255, 166, 215, 0.2);
+        }
         .lenormand-intro-body {
+            position: relative;
+            z-index: 1;
             color: #d7efff;
             font-size: 12.5px;
             line-height: 1.7;
             margin: 0;
         }
         .lenormand-chip-row {
+            position: relative;
+            z-index: 1;
             display: flex;
             flex-wrap: wrap;
             gap: 6px;
@@ -792,6 +833,29 @@
             border: 1px solid rgba(255, 255, 255, 0.22);
             color: #f6fbff;
             font-size: 11px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.16);
+        }
+
+        @keyframes lenormandFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+        }
+        @keyframes lenormandSheen {
+            0%, 14% { transform: translateX(-55%) rotate(-8deg); opacity: 0; }
+            26% { opacity: 0.95; }
+            46% { transform: translateX(60%) rotate(-8deg); opacity: 0.25; }
+            100% { transform: translateX(62%) rotate(-8deg); opacity: 0; }
+        }
+        @keyframes lenormandIconBob {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-2px); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .lenormand-intro-card,
+            .lenormand-intro-card::before,
+            .lenormand-intro-icon {
+                animation: none !important;
+            }
         }
 
         /* --- 広告スロット余白 --- */
@@ -1916,8 +1980,9 @@
             <div class="guide-section-title" data-ja="ルノルマンって？" data-en="What is Lenormand?">ルノルマンって？</div>
             <div class="lenormand-intro-card">
                 <div class="lenormand-intro-title">
-                    <span>♡🃏</span>
+                    <span class="lenormand-intro-icon" aria-hidden="true">♡🃏</span>
                     <span data-ja="シンプルで現実的なメッセージを読むカード" data-en="A sweet, practical oracle style">シンプルで現実的なメッセージを読むカード</span>
+                    <span class="lenormand-intro-badge" data-ja="39 CARDS" data-en="39 CARDS">39 CARDS</span>
                 </div>
                 <p class="lenormand-intro-body" data-ja="ルノルマンは、日常に寄り添う具体的なヒントを読み解く占術です。
 このアプリでは通常36枚に加え、あなたの構成に合わせた39枚版デッキをプリセットしています。
