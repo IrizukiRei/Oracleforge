@@ -397,6 +397,9 @@
             margin-bottom: 8px;
             color: #64c8ff;
             font-size: 1em;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
         
         .spread-card p {
@@ -643,8 +646,8 @@
         }
         .guide-step-num {
             flex-shrink: 0;
-            width: 32px;
-            height: 32px;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
             background: rgba(100, 200, 255, 0.2);
             border: 2px solid rgba(100, 200, 255, 0.5);
@@ -1796,72 +1799,6 @@
     <!-- 操作ガイドボタン（?）- 全画面共通 / body直下でposition:fixed -->
     <button id="app-guide-btn" class="app-guide-btn" onclick="openAppGuide()" title="Guide">?</button>
 
-    <!-- 操作ガイドオーバーレイ（全画面共通） -->
-    <div id="app-guide-overlay" class="reading-guide-overlay">
-        <div class="reading-guide-panel">
-            <div class="guide-title" data-ja="使い方ガイド" data-en="App Guide">使い方ガイド</div>
-
-            <!-- ===== 基本の4画面 ===== -->
-            <div class="guide-section-title" data-ja="基本の使い方" data-en="Core Screens">基本の使い方</div>
-            <div class="guide-step-list">
-                <div class="guide-step">
-                    <div class="guide-step-num" style="font-size:12px;" data-ja="編集" data-en="Edit">編集</div>
-                    <div class="guide-step-body">
-                        <h4 data-ja="カード管理" data-en="Card Management">カード管理</h4>
-                        <p data-ja="カードの名前・画像・説明を編集。裏面画像やシグニフィケーターもここで設定します。" data-en="Edit card names, images, and descriptions. Also configure back image and significators here.">カードの名前・画像・説明を編集。裏面画像やシグニフィケーターもここで設定します。</p>
-                    </div>
-                </div>
-                <div class="guide-step">
-                    <div class="guide-step-num" style="font-size:10px;" data-ja="セット" data-en="Sets">セット</div>
-                    <div class="guide-step-body">
-                        <h4 data-ja="デッキ管理" data-en="Deck Management">デッキ管理</h4>
-                        <p data-ja="使うカードデッキを選択・作成します。ここで選んだセットが展開・占い・くじ すべてに反映されます。" data-en="Select or create card decks. The chosen set applies to Spread, Reading, and Draw screens.">使うカードデッキを選択・作成します。ここで選んだセットが展開・占い・くじ すべてに反映されます。</p>
-                    </div>
-                </div>
-                <div class="guide-step">
-                    <div class="guide-step-num" style="font-size:12px;" data-ja="記録" data-en="Notes">記録</div>
-                    <div class="guide-step-body">
-                        <h4 data-ja="問い・メモ" data-en="Questions & Notes">問い・メモ</h4>
-                        <p data-ja="占い前の深呼吸・問いの入力。ここで入力した問いは展開・占い画面に自動で引き継がれます。リーディング後のメモもここに保存。" data-en="Breathing and question input before readings. Questions entered here automatically carry over to Spread and Reading screens. Post-reading notes are also saved here.">占い前の深呼吸・問いの入力。ここで入力した問いは展開・占い画面に自動で引き継がれます。リーディング後のメモもここに保存。</p>
-                    </div>
-                </div>
-                <div class="guide-step">
-                    <div class="guide-step-num" style="font-size:14px;">⚙️</div>
-                    <div class="guide-step-body">
-                        <h4 data-ja="設定" data-en="Settings">設定</h4>
-                        <p data-ja="右上の⚙️ボタンから。音量調整、データのエクスポート／インポート（機種変更時に便利）、広告削除の購入ができます。" data-en="Via the ⚙️ button at top-right. Adjust volume, export/import data (useful for device transfers), and purchase ad removal.">右上の⚙️ボタンから。音量調整、データのエクスポート／インポート（機種変更時に便利）、広告削除の購入ができます。</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ===== 占いの流れ ===== -->
-            <div class="guide-section-title" data-ja="占いの流れ" data-en="Reading Flow">占いの流れ</div>
-            <div class="guide-connection">
-                <strong>★ </strong>
-                <span class="guide-tab-badge" data-ja="記録" data-en="Notes">記録</span> <span data-ja="で問いを入力 →" data-en="enter question →">で問いを入力 →</span>
-                <span class="guide-tab-badge" data-ja="展開" data-en="Spread">展開</span> <span data-ja="でスプレッドを選択（14種類） →" data-en="choose spread (14 types) →">でスプレッドを選択（14種類） →</span>
-                <span class="guide-tab-badge" data-ja="占う" data-en="Read">占う</span> <span data-ja="に自動遷移" data-en="auto-navigates">に自動遷移</span>
-            </div>
-            <div class="guide-connection">
-                <strong data-ja="占い画面の手順:" data-en="Reading steps:">占い画面の手順:</strong><br>
-                <span data-ja="❶ シャッフル → ❷ カードを集める → ❸ カードが開く → ❹ 結果を見る（タップで拡大・下スクロールで意味表示）" data-en="❶ Shuffle → ❷ Collect cards → ❸ Cards reveal → ❹ View results (tap to zoom, scroll for meanings)">❶ シャッフル → ❷ カードを集める → ❸ カードが開く → ❹ 結果を見る（タップで拡大・下スクロールで意味表示）</span>
-            </div>
-            <div class="guide-connection">
-                <span class="guide-tab-badge" data-ja="くじ" data-en="Draw">くじ</span>
-                <span data-ja="好きな枚数をランダムに引けます。リセットまで同じカードは出ません。" data-en="Draw any number of random cards. Same card won't appear again until reset.">好きな枚数をランダムに引けます。リセットまで同じカードは出ません。</span>
-            </div>
-
-            <div class="guide-note">
-                <div class="guide-note-title" data-ja="このアプリについて" data-en="About This App">このアプリについて</div>
-                <span data-ja="ルノルマンカードはプリセットのため編集できません。すべてのデータはお使いの端末にローカル保存されます（サーバーへの送信なし）。" data-en="Lenormand cards are preset and cannot be edited. All data is saved locally on your device (nothing sent to servers).">ルノルマンカードはプリセットのため編集できません。すべてのデータはお使いの端末にローカル保存されます（サーバーへの送信なし）。</span>
-            </div>
-            <div id="guide-banner-restore" style="text-align:center;margin-top:14px;">
-                <button class="guide-close-btn" style="margin:0;display:inline-block;padding:8px 18px;font-size:12px;background:rgba(255,200,100,0.15);border-color:rgba(255,200,100,0.4);color:#ffcc66;" onclick="restorePhaseBanner();this.parentElement.innerHTML='<span style=\'color:#ffcc66;font-size:12px;\'>✓</span>';" data-ja="占い画面のステップ表示を再表示" data-en="Show reading screen step banner">占い画面のステップ表示を再表示</button>
-            </div>
-            <button class="guide-close-btn" onclick="closeAppGuide()" data-ja="閉じる" data-en="Close">閉じる</button>
-            <button class="guide-close-btn" style="margin-top:8px;font-size:12px;padding:8px 24px;background:rgba(255,100,100,0.1);border-color:rgba(255,100,100,0.3);color:#ff9999;" onclick="hideGuideButton()" data-ja="このボタン（?）を非表示にする" data-en="Hide this (?) button">このボタン（?）を非表示にする</button>
-        </div>
-    </div>
 
     <!-- 設定ドロワー -->
     <div class="settings-drawer-overlay" id="settingsOverlay" onclick="closeSettingsDrawer()"></div>
@@ -1974,11 +1911,11 @@
                                 </select>
                             </div>
                         </div>
-                        <label style="display:inline-flex;align-items:center;gap:4px;margin-top:6px;font-size:13px;cursor:pointer;">
-                            <input type="checkbox" id="card-show-archived">
-                            <span data-ja="アーカイブ済みを表示" data-en="Show archived">アーカイブ済みを表示</span>
-                        </label>
                     </div>
+                    <label style="display:inline-flex;align-items:center;gap:4px;margin-top:6px;font-size:13px;cursor:pointer;">
+                        <input type="checkbox" id="card-show-archived">
+                        <span data-ja="アーカイブ済みを表示" data-en="Show archived">アーカイブ済みを表示</span>
+                    </label>
                     <div class="card-density">
                         <span class="density-label" data-ja="表示密度" data-en="Density">表示密度</span>
                         <button type="button" class="btn density-btn" id="density-large" data-ja="大きい" data-en="Large">大きい</button>
@@ -2328,6 +2265,62 @@
                 <p style="font-size:12px;color:#aaa;margin-bottom:10px;" data-ja="BGM/SE/画像/フォントの出典一覧" data-en="Sources for BGM/SE/images/fonts.">BGM/SE/画像/フォントの出典一覧</p>
                 <button class="btn" onclick="openCreditsModal()" style="padding:10px 16px;font-size:13px;" data-ja="一覧を見る" data-en="View List">一覧を見る</button>
             </div>
+        </div>
+    </div>
+
+
+    <!-- 操作ガイドオーバーレイ -->
+    <div id="app-guide-overlay" class="reading-guide-overlay" onclick="if(event.target===this) closeAppGuide()">
+        <div class="reading-guide-panel" onclick="event.stopPropagation()">
+            <div class="guide-title" data-ja="操作ガイド" data-en="App Guide">操作ガイド</div>
+
+            <div class="guide-section-title" data-ja="基本の流れ" data-en="Basic Flow">基本の流れ</div>
+            <div class="guide-step-list">
+                <div class="guide-step">
+                    <div class="guide-step-num">1</div>
+                    <div class="guide-step-body">
+                        <h4 data-ja="スプレッドを選ぶ" data-en="Choose a spread">スプレッドを選ぶ</h4>
+                        <p data-ja="1枚引き、3枚引き、グランタブローなどから好きな配置を選びます。" data-en="Choose the layout you want, such as 1-card, 3-card, or Grand Tableau.">1枚引き、3枚引き、グランタブローなどから好きな配置を選びます。</p>
+                    </div>
+                </div>
+                <div class="guide-step">
+                    <div class="guide-step-num">2</div>
+                    <div class="guide-step-body">
+                        <h4 data-ja="シャッフルする" data-en="Shuffle the cards">シャッフルする</h4>
+                        <p data-ja="占い画面で「シャッフル」を押すとカードが混ざります。" data-en="Press &quot;Shuffle&quot; on the reading screen to mix the cards.">占い画面で「シャッフル」を押すとカードが混ざります。</p>
+                    </div>
+                </div>
+                <div class="guide-step">
+                    <div class="guide-step-num">3</div>
+                    <div class="guide-step-body">
+                        <h4 data-ja="カードを集める" data-en="Collect the cards">カードを集める</h4>
+                        <p data-ja="画面内のカードをタップして集めると、配置に沿って並びます。" data-en="Tap the cards on screen to collect them, and they will settle into the chosen spread.">画面内のカードをタップして集めると、配置に沿って並びます。</p>
+                    </div>
+                </div>
+                <div class="guide-step">
+                    <div class="guide-step-num">4</div>
+                    <div class="guide-step-body">
+                        <h4 data-ja="結果を見る" data-en="View the result">結果を見る</h4>
+                        <p data-ja="カードをタップで拡大表示。下へスクロールすると結果テキストが読めます。" data-en="Tap a card to zoom it. Scroll down to read the result text.">カードをタップで拡大表示。下へスクロールすると結果テキストが読めます。</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="guide-section-title" data-ja="補足" data-en="Notes">補足</div>
+            <div class="guide-connection">
+                <strong data-ja="? ボタン" data-en="? Button">? ボタン</strong>
+                <span data-ja="からこのガイドをいつでも開けます。" data-en=" opens this guide any time.">からこのガイドをいつでも開けます。</span>
+            </div>
+            <div class="guide-connection">
+                <strong data-ja="設定" data-en="Settings">設定</strong>
+                <span data-ja="内の「操作ガイド」からも再表示できます。" data-en=" also lets you show it again from the App Guide section.">内の「操作ガイド」からも再表示できます。</span>
+            </div>
+            <div class="guide-note">
+                <div class="guide-note-title" data-ja="ヒント" data-en="Tip">ヒント</div>
+                <div data-ja="フェーズ案内が邪魔なときは、占い画面上部の×で閉じられます。" data-en="If the phase banner gets in the way, close it with the × at the top of the reading screen.">フェーズ案内が邪魔なときは、占い画面上部の×で閉じられます。</div>
+            </div>
+
+            <button type="button" class="guide-close-btn" onclick="closeAppGuide()" data-ja="閉じる" data-en="Close">閉じる</button>
         </div>
     </div>
 
@@ -4294,7 +4287,7 @@
                     for (let i = 0; i < 10; i++) {
                         masterCards.push({
                             id: i,
-                            name: `Card \${i + 1}`,
+                            name: 'Card ' + (i + 1),
                             description: {ja: '', en: ''},
                             imageData: '',
                             archived: false
@@ -4745,7 +4738,7 @@
                 for (let i = currentCount; i < count; i++) {
                     masterCards.push({
                         id: i,
-                        name: `${cardPrefix} ${i + 1}`,
+                        name: cardPrefix + ' ' + (i + 1),
                         description: {ja: '', en: ''},
                         imageData: '',
                         archived: false
@@ -5568,8 +5561,74 @@
         }
 
         // --- アプリ全体ガイド ---
+        function ensureAppGuideOverlay() {
+            let overlay = document.getElementById('app-guide-overlay');
+            if (overlay) return overlay;
+
+            const wrapper = document.createElement('div');
+            wrapper.id = 'app-guide-overlay';
+            wrapper.className = 'reading-guide-overlay';
+            wrapper.onclick = function(event) {
+                if (event.target === wrapper) closeAppGuide();
+            };
+            wrapper.innerHTML = `
+                <div class="reading-guide-panel" onclick="event.stopPropagation()">
+                    <div class="guide-title" data-ja="操作ガイド" data-en="App Guide">操作ガイド</div>
+
+                    <div class="guide-section-title" data-ja="基本の流れ" data-en="Basic Flow">基本の流れ</div>
+                    <div class="guide-step-list">
+                        <div class="guide-step">
+                            <div class="guide-step-num">1</div>
+                            <div class="guide-step-body">
+                                <h4 data-ja="スプレッドを選ぶ" data-en="Choose a spread">スプレッドを選ぶ</h4>
+                                <p data-ja="1枚引き、3枚引き、グランタブローなどから好きな配置を選びます。" data-en="Choose the layout you want, such as 1-card, 3-card, or Grand Tableau.">1枚引き、3枚引き、グランタブローなどから好きな配置を選びます。</p>
+                            </div>
+                        </div>
+                        <div class="guide-step">
+                            <div class="guide-step-num">2</div>
+                            <div class="guide-step-body">
+                                <h4 data-ja="シャッフルする" data-en="Shuffle the cards">シャッフルする</h4>
+                                <p data-ja="占い画面で「シャッフル」を押すとカードが混ざります。" data-en="Press &quot;Shuffle&quot; on the reading screen to mix the cards.">占い画面で「シャッフル」を押すとカードが混ざります。</p>
+                            </div>
+                        </div>
+                        <div class="guide-step">
+                            <div class="guide-step-num">3</div>
+                            <div class="guide-step-body">
+                                <h4 data-ja="カードを集める" data-en="Collect the cards">カードを集める</h4>
+                                <p data-ja="画面内のカードをタップして集めると、配置に沿って並びます。" data-en="Tap the cards on screen to collect them, and they will settle into the chosen spread.">画面内のカードをタップして集めると、配置に沿って並びます。</p>
+                            </div>
+                        </div>
+                        <div class="guide-step">
+                            <div class="guide-step-num">4</div>
+                            <div class="guide-step-body">
+                                <h4 data-ja="結果を見る" data-en="View the result">結果を見る</h4>
+                                <p data-ja="カードをタップで拡大表示。下へスクロールすると結果テキストが読めます。" data-en="Tap a card to zoom it. Scroll down to read the result text.">カードをタップで拡大表示。下へスクロールすると結果テキストが読めます。</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="guide-section-title" data-ja="補足" data-en="Notes">補足</div>
+                    <div class="guide-connection">
+                        <strong data-ja="? ボタン" data-en="? Button">? ボタン</strong>
+                        <span data-ja="からこのガイドをいつでも開けます。" data-en=" opens this guide any time.">からこのガイドをいつでも開けます。</span>
+                    </div>
+                    <div class="guide-connection">
+                        <strong data-ja="設定" data-en="Settings">設定</strong>
+                        <span data-ja="内の「操作ガイド」からも再表示できます。" data-en=" also lets you show it again from the App Guide section.">内の「操作ガイド」からも再表示できます。</span>
+                    </div>
+                    <div class="guide-note">
+                        <div class="guide-note-title" data-ja="ヒント" data-en="Tip">ヒント</div>
+                        <div data-ja="フェーズ案内が邪魔なときは、占い画面上部の×で閉じられます。" data-en="If the phase banner gets in the way, close it with the × at the top of the reading screen.">フェーズ案内が邪魔なときは、占い画面上部の×で閉じられます。</div>
+                    </div>
+
+                    <button type="button" class="guide-close-btn" onclick="closeAppGuide()" data-ja="閉じる" data-en="Close">閉じる</button>
+                </div>`;
+            document.body.appendChild(wrapper);
+            return wrapper;
+        }
+
         function openAppGuide() {
-            const overlay = document.getElementById('app-guide-overlay');
+            const overlay = ensureAppGuideOverlay();
             if (overlay) overlay.classList.add('show');
         }
 
@@ -5663,8 +5722,8 @@
                 slot.className = 'card-slot';
                 slot.style.left = pos.x + 'px';
                 slot.style.top = pos.y + 'px';
-                slot.id = `slot-${i}`;
-                slot.innerHTML = `<span>${pos.label || (i + 1)}</span>`;
+                slot.id = 'slot-' + i;
+                slot.innerHTML = '<span>' + (pos.label || (i + 1)) + '</span>';
                 inner.appendChild(slot);
             });
         }
@@ -6441,8 +6500,8 @@
                 });
                 if (sigIndices.length > 0) {
                     const sigPosText = currentLang === 'ja' 
-                        ? `シグニフィケーター位置: ${sigIndices.join('番, ')}番` 
-                        : `Significator Position: #${sigIndices.join(', #')}`;
+                    ? 'シグニフィケーター位置：' + sigIndices.join('番、 ') + '番'
+　　　　　　　　　　　　: 'Significator Position: #' + sigIndices.join(', #');
                     const sigDescText = currentLang === 'ja' 
                         ? 'グランタブロー内での「私」の位置' 
                         : 'Your position in the Grand Tableau';
@@ -6467,7 +6526,8 @@
                 const descText = isUsingPreset
                     ? getDescriptionForLang(card.description, card.id)
                     : getDescriptionForLang(card.description);
-                html += `<div class="card-meaning" style="${sigStyle}"><strong>${label}: ${card.name} (${pos})${sigBadge}</strong><br>${descText || noDescText}</div>`;
+      html += '<div class="card-meaning" style="' + sigStyle + '"><strong>' + label + ': ' + card.name + ' (' + pos + '), ' +
+sigBadge + '</strong><br>' + (descText || noDescText) + '</div>';
             });
             
             // 補足カード表示
@@ -6761,6 +6821,10 @@
             }
         });
         
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') closeAppGuide();
+        });
+
         // setupStartButton削除 - HTMLのonclick属性で直接startApp()を呼び出す
         
         // エクスポート機能
