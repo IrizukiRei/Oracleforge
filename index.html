@@ -747,6 +747,46 @@
             background: rgba(100, 200, 255, 0.4);
         }
 
+        .lenormand-intro-card {
+            margin-top: 12px;
+            padding: 14px;
+            background: linear-gradient(135deg, rgba(255, 166, 215, 0.16), rgba(122, 209, 255, 0.14));
+            border: 1px solid rgba(255, 185, 232, 0.45);
+            border-radius: 12px;
+        }
+        .lenormand-intro-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #ffd7ef;
+            font-weight: 700;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+        .lenormand-intro-body {
+            color: #d7efff;
+            font-size: 12.5px;
+            line-height: 1.7;
+            margin: 0;
+        }
+        .lenormand-chip-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 10px;
+        }
+        .lenormand-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            color: #f6fbff;
+            font-size: 11px;
+        }
+
         /* --- 広告スロット余白 --- */
         .reading-ad-slot {
             min-height: 0;
@@ -1855,6 +1895,27 @@
                 <span data-ja="好きな枚数をランダムに引けます。リセットまで同じカードは出ません。" data-en="Draw any number of random cards. Same card won't appear again until reset.">好きな枚数をランダムに引けます。リセットまで同じカードは出ません。</span>
             </div>
 
+
+            <div class="guide-section-title" data-ja="ルノルマンって？" data-en="What is Lenormand?">ルノルマンって？</div>
+            <div class="lenormand-intro-card">
+                <div class="lenormand-intro-title">
+                    <span>🩷🃏</span>
+                    <span data-ja="シンプルで現実的なメッセージを読むカード" data-en="A sweet, practical oracle style">シンプルで現実的なメッセージを読むカード</span>
+                </div>
+                <p class="lenormand-intro-body" data-ja="ルノルマンは、日常に寄り添う具体的なヒントを読み解く占術です。
+このアプリでは通常36枚に加え、あなたの構成に合わせた39枚版デッキをプリセットしています。
+1枚で『今日のテーマ』、3枚で『流れ』、多枚数で『全体像』を見るのがおすすめです。"
+                   data-en="Lenormand is an oracle system known for clear, down-to-earth guidance.
+In this app, your preset uses a 39-card Lenormand deck (including your extra cards) instead of only the classic 36.
+Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigger picture.">ルノルマンは、日常に寄り添う具体的なヒントを読み解く占術です。
+このアプリでは通常36枚に加え、あなたの構成に合わせた39枚版デッキをプリセットしています。
+1枚で『今日のテーマ』、3枚で『流れ』、多枚数で『全体像』を見るのがおすすめです。</p>
+                <div class="lenormand-chip-row">
+                    <span class="lenormand-chip" data-ja="✨ 全39枚" data-en="✨ Full 39 cards">✨ 全39枚</span>
+                    <span class="lenormand-chip" data-ja="🌿 日常の問い向き" data-en="🌿 Great for daily questions">🌿 日常の問い向き</span>
+                    <span class="lenormand-chip" data-ja="🔎 具体的で読みやすい" data-en="🔎 Concrete & easy to read">🔎 具体的で読みやすい</span>
+                </div>
+            </div>
             <div class="guide-note">
                 <div class="guide-note-title" data-ja="このアプリについて" data-en="About This App">このアプリについて</div>
                 <span data-ja="ルノルマンカードはプリセットのため編集できません。すべてのデータはお使いの端末にローカル保存されます（サーバーへの送信なし）。" data-en="Lenormand cards are preset and cannot be edited. All data is saved locally on your device (nothing sent to servers).">ルノルマンカードはプリセットのため編集できません。すべてのデータはお使いの端末にローカル保存されます（サーバーへの送信なし）。</span>
@@ -2306,12 +2367,12 @@
 
             <div class="info-box" id="ads-removal-section" style="background:rgba(100,200,100,0.1);border-color:rgba(100,200,100,0.3);">
                 <h3>🚫 <span data-ja="課金プラン" data-en="Billing Plans">課金プラン</span></h3>
-                <p style="font-size:12px;color:#aaa;margin-bottom:10px;" data-ja="Google Play Billing v6で管理対象商品（remove_ads / save_plus）を取得・購入・復元します" data-en="Managed products (remove_ads / save_plus) are fetched, purchased, and restored via Google Play Billing v6.">Google Play Billing v6で管理対象商品（remove_ads / save_plus）を取得・購入・復元します</p>
+                <p style="font-size:12px;color:#aaa;margin-bottom:10px;" data-ja="購入情報を確認して、広告非表示（remove_ads）と保存無制限＋広告削除（save_pluss）を購入・復元できます" data-en="Check purchase status and buy/restore Hide Ads (remove_ads) and Unlimited Saves + Remove Ads (save_pluss).">購入情報を確認して、広告非表示（remove_ads）と保存無制限＋広告削除（save_pluss）を購入・復元できます</p>
                 <p id="ads-status" style="font-size:13px;color:#64c8ff;margin-bottom:6px;"></p>
                 <p id="save-plus-status" style="font-size:13px;color:#64c8ff;margin-bottom:10px;"></p>
                 <div style="display:flex;gap:10px;flex-wrap:wrap;">
-                    <button class="btn" id="buy-remove-ads" onclick="purchaseRemoveAds()" style="padding:10px 15px;font-size:13px;background:rgba(100,200,100,0.2);border-color:rgba(100,200,100,0.5);" data-ja="広告削除を購入" data-en="Buy Remove Ads">広告削除を購入</button>
-                    <button class="btn" id="buy-save-plus" onclick="purchaseSavePlus()" style="padding:10px 15px;font-size:13px;background:rgba(100,160,255,0.2);border-color:rgba(100,160,255,0.5);" data-ja="保存拡張（広告削除込み）を購入" data-en="Buy Save Plus (includes remove ads)">保存拡張（広告削除込み）を購入</button>
+                    <button class="btn" id="buy-remove-ads" onclick="purchaseRemoveAds()" style="padding:10px 15px;font-size:13px;background:rgba(100,200,100,0.2);border-color:rgba(100,200,100,0.5);" data-ja="広告を非表示にする" data-en="Hide Ads">広告を非表示にする</button>
+                    <button class="btn" id="buy-save-plus" onclick="purchaseSavePlus()" style="padding:10px 15px;font-size:13px;background:rgba(100,160,255,0.2);border-color:rgba(100,160,255,0.5);" data-ja="保存無制限＋広告削除" data-en="Unlimited Saves + Remove Ads">保存無制限＋広告削除</button>
                     <button class="btn" id="restore-purchases" onclick="restorePurchases()" style="padding:10px 15px;font-size:13px;" data-ja="購入を復元" data-en="Restore Purchases">購入を復元</button>
                 </div>
             </div>
@@ -2412,7 +2473,8 @@
             platform: 'google_play_billing_v6',
             products: {
                 removeAds: 'remove_ads',
-                savePlus: 'save_plus'
+                savePlus: 'save_pluss',
+                savePlusLegacy: 'save_plus'
             },
             legacyStorageKey: 'oracleforge_ads_removed',
             entitlementsStorageKey: 'app_entitlements'
@@ -2461,7 +2523,7 @@
                 if (productId === IAP_CONFIG.products.removeAds) {
                     this.entitlements.ads_removed = true;
                 }
-                if (productId === IAP_CONFIG.products.savePlus) {
+                if ([IAP_CONFIG.products.savePlus, IAP_CONFIG.products.savePlusLegacy].includes(productId)) {
                     this.entitlements.save_plus = true;
                     this.entitlements.ads_removed = true;
                 }
@@ -2482,10 +2544,23 @@
 
                 this.store.register({ id: IAP_CONFIG.products.removeAds, type, platform });
                 this.store.register({ id: IAP_CONFIG.products.savePlus, type, platform });
+                this.store.register({ id: IAP_CONFIG.products.savePlusLegacy, type, platform });
             }
 
             getManagedProductIds() {
-                return [IAP_CONFIG.products.removeAds, IAP_CONFIG.products.savePlus];
+                return [
+                    IAP_CONFIG.products.removeAds,
+                    IAP_CONFIG.products.savePlus,
+                    IAP_CONFIG.products.savePlusLegacy
+                ];
+            }
+
+            getPreferredSavePlusProduct() {
+                return this.managedProducts[IAP_CONFIG.products.savePlus]
+                    ? IAP_CONFIG.products.savePlus
+                    : (this.managedProducts[IAP_CONFIG.products.savePlusLegacy]
+                        ? IAP_CONFIG.products.savePlusLegacy
+                        : IAP_CONFIG.products.savePlus);
             }
 
             getDisplayPrice(product) {
@@ -2585,7 +2660,7 @@
             }
 
             async purchaseSavePlus() {
-                return this.purchaseProduct(IAP_CONFIG.products.savePlus);
+                return this.purchaseProduct(this.getPreferredSavePlusProduct());
             }
 
             async restorePurchases() {
@@ -2613,18 +2688,18 @@
                 const savePlusStatusText = document.getElementById('save-plus-status');
 
                 const removeAdsProduct = this.managedProducts[IAP_CONFIG.products.removeAds];
-                const savePlusProduct = this.managedProducts[IAP_CONFIG.products.savePlus];
+                const savePlusProduct = this.managedProducts[this.getPreferredSavePlusProduct()];
 
                 if (removeAdsBtn) {
                     const removeAdsPrice = removeAdsProduct?.price ? ` (${removeAdsProduct.price})` : '';
-                    removeAdsBtn.textContent = (currentLang === 'ja' ? '広告削除を購入' : 'Buy Remove Ads') + removeAdsPrice;
+                    removeAdsBtn.textContent = (currentLang === 'ja' ? '広告を非表示にする' : 'Hide Ads') + removeAdsPrice;
                     removeAdsBtn.disabled = this.entitlements.ads_removed;
                     removeAdsBtn.style.opacity = this.entitlements.ads_removed ? '0.6' : '1';
                 }
 
                 if (savePlusBtn) {
                     const savePlusPrice = savePlusProduct?.price ? ` (${savePlusProduct.price})` : '';
-                    savePlusBtn.textContent = (currentLang === 'ja' ? '保存拡張（広告削除込み）を購入' : 'Buy Save Plus (includes remove ads)') + savePlusPrice;
+                    savePlusBtn.textContent = (currentLang === 'ja' ? '保存無制限＋広告削除' : 'Unlimited Saves + Remove Ads') + savePlusPrice;
                     savePlusBtn.disabled = this.entitlements.save_plus;
                     savePlusBtn.style.opacity = this.entitlements.save_plus ? '0.6' : '1';
                 }
@@ -2635,15 +2710,15 @@
 
                 if (adsStatusText) {
                     adsStatusText.textContent = this.entitlements.ads_removed
-                        ? (currentLang === 'ja' ? '✓ app_entitlements.ads_removed = true' : '✓ app_entitlements.ads_removed = true')
-                        : (currentLang === 'ja' ? '・app_entitlements.ads_removed = false' : '• app_entitlements.ads_removed = false');
+                        ? (currentLang === 'ja' ? '✅ 広告表示: オフ（購入済み）' : '✅ Ads: Hidden (Purchased)')
+                        : (currentLang === 'ja' ? '・広告表示: オン（未購入）' : '• Ads: Visible (Not purchased)');
                     adsStatusText.style.color = this.entitlements.ads_removed ? '#4CAF50' : '#64c8ff';
                 }
 
                 if (savePlusStatusText) {
                     savePlusStatusText.textContent = this.entitlements.save_plus
-                        ? (currentLang === 'ja' ? '✓ app_entitlements.save_plus = true' : '✓ app_entitlements.save_plus = true')
-                        : (currentLang === 'ja' ? '・app_entitlements.save_plus = false' : '• app_entitlements.save_plus = false');
+                        ? (currentLang === 'ja' ? '✅ 保存無制限: 有効（購入済み）' : '✅ Unlimited Saves: Enabled (Purchased)')
+                        : (currentLang === 'ja' ? '・保存無制限: 無効（未購入）' : '• Unlimited Saves: Disabled (Not purchased)');
                     savePlusStatusText.style.color = this.entitlements.save_plus ? '#4CAF50' : '#64c8ff';
                 }
             }
