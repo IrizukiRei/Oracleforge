@@ -642,6 +642,7 @@
             background: rgba(100, 200, 255, 0.06);
             border: 1px solid rgba(100, 200, 255, 0.15);
             border-radius: 12px;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.06);
             transition: all 0.3s;
         }
         .guide-step-num {
@@ -669,6 +670,7 @@
             font-size: 12.5px;
             line-height: 1.6;
             margin: 0;
+            white-space: pre-line;
         }
         .guide-note {
             margin-top: 18px;
@@ -757,6 +759,7 @@
             background: linear-gradient(135deg, rgba(255, 166, 215, 0.16), rgba(122, 209, 255, 0.14));
             border: 1px solid rgba(255, 185, 232, 0.45);
             border-radius: 12px;
+            box-shadow: 0 10px 22px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.14);
         }
         .lenormand-intro-title {
             display: flex;
@@ -994,6 +997,7 @@
             border-radius: 8px;
             margin-bottom: 15px;
             font-size: 13px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.08);
         }
 
         .info-box h3 {
@@ -1877,7 +1881,7 @@
                     <div class="guide-step-num">4</div>
                     <div class="guide-step-body">
                         <h4 data-ja="設定" data-en="Settings">設定</h4>
-                        <p data-ja="右上の⚙️ボタンから。音量調整、データのエクスポート／インポート（機種変更時に便利）、広告削除の購入ができます。" data-en="Via the ⚙️ button at top-right. Adjust volume, export/import data (useful for device transfers), and purchase ad removal.">右上の⚙️ボタンから。音量調整、データのエクスポート／インポート（機種変更時に便利）、広告削除の購入ができます。</p>
+                        <p data-ja="右上の⚙️ボタンから設定を開きます。\n音量調整、データのエクスポート／インポート（機種変更時に便利）、\n広告削除の購入ができます。" data-en="Open Settings from the ⚙️ button at top-right.\nAdjust volume, export/import data (useful for device transfers),\nand purchase ad removal.">右上の⚙️ボタンから設定を開きます。<br>音量調整、データのエクスポート／インポート（機種変更時に便利）、<br>広告削除の購入ができます。</p>
                     </div>
                 </div>
             </div>
@@ -1912,7 +1916,7 @@
             <div class="guide-section-title" data-ja="ルノルマンって？" data-en="What is Lenormand?">ルノルマンって？</div>
             <div class="lenormand-intro-card">
                 <div class="lenormand-intro-title">
-                    <span>🩷🃏</span>
+                    <span>♡🃏</span>
                     <span data-ja="シンプルで現実的なメッセージを読むカード" data-en="A sweet, practical oracle style">シンプルで現実的なメッセージを読むカード</span>
                 </div>
                 <p class="lenormand-intro-body" data-ja="ルノルマンは、日常に寄り添う具体的なヒントを読み解く占術です。
@@ -1966,9 +1970,9 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
         <!-- カード編集画面 -->
         <div id="edit-screen" class="screen active">
             <div class="info-box" style="background:rgba(255,200,100,0.15);border-color:rgba(255,200,100,0.4);">
-                <p style="margin:0;" data-ja="🩷 ルノルマンは、日常の出来事を具体的に読み解く占術です。
-このアプリでは39枚プリセットを「セット」タブに用意しているので、すぐに占いを始められます。" data-en="🩷 Lenormand is an oracle style that reads everyday situations in a practical way.
-This app includes a ready-to-use 39-card preset in the Sets tab, so you can start right away.">🩷 ルノルマンは、日常の出来事を具体的に読み解く占術です。<br>このアプリでは39枚プリセットを「セット」タブに用意しているので、すぐに占いを始められます。</p>
+                <p style="margin:0;" data-ja="♡ ルノルマンは、日常の出来事を具体的に読み解く占術です。
+このアプリでは39枚プリセットを「セット」タブに用意しているので、すぐに占いを始められます。" data-en="♡ Lenormand is an oracle style that reads everyday situations in a practical way.
+This app includes a ready-to-use 39-card preset in the Sets tab, so you can start right away.">♡ ルノルマンは、日常の出来事を具体的に読み解く占術です。<br>このアプリでは39枚プリセットを「セット」タブに用意しているので、すぐに占いを始められます。</p>
             </div>
 
             <div id="storage-warning" class="storage-warning compact" style="display:none;">
@@ -2408,63 +2412,6 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
             </div>
         </div>
     </div>
-
-
-    <!-- 操作ガイドオーバーレイ -->
-    <div id="app-guide-overlay" class="reading-guide-overlay" onclick="if(event.target===this) closeAppGuide()">
-        <div class="reading-guide-panel" onclick="event.stopPropagation()">
-            <div class="guide-title" data-ja="操作ガイド" data-en="App Guide">操作ガイド</div>
-
-            <div class="guide-section-title" data-ja="基本の流れ" data-en="Basic Flow">基本の流れ</div>
-            <div class="guide-step-list">
-                <div class="guide-step">
-                    <div class="guide-step-num">1</div>
-                    <div class="guide-step-body">
-                        <h4 data-ja="スプレッドを選ぶ" data-en="Choose a spread">スプレッドを選ぶ</h4>
-                        <p data-ja="1枚引き、3枚引き、グランタブローなどから好きな配置を選びます。" data-en="Choose the layout you want, such as 1-card, 3-card, or Grand Tableau.">1枚引き、3枚引き、グランタブローなどから好きな配置を選びます。</p>
-                    </div>
-                </div>
-                <div class="guide-step">
-                    <div class="guide-step-num">2</div>
-                    <div class="guide-step-body">
-                        <h4 data-ja="シャッフルする" data-en="Shuffle the cards">シャッフルする</h4>
-                        <p data-ja="占い画面で「シャッフル」を押すとカードが混ざります。" data-en="Press &quot;Shuffle&quot; on the reading screen to mix the cards.">占い画面で「シャッフル」を押すとカードが混ざります。</p>
-                    </div>
-                </div>
-                <div class="guide-step">
-                    <div class="guide-step-num">3</div>
-                    <div class="guide-step-body">
-                        <h4 data-ja="カードを集める" data-en="Collect the cards">カードを集める</h4>
-                        <p data-ja="画面内のカードをタップして集めると、配置に沿って並びます。" data-en="Tap the cards on screen to collect them, and they will settle into the chosen spread.">画面内のカードをタップして集めると、配置に沿って並びます。</p>
-                    </div>
-                </div>
-                <div class="guide-step">
-                    <div class="guide-step-num">4</div>
-                    <div class="guide-step-body">
-                        <h4 data-ja="結果を見る" data-en="View the result">結果を見る</h4>
-                        <p data-ja="カードをタップで拡大表示。下へスクロールすると結果テキストが読めます。" data-en="Tap a card to zoom it. Scroll down to read the result text.">カードをタップで拡大表示。下へスクロールすると結果テキストが読めます。</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="guide-section-title" data-ja="補足" data-en="Notes">補足</div>
-            <div class="guide-connection">
-                <strong data-ja="? ボタン" data-en="? Button">? ボタン</strong>
-                <span data-ja="からこのガイドをいつでも開けます。" data-en=" opens this guide any time.">からこのガイドをいつでも開けます。</span>
-            </div>
-            <div class="guide-connection">
-                <strong data-ja="設定" data-en="Settings">設定</strong>
-                <span data-ja="内の「操作ガイド」からも再表示できます。" data-en=" also lets you show it again from the App Guide section.">内の「操作ガイド」からも再表示できます。</span>
-            </div>
-            <div class="guide-note">
-                <div class="guide-note-title" data-ja="ヒント" data-en="Tip">ヒント</div>
-                <div data-ja="フェーズ案内が邪魔なときは、占い画面上部の×で閉じられます。" data-en="If the phase banner gets in the way, close it with the × at the top of the reading screen.">フェーズ案内が邪魔なときは、占い画面上部の×で閉じられます。</div>
-            </div>
-
-            <button type="button" class="guide-close-btn" onclick="closeAppGuide()" data-ja="閉じる" data-en="Close">閉じる</button>
-        </div>
-    </div>
-
     <!-- モーダル -->
     <div class="modal-overlay" id="imageModal" onclick="closeImageModal()">
         <div class="modal-close">&times;</div>
