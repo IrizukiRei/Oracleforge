@@ -4014,6 +4014,7 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
                 this.bgmPlaying = false;
                 this.currentBgmTrack = null;
                 this.invalidAudioFiles = new Set();
+                this.trackSourceOverrides = new Map();
                 this.applyManifest(manifest || defaultAudioManifest);
             }
 
@@ -4043,6 +4044,15 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
                 if (!path) return;
                 this.invalidAudioFiles.add(path);
                 console.warn(`Audio file missing or failed to load: ${path}`);
+            }
+
+            addCacheBust(path) {
+                const separator = path.includes('?') ? '&' : '?';
+                return `${path}${separator}cb=${Date.now()}`;
+            }
+
+            getResolvedTrackPath(path) {
+                return this.trackSourceOverrides.get(path) || path;
             }
 
             // 設定をlocalStorageから読み込み
@@ -4086,8 +4096,23 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
                         this.bgm.pause();
                     }
                     this.currentBgmTrack = nextTrack;
-                    this.bgm = new Audio(nextTrack);
+                    const resolvedTrack = this.getResolvedTrackPath(nextTrack);
+                    this.bgm = new Audio(resolvedTrack);
                     this.bgm.loop = this.bgmMode === 'loop';
+                    this.bgm.addEventListener('loadedmetadata', () => {
+                        if (!this.bgm || this.currentBgmTrack !== nextTrack) return;
+                        const duration = this.bgm.duration;
+                        const suspiciousDuration = Number.isFinite(duration) && duration > 0 && duration < 30;
+                        if (suspiciousDuration && !this.trackSourceOverrides.has(nextTrack)) {
+                            const cacheBustedPath = this.addCacheBust(nextTrack);
+                            this.trackSourceOverrides.set(nextTrack, cacheBustedPath);
+                            console.warn(`BGM duration looks too short (${duration.toFixed(2)}s). Retrying with cache-busted URL.`);
+                            this.bgm.pause();
+                            this.bgm = null;
+                            this.bgmPlaying = false;
+                            this.startBGM();
+                        }
+                    }, { once: true });
                     this.bgm.addEventListener('error', () => {
                         this.markAudioInvalid(nextTrack);
                         this.bgmPlaying = false;
