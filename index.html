@@ -2046,7 +2046,7 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
             </div>
 
             <div id="storage-warning" class="storage-warning compact" style="display:none;">
-                <span>⚠️ <span data-ja="ストレージ使用量が多くなっています。画像サイズを小さくするか、不要なカードを削除してください。" data-en="Storage is running low. Reduce image sizes or delete unused cards.">ストレージ使用量が多くなっています。画像サイズを小さくするか、不要なカードを削除してください。</span></span>
+                <span>⚠️ <span data-ja="デバイスのストレージ残量が少なくなっています。不要なカードを削除してください。" data-en="Device storage is running low. Please delete unused cards.">デバイスのストレージ残量が少なくなっています。不要なカードを削除してください。</span></span>
             </div>
 
             <div class="deck-info">
@@ -2430,7 +2430,7 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
 
             <div class="info-box" style="background:rgba(255,200,100,0.1);border-color:rgba(255,200,100,0.3);">
                 <h3>💾 <span data-ja="データ移行" data-en="Data Transfer">データ移行</span></h3>
-                <p style="margin-bottom:10px;" data-ja="PC↔スマホ間でデータを移すにはエクスポート/インポートを使用" data-en="Use Export/Import to transfer data between PC and mobile">PC↔スマホ間でデータを移すにはエクスポート/インポートを使用</p>
+                <p style="margin-bottom:10px;" data-ja="バックアップや端末間のデータ移行にエクスポート/インポートを使用" data-en="Use Export/Import for backup or transferring data between devices">バックアップや端末間のデータ移行にエクスポート/インポートを使用</p>
                 <div style="display:flex;gap:10px;flex-wrap:wrap;">
                     <button class="btn" onclick="exportData()" style="padding:10px 15px;font-size:13px;" data-ja="エクスポート" data-en="Export">エクスポート</button>
                     <input type="file" accept=".json" style="display:none" id="import-file" onchange="importData(this)">
@@ -4645,19 +4645,17 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
         // キー：oracleAllCards - ユーザー作成カード配列（id, name, description, imageData, archived）
         // カード追加・編集・削除時に自動保存、起動時に必ず読み込みUIに反映
         function saveMasterCards() {
+            // IndexedDBに保存（プライマリ、容量制限なし）
+            if (oracleDB && oracleDB.ready) {
+                saveCardsToIndexedDB(masterCards).catch(e => console.warn('IndexedDB save error:', e));
+            }
+            // localStorageにも保存（後方互換、容量超過時はスキップ）
             try {
                 const data = JSON.stringify(masterCards);
-                // localStorageに保存（後方互換）
                 localStorage.setItem('oracleAllCards', data);
                 localStorage.setItem('oracleCards', data);
-                // IndexedDBにも保存（非同期、エラーはログのみ）
-                if (oracleDB && oracleDB.ready) {
-                    saveCardsToIndexedDB(masterCards).catch(e => console.warn('IndexedDB save error:', e));
-                }
             } catch(e) {
-                alert(currentLang === 'ja'
-                    ? '保存容量を超えました。画像サイズを小さくしてください。'
-                    : 'Storage limit exceeded. Please reduce image sizes.');
+                console.warn('localStorage quota exceeded, data is safely stored in IndexedDB.');
             }
         }
 
@@ -4696,7 +4694,30 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
             const storageInfo = document.getElementById('storage-info');
             const storageWarning = document.getElementById('storage-warning');
             if (!storageInfo || !storageWarning) return;
-            
+
+            // StorageManager APIで実際のデバイスストレージ使用量を取得
+            if (navigator.storage && navigator.storage.estimate) {
+                navigator.storage.estimate().then(estimate => {
+                    const usedMB = (estimate.usage / 1024 / 1024).toFixed(2);
+                    const quotaMB = (estimate.quota / 1024 / 1024).toFixed(0);
+                    const usageText = currentLang === 'ja' ? '使用量' : 'Storage';
+                    storageInfo.textContent = `${usageText}: ${usedMB} MB / ${quotaMB} MB`;
+
+                    // デバイスストレージの90%以上使用時のみ警告
+                    if (estimate.usage > estimate.quota * 0.9) {
+                        storageWarning.style.display = 'block';
+                    } else {
+                        storageWarning.style.display = 'none';
+                    }
+                }).catch(() => {
+                    updateStorageInfoFallback(storageInfo, storageWarning);
+                });
+            } else {
+                updateStorageInfoFallback(storageInfo, storageWarning);
+            }
+        }
+
+        function updateStorageInfoFallback(storageInfo, storageWarning) {
             let total = 0;
             for (let key in localStorage) {
                 if (localStorage.hasOwnProperty(key)) {
@@ -4706,7 +4727,7 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
             const mb = (total / 1024 / 1024).toFixed(2);
             const usageText = currentLang === 'ja' ? '使用量' : 'Storage';
             storageInfo.textContent = `${usageText}: ${mb} MB`;
-            
+
             if (total > 4.5 * 1024 * 1024) {
                 storageWarning.style.display = 'block';
             } else {
@@ -7075,19 +7096,50 @@ sigBadge + '</strong><br>' + (descText || noDescText) + '</div>';
                 soundSettings: soundSettings // 音声設定
             };
 
-            const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+            const jsonStr = JSON.stringify(data, null, 2);
+            const blob = new Blob([jsonStr], {type: 'application/json'});
+            const fileName = 'mayumayan-oracle-backup.json';
+
+            // Web Share API対応（モバイル向け）
+            if (navigator.share && navigator.canShare) {
+                const file = new File([blob], fileName, {type: 'application/json'});
+                if (navigator.canShare({files: [file]})) {
+                    navigator.share({
+                        title: 'OracleForge Backup',
+                        files: [file]
+                    }).then(() => {
+                        const msg = currentLang === 'ja'
+                            ? 'エクスポート完了！'
+                            : 'Export complete!';
+                        alert(msg);
+                    }).catch(e => {
+                        // ユーザーがキャンセルした場合は何もしない
+                        if (e.name !== 'AbortError') {
+                            console.warn('Share failed, falling back to download:', e);
+                            downloadExportFile(blob, fileName);
+                        }
+                    });
+                    return;
+                }
+            }
+
+            // フォールバック：ダウンロード
+            downloadExportFile(blob, fileName);
+        }
+
+        function downloadExportFile(blob, fileName) {
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'mayumayan-oracle-backup.json';
+            a.download = fileName;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
 
             const msg = currentLang === 'ja'
-                ? 'エクスポート完了！\nファイルをスマホに送ってインポートしてください'
-                : 'Export complete!\nSend the file to your phone and import it.';
+                ? 'エクスポート完了！\nバックアップファイルが保存されました。'
+                : 'Export complete!\nBackup file has been saved.';
             alert(msg);
         }
         
