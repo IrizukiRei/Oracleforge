@@ -2409,7 +2409,7 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
                 <div class="ritual-section">
                     <h3 data-ja="4. 振り返り" data-en="4. Reflect">4. 振り返り</h3>
                     <p data-ja="リーディングから得た気づきを書き留めます。" data-en="Write down the key insight from your reading.">リーディングから得た気づきを書き留めます。</p>
-                    <p style="font-size:11px;color:#888;margin-top:5px;" data-ja="※最新20件まで保存されます（古いものは自動削除）" data-en="※Up to 20 entries saved (older ones auto-deleted)">※最新20件まで保存されます（古いものは自動削除）</p>
+                    <p id="crystal-save-limit-note" style="font-size:11px;color:#888;margin-top:5px;" data-ja="※通常は3件まで保存できます（保存無制限プランで制限解除）" data-en="※Standard plan saves up to 3 entries (Unlimited Saves plan removes the limit)">※通常は3件まで保存できます（保存無制限プランで制限解除）</p>
                     <textarea id="crystalNote" data-ja-placeholder="気づきを記録..." data-en-placeholder="Your insight..."></textarea>
                     <button class="btn" onclick="saveCrystal()" style="margin-top:10px;" data-ja="保存" data-en="Save">保存</button>
                     
@@ -2514,7 +2514,8 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
                 savePlusLegacy: 'save_plus'
             },
             legacyStorageKey: 'oracleforge_ads_removed',
-            entitlementsStorageKey: 'app_entitlements'
+            entitlementsStorageKey: 'app_entitlements',
+            freeSaveLimit: 3
         };
 
         class IAPManager {
@@ -2763,6 +2764,14 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
             isAdsRemoved() {
                 return this.entitlements.ads_removed;
             }
+
+            hasUnlimitedSaves() {
+                return this.entitlements.save_plus;
+            }
+
+            getSaveLimit() {
+                return this.hasUnlimitedSaves() ? Number.POSITIVE_INFINITY : IAP_CONFIG.freeSaveLimit;
+            }
         }
 
         let iapManager = null;
@@ -2963,7 +2972,7 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
                     currentLang === 'ja' ? '課金機能が利用できません' : 'In-app purchase is not available',
                     [{ text: 'OK', onClick: closeGenericModal }]
                 );
-                return;
+                return false;
             }
 
             const success = await iapManager.purchaseSavePlus();
@@ -2974,6 +2983,7 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
                     [{ text: 'OK', onClick: closeGenericModal }]
                 );
             }
+            return success;
         }
 
         async function restorePurchases() {
@@ -3596,6 +3606,7 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
             if (iapManager) {
                 iapManager.updateUI();
             }
+            updateCrystalSaveLimitNote();
         }
         
         // 言語に応じたテキスト取得
@@ -4432,6 +4443,7 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
             if (iapManager) {
                 iapManager.updateUI();
             }
+            updateCrystalSaveLimitNote();
 
             // 言語設定を読み込み（IndexedDB優先）
             let savedLang = null;
@@ -6601,6 +6613,28 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
             });
         }
 
+        function getCrystalSaveLimit() {
+            if (iapManager) {
+                return iapManager.getSaveLimit();
+            }
+            return IAP_CONFIG.freeSaveLimit;
+        }
+
+        function updateCrystalSaveLimitNote() {
+            const limitNote = document.getElementById('crystal-save-limit-note');
+            if (!limitNote) return;
+            const limit = getCrystalSaveLimit();
+            if (Number.isFinite(limit)) {
+                limitNote.textContent = currentLang === 'ja'
+                    ? `※通常は${limit}件まで保存できます（保存無制限プランで制限解除）`
+                    : `※Standard plan saves up to ${limit} entries (Unlimited Saves plan removes the limit)`;
+            } else {
+                limitNote.textContent = currentLang === 'ja'
+                    ? '※保存は無制限です（保存無制限プラン有効）'
+                    : '※Unlimited saves are enabled';
+            }
+        }
+
         function showConfirmModal(message, titleText) {
             const title = titleText || (currentLang === 'ja' ? '確認' : 'Confirm');
             return showModal({
@@ -6990,21 +7024,62 @@ sigBadge + '</strong><br>' + (descText || noDescText) + '</div>';
             document.querySelector('.nav-tabs button:nth-child(3)').classList.add('active');
         }
         
-        function saveCrystal() {
+        async function saveCrystal() {
             const note = document.getElementById('crystalNote').value.trim();
             if (!note) {
-                alert('言葉を入力');
+                showAlertModal(currentLang === 'ja' ? 'メモを入力してください' : 'Please enter a note');
                 return;
             }
             
             const crystals = JSON.parse(localStorage.getItem('oracleCrystals') || '[]');
+            const saveLimit = getCrystalSaveLimit();
+
+            if (Number.isFinite(saveLimit) && crystals.length >= saveLimit) {
+                const decision = await showModal({
+                    title: currentLang === 'ja' ? '保存上限に達しました' : 'Save limit reached',
+                    bodyHtml: currentLang === 'ja'
+                        ? `<p>通常プランでは最大${saveLimit}件まで保存できます。</p><p>保存無制限プランを購入するか、最古の保存を削除して続けてください。</p>`
+                        : `<p>The standard plan allows up to ${saveLimit} saved entries.</p><p>Purchase Unlimited Saves, or remove the oldest save to continue.</p>`,
+                    closeOnBackdrop: false,
+                    buttons: [
+                        {
+                            label: currentLang === 'ja' ? '保存無制限を購入' : 'Buy Unlimited Saves',
+                            variant: 'primary',
+                            value: 'purchase'
+                        },
+                        {
+                            label: currentLang === 'ja' ? '最古を削除して保存' : 'Delete oldest and save',
+                            variant: 'secondary',
+                            value: 'replace'
+                        },
+                        {
+                            label: currentLang === 'ja' ? 'キャンセル' : 'Cancel',
+                            variant: 'ghost',
+                            value: 'cancel'
+                        }
+                    ]
+                });
+
+                if (decision === 'purchase') {
+                    const success = await purchaseSavePlus();
+                    if (!success || Number.isFinite(getCrystalSaveLimit())) {
+                        return;
+                    }
+                } else if (decision === 'replace') {
+                    crystals.pop();
+                } else {
+                    return;
+                }
+            }
+
             crystals.unshift({date: new Date().toLocaleDateString('ja-JP'), text: note});
-            if (crystals.length > 20) crystals.pop();
+            const activeSaveLimit = getCrystalSaveLimit();
+            if (Number.isFinite(activeSaveLimit) && crystals.length > activeSaveLimit) crystals.pop();
             
             localStorage.setItem('oracleCrystals', JSON.stringify(crystals));
             document.getElementById('crystalNote').value = '';
             loadCrystals();
-            alert('保存しました ✨');
+            showAlertModal(currentLang === 'ja' ? '保存しました ✨' : 'Saved ✨');
         }
         
         function loadCrystals() {
