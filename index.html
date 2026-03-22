@@ -7167,6 +7167,95 @@ sigBadge + '</strong><br>' + (descText || noDescText) + '</div>';
 
         // setupStartButton削除 - HTMLのonclick属性で直接startApp()を呼び出す
         
+        function isNativeAppEnvironment() {
+            try {
+                return !!(window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' && window.Capacitor.isNativePlatform());
+            } catch (e) {
+                console.warn('Failed to detect native environment:', e);
+                return false;
+            }
+        }
+
+        async function tryShareExportFile(blob, fileName) {
+            if (!navigator.share) return false;
+            try {
+                const file = new File([blob], fileName, {type: 'application/json'});
+                if (navigator.canShare && !navigator.canShare({files: [file]})) {
+                    return false;
+                }
+                await navigator.share({
+                    title: 'OracleForge Backup',
+                    files: [file]
+                });
+                const msg = currentLang === 'ja'
+                    ? '共有メニューを開きました。\n保存先アプリを選んでバックアップを保存してください。'
+                    : 'Share sheet opened.\nChoose an app/location to save your backup.';
+                alert(msg);
+                return true;
+            } catch (e) {
+                if (e.name === 'AbortError') return true;
+                console.warn('Share method failed:', e);
+                return false;
+            }
+        }
+
+        async function showManualExportModal(jsonStr, fileName) {
+            const title = currentLang === 'ja' ? '手動バックアップ' : 'Manual Backup';
+            const desc = currentLang === 'ja'
+                ? 'この端末ではファイル保存UIを直接開けませんでした。下のJSONをコピーしてメモアプリ等に貼り付けて保存してください。'
+                : 'Could not open a file-save UI on this device. Copy the JSON below and save it in a notes app.';
+            const copyLabel = currentLang === 'ja' ? 'JSONをコピー' : 'Copy JSON';
+            const closeLabel = currentLang === 'ja' ? '閉じる' : 'Close';
+            const copiedMsg = currentLang === 'ja'
+                ? `コピーしました。\nファイル名の例: ${fileName}`
+                : `Copied.\nSuggested file name: ${fileName}`;
+            const copyFailMsg = currentLang === 'ja'
+                ? 'コピーできませんでした。長押しで全選択してコピーしてください。'
+                : 'Copy failed. Long-press to select all and copy manually.';
+
+            await showModal({
+                title,
+                bodyHtml: `
+                    <p style="font-size:12px;line-height:1.6;margin-bottom:10px;">${escapeHtml(desc)}</p>
+                    <textarea id="manualExportTextarea" style="width:100%;min-height:220px;border-radius:8px;padding:10px;font-size:12px;background:rgba(0,0,0,0.35);color:#fff;border:1px solid rgba(255,255,255,0.25);" readonly></textarea>
+                `,
+                closeOnBackdrop: true,
+                buttons: [
+                    {
+                        label: copyLabel,
+                        variant: 'primary',
+                        closeOnClick: false,
+                        onClick: async () => {
+                            const textarea = document.getElementById('manualExportTextarea');
+                            if (!textarea) return;
+                            textarea.focus();
+                            textarea.select();
+                            textarea.setSelectionRange(0, textarea.value.length);
+                            try {
+                                if (navigator.clipboard && navigator.clipboard.writeText) {
+                                    await navigator.clipboard.writeText(textarea.value);
+                                } else {
+                                    const ok = document.execCommand('copy');
+                                    if (!ok) throw new Error('execCommand(copy) failed');
+                                }
+                                showAlertModal(copiedMsg, title);
+                            } catch (e) {
+                                console.warn('Manual export copy failed:', e);
+                                showAlertModal(copyFailMsg, title);
+                            }
+                        }
+                    },
+                    { label: closeLabel, variant: 'secondary' }
+                ]
+            });
+
+            const textarea = document.getElementById('manualExportTextarea');
+            if (textarea) {
+                textarea.value = jsonStr;
+                textarea.scrollTop = 0;
+            }
+        }
+
         // エクスポート機能
         async function exportData() {
             try {
@@ -7186,27 +7275,23 @@ sigBadge + '</strong><br>' + (descText || noDescText) + '</div>';
                 const jsonStr = JSON.stringify(data, null, 2);
                 const blob = new Blob([jsonStr], {type: 'application/json'});
                 const fileName = 'mayumayan-oracle-backup.json';
+                const isNativeApp = isNativeAppEnvironment();
+
+                // ネイティブアプリ環境では、まず共有メニューを優先（WebViewのdownload属性は効かないことがある）
+                if (isNativeApp) {
+                    const shared = await tryShareExportFile(blob, fileName);
+                    if (shared) return;
+                    await showManualExportModal(jsonStr, fileName);
+                    return;
+                }
 
                 // まずダウンロードを試行（最も確実な方法）
                 const downloaded = downloadExportFile(blob, fileName);
                 if (downloaded) return;
 
                 // ダウンロードが効かない環境ではWeb Share APIを試行
-                if (navigator.share) {
-                    try {
-                        const file = new File([blob], fileName, {type: 'application/json'});
-                        if (!navigator.canShare || navigator.canShare({files: [file]})) {
-                            await navigator.share({
-                                title: 'OracleForge Backup',
-                                files: [file]
-                            });
-                            return;
-                        }
-                    } catch(e) {
-                        if (e.name === 'AbortError') return;
-                        console.warn('Share failed:', e);
-                    }
-                }
+                const shared = await tryShareExportFile(blob, fileName);
+                if (shared) return;
 
                 // 最終フォールバック：Blob URLを新しいタブで開く
                 const url = URL.createObjectURL(blob);
