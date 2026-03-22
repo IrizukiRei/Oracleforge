@@ -7167,6 +7167,38 @@ sigBadge + '</strong><br>' + (descText || noDescText) + '</div>';
 
         // setupStartButton削除 - HTMLのonclick属性で直接startApp()を呼び出す
         
+        function isNativeAppEnvironment() {
+            try {
+                return !!(window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' && window.Capacitor.isNativePlatform());
+            } catch (e) {
+                console.warn('Failed to detect native environment:', e);
+                return false;
+            }
+        }
+
+        async function tryShareExportFile(blob, fileName) {
+            if (!navigator.share) return false;
+            try {
+                const file = new File([blob], fileName, {type: 'application/json'});
+                if (navigator.canShare && !navigator.canShare({files: [file]})) {
+                    return false;
+                }
+                await navigator.share({
+                    title: 'OracleForge Backup',
+                    files: [file]
+                });
+                const msg = currentLang === 'ja'
+                    ? '共有メニューを開きました。\n保存先アプリを選んでバックアップを保存してください。'
+                    : 'Share sheet opened.\nChoose an app/location to save your backup.';
+                alert(msg);
+                return true;
+            } catch (e) {
+                if (e.name === 'AbortError') return true;
+                console.warn('Share method failed:', e);
+                return false;
+            }
+        }
+
         // エクスポート機能
         async function exportData() {
             try {
@@ -7186,27 +7218,21 @@ sigBadge + '</strong><br>' + (descText || noDescText) + '</div>';
                 const jsonStr = JSON.stringify(data, null, 2);
                 const blob = new Blob([jsonStr], {type: 'application/json'});
                 const fileName = 'mayumayan-oracle-backup.json';
+                const isNativeApp = isNativeAppEnvironment();
+
+                // ネイティブアプリ環境では、まず共有メニューを優先（WebViewのdownload属性は効かないことがある）
+                if (isNativeApp) {
+                    const shared = await tryShareExportFile(blob, fileName);
+                    if (shared) return;
+                }
 
                 // まずダウンロードを試行（最も確実な方法）
                 const downloaded = downloadExportFile(blob, fileName);
                 if (downloaded) return;
 
                 // ダウンロードが効かない環境ではWeb Share APIを試行
-                if (navigator.share) {
-                    try {
-                        const file = new File([blob], fileName, {type: 'application/json'});
-                        if (!navigator.canShare || navigator.canShare({files: [file]})) {
-                            await navigator.share({
-                                title: 'OracleForge Backup',
-                                files: [file]
-                            });
-                            return;
-                        }
-                    } catch(e) {
-                        if (e.name === 'AbortError') return;
-                        console.warn('Share failed:', e);
-                    }
-                }
+                const shared = await tryShareExportFile(blob, fileName);
+                if (shared) return;
 
                 // 最終フォールバック：Blob URLを新しいタブで開く
                 const url = URL.createObjectURL(blob);
