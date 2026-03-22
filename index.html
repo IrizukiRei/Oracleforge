@@ -7167,6 +7167,78 @@ sigBadge + '</strong><br>' + (descText || noDescText) + '</div>';
 
         // setupStartButton削除 - HTMLのonclick属性で直接startApp()を呼び出す
         
+        function isNativeAppEnvironment() {
+            try {
+                return !!(window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' && window.Capacitor.isNativePlatform());
+            } catch (e) {
+                console.warn('Failed to detect native environment:', e);
+                return false;
+            }
+        }
+
+        async function tryShareExportFile(blob, fileName, jsonStr) {
+            if (!navigator.share) return false;
+            try {
+                const file = new File([blob], fileName, {type: 'application/json'});
+                if (!navigator.canShare || navigator.canShare({files: [file]})) {
+                    await navigator.share({
+                        title: 'OracleForge Backup',
+                        files: [file]
+                    });
+                    const msg = currentLang === 'ja'
+                        ? '共有メニューを開きました。\n保存先アプリを選んでバックアップファイルを保存してください。'
+                        : 'Share sheet opened.\nChoose an app/location to save your backup file.';
+                    alert(msg);
+                    return true;
+                }
+
+                // ファイル共有が未対応の環境ではテキスト共有にフォールバック
+                if (jsonStr) {
+                    await navigator.share({
+                        title: 'OracleForge Backup',
+                        text: jsonStr
+                    });
+                    const msg = currentLang === 'ja'
+                        ? 'この端末はファイル共有に未対応のため、JSONテキストを共有しました。\n受け取った先のアプリで .json ファイルとして保存してください。'
+                        : 'This device cannot share files directly, so JSON text was shared.\nPlease save it as a .json file in the receiving app.';
+                    alert(msg);
+                    return true;
+                }
+            } catch (e) {
+                if (e.name === 'AbortError') return true;
+                console.warn('Share method failed:', e);
+                return false;
+            }
+        }
+
+        async function showManualExportModal(jsonStr, fileName) {
+            const title = currentLang === 'ja' ? '手動バックアップ' : 'Manual Backup';
+            const desc = currentLang === 'ja'
+                ? `共有メニューを開けませんでした。\nバックアップ内容をクリップボードへコピーしました。\n\n次の手順:\n1) メモアプリを開く\n2) 貼り付ける\n3) 「${fileName}」の名前で保存`
+                : `Could not open the share sheet.\nBackup JSON was copied to clipboard.\n\nNext steps:\n1) Open a notes app\n2) Paste\n3) Save as "${fileName}"`;
+            try {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(jsonStr);
+                    alert(desc);
+                    return;
+                }
+            } catch (e) {
+                console.warn('Clipboard write failed:', e);
+            }
+            await showModal({
+                title,
+                bodyHtml: `
+                    <p style="font-size:12px;line-height:1.6;margin-bottom:10px;">
+                        ${currentLang === 'ja'
+                            ? `クリップボードへの自動コピーができませんでした。\n下のJSONを長押しで全選択→コピーして、メモアプリに貼り付けて「${fileName}」として保存してください。`
+                            : `Auto-copy to clipboard failed.\nLong-press JSON below, copy all text, paste into a notes app, and save as "${fileName}".`}
+                    </p>
+                    <textarea style="width:100%;min-height:220px;border-radius:8px;padding:10px;font-size:12px;background:rgba(0,0,0,0.35);color:#fff;border:1px solid rgba(255,255,255,0.25);" readonly>${escapeHtml(jsonStr)}</textarea>
+                `,
+                closeOnBackdrop: true
+            });
+        }
+
         // エクスポート機能
         async function exportData() {
             try {
@@ -7186,27 +7258,23 @@ sigBadge + '</strong><br>' + (descText || noDescText) + '</div>';
                 const jsonStr = JSON.stringify(data, null, 2);
                 const blob = new Blob([jsonStr], {type: 'application/json'});
                 const fileName = 'mayumayan-oracle-backup.json';
+                const isNativeApp = isNativeAppEnvironment();
+
+                // ネイティブアプリ環境では、まず共有メニューを優先（WebViewのdownload属性は効かないことがある）
+                if (isNativeApp) {
+                    const shared = await tryShareExportFile(blob, fileName, jsonStr);
+                    if (shared) return;
+                    await showManualExportModal(jsonStr, fileName);
+                    return;
+                }
 
                 // まずダウンロードを試行（最も確実な方法）
                 const downloaded = downloadExportFile(blob, fileName);
                 if (downloaded) return;
 
                 // ダウンロードが効かない環境ではWeb Share APIを試行
-                if (navigator.share) {
-                    try {
-                        const file = new File([blob], fileName, {type: 'application/json'});
-                        if (!navigator.canShare || navigator.canShare({files: [file]})) {
-                            await navigator.share({
-                                title: 'OracleForge Backup',
-                                files: [file]
-                            });
-                            return;
-                        }
-                    } catch(e) {
-                        if (e.name === 'AbortError') return;
-                        console.warn('Share failed:', e);
-                    }
-                }
+                const shared = await tryShareExportFile(blob, fileName, jsonStr);
+                if (shared) return;
 
                 // 最終フォールバック：Blob URLを新しいタブで開く
                 const url = URL.createObjectURL(blob);
