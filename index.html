@@ -4143,21 +4143,8 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
                     this.currentBgmTrack = nextTrack;
                     const resolvedTrack = this.getResolvedTrackPath(nextTrack);
                     this.bgm = new Audio(resolvedTrack);
+                    this.bgm.preload = 'auto';
                     this.bgm.loop = this.bgmMode === 'loop';
-                    this.bgm.addEventListener('loadedmetadata', () => {
-                        if (!this.bgm || this.currentBgmTrack !== nextTrack) return;
-                        const duration = this.bgm.duration;
-                        const suspiciousDuration = Number.isFinite(duration) && duration > 0 && duration < 30;
-                        if (suspiciousDuration && !this.trackSourceOverrides.has(nextTrack)) {
-                            const cacheBustedPath = this.addCacheBust(nextTrack);
-                            this.trackSourceOverrides.set(nextTrack, cacheBustedPath);
-                            console.warn(`BGM duration looks too short (${duration.toFixed(2)}s). Retrying with cache-busted URL.`);
-                            this.bgm.pause();
-                            this.bgm = null;
-                            this.bgmPlaying = false;
-                            this.startBGM();
-                        }
-                    }, { once: true });
                     this.bgm.addEventListener('error', () => {
                         this.markAudioInvalid(nextTrack);
                         this.bgmPlaying = false;
@@ -7182,61 +7169,86 @@ sigBadge + '</strong><br>' + (descText || noDescText) + '</div>';
         
         // エクスポート機能
         async function exportData() {
-            const data = {
-                version: 2, // バージョンアップ（activeCount追加）
-                exportDate: new Date().toISOString(),
-                masterCards: masterCards,
-                activeCount: activeCount, // 使用枚数
-                cardSets: cardSets,
-                currentSetName: currentSetName,
-                backCardImage: backCardImage,
-                significatorIds: significatorIds,
-                crystals: JSON.parse(localStorage.getItem('oracleCrystals') || '[]'),
-                soundSettings: soundSettings // 音声設定
-            };
+            try {
+                const data = {
+                    version: 2, // バージョンアップ（activeCount追加）
+                    exportDate: new Date().toISOString(),
+                    masterCards: masterCards,
+                    activeCount: activeCount, // 使用枚数
+                    cardSets: cardSets,
+                    currentSetName: currentSetName,
+                    backCardImage: backCardImage,
+                    significatorIds: significatorIds,
+                    crystals: JSON.parse(localStorage.getItem('oracleCrystals') || '[]'),
+                    soundSettings: soundSettings // 音声設定
+                };
 
-            const jsonStr = JSON.stringify(data, null, 2);
-            const blob = new Blob([jsonStr], {type: 'application/json'});
-            const fileName = 'mayumayan-oracle-backup.json';
+                const jsonStr = JSON.stringify(data, null, 2);
+                const blob = new Blob([jsonStr], {type: 'application/json'});
+                const fileName = 'mayumayan-oracle-backup.json';
 
-            // Web Share APIでファイル共有（Android/iOS向け）
-            // テキスト共有フォールバックは使わない（ファイルとして保存できないため）
-            if (navigator.share) {
-                try {
-                    const file = new File([blob], fileName, {type: 'application/json'});
-                    const canShareFiles = !navigator.canShare || navigator.canShare({files: [file]});
-                    if (canShareFiles) {
-                        await navigator.share({
-                            title: 'OracleForge Backup',
-                            files: [file]
-                        });
-                        // キャンセルせずに完了した場合
-                        return;
+                // まずダウンロードを試行（最も確実な方法）
+                const downloaded = downloadExportFile(blob, fileName);
+                if (downloaded) return;
+
+                // ダウンロードが効かない環境ではWeb Share APIを試行
+                if (navigator.share) {
+                    try {
+                        const file = new File([blob], fileName, {type: 'application/json'});
+                        if (!navigator.canShare || navigator.canShare({files: [file]})) {
+                            await navigator.share({
+                                title: 'OracleForge Backup',
+                                files: [file]
+                            });
+                            return;
+                        }
+                    } catch(e) {
+                        if (e.name === 'AbortError') return;
+                        console.warn('Share failed:', e);
                     }
-                } catch(e) {
-                    if (e.name === 'AbortError') return;
-                    console.warn('Share failed, falling back to download:', e);
                 }
-            }
 
-            // フォールバック：ダウンロード（デスクトップ向け）
-            downloadExportFile(blob, fileName);
+                // 最終フォールバック：Blob URLを新しいタブで開く
+                const url = URL.createObjectURL(blob);
+                window.open(url, '_blank');
+                setTimeout(() => URL.revokeObjectURL(url), 10000);
+                const msg = currentLang === 'ja'
+                    ? 'バックアップデータが新しいタブで開きました。\n長押しして「保存」してください。'
+                    : 'Backup data opened in a new tab.\nLong-press and save the file.';
+                alert(msg);
+            } catch(e) {
+                console.error('Export failed:', e);
+                const msg = currentLang === 'ja'
+                    ? 'エクスポートに失敗しました: ' + e.message
+                    : 'Export failed: ' + e.message;
+                alert(msg);
+            }
         }
 
         function downloadExportFile(blob, fileName) {
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = fileName;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            try {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;
+                a.style.display = 'none';
+                document.body.appendChild(a);
+                a.click();
+                // クリック後に少し待ってから要素を削除
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 1000);
 
-            const msg = currentLang === 'ja'
-                ? 'エクスポート完了！\nバックアップファイルが保存されました。'
-                : 'Export complete!\nBackup file has been saved.';
-            alert(msg);
+                const msg = currentLang === 'ja'
+                    ? 'エクスポート完了！\nバックアップファイルが保存されました。'
+                    : 'Export complete!\nBackup file has been saved.';
+                alert(msg);
+                return true;
+            } catch(e) {
+                console.warn('Download method failed:', e);
+                return false;
+            }
         }
         
         // インポート機能
