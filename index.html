@@ -7199,6 +7199,32 @@ sigBadge + '</strong><br>' + (descText || noDescText) + '</div>';
             }
         }
 
+        async function showManualExportModal(jsonStr, fileName) {
+            const title = currentLang === 'ja' ? '手動バックアップ' : 'Manual Backup';
+            const desc = currentLang === 'ja'
+                ? `共有メニューを開けませんでした。\nバックアップ内容をクリップボードへコピーします。\nファイル名例: ${fileName}`
+                : `Could not open the share sheet.\nCopying backup JSON to clipboard.\nSuggested file name: ${fileName}`;
+            try {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(jsonStr);
+                    alert(desc);
+                    return;
+                }
+            } catch (e) {
+                console.warn('Clipboard write failed:', e);
+            }
+            await showModal({
+                title,
+                bodyHtml: `
+                    <p style="font-size:12px;line-height:1.6;margin-bottom:10px;">
+                        ${currentLang === 'ja' ? 'コピーできないため、下のJSONを長押しでコピーしてください。' : 'Clipboard unavailable. Long-press JSON below to copy manually.'}
+                    </p>
+                    <textarea style="width:100%;min-height:220px;border-radius:8px;padding:10px;font-size:12px;background:rgba(0,0,0,0.35);color:#fff;border:1px solid rgba(255,255,255,0.25);" readonly>${escapeHtml(jsonStr)}</textarea>
+                `,
+                closeOnBackdrop: true
+            });
+        }
+
         // エクスポート機能
         async function exportData() {
             try {
@@ -7224,6 +7250,8 @@ sigBadge + '</strong><br>' + (descText || noDescText) + '</div>';
                 if (isNativeApp) {
                     const shared = await tryShareExportFile(blob, fileName);
                     if (shared) return;
+                    await showManualExportModal(jsonStr, fileName);
+                    return;
                 }
 
                 // まずダウンロードを試行（最も確実な方法）
