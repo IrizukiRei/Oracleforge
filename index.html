@@ -7157,7 +7157,7 @@ sigBadge + '</strong><br>' + (descText || noDescText) + '</div>';
         // setupStartButton削除 - HTMLのonclick属性で直接startApp()を呼び出す
         
         // エクスポート機能
-        function exportData() {
+        async function exportData() {
             const data = {
                 version: 2, // バージョンアップ（activeCount追加）
                 exportDate: new Date().toISOString(),
@@ -7176,25 +7176,33 @@ sigBadge + '</strong><br>' + (descText || noDescText) + '</div>';
             const fileName = 'mayumayan-oracle-backup.json';
 
             // Web Share API対応（モバイル向け）
-            if (navigator.share && navigator.canShare) {
-                const file = new File([blob], fileName, {type: 'application/json'});
-                if (navigator.canShare({files: [file]})) {
-                    navigator.share({
-                        title: 'OracleForge Backup',
-                        files: [file]
-                    }).then(() => {
-                        const msg = currentLang === 'ja'
-                            ? 'エクスポート完了！'
-                            : 'Export complete!';
-                        alert(msg);
-                    }).catch(e => {
-                        // ユーザーがキャンセルした場合は何もしない
-                        if (e.name !== 'AbortError') {
-                            console.warn('Share failed, falling back to download:', e);
-                            downloadExportFile(blob, fileName);
-                        }
-                    });
+            // Android WebViewではnavigator.canShareが未実装でもnavigator.shareだけ使える場合がある
+            if (navigator.share) {
+                try {
+                    const file = new File([blob], fileName, {type: 'application/json'});
+                    if (!navigator.canShare || navigator.canShare({files: [file]})) {
+                        await navigator.share({
+                            title: 'OracleForge Backup',
+                            text: 'OracleForge backup data',
+                            files: [file]
+                        });
+                    } else {
+                        // files共有不可な環境向けフォールバック（共有シート起動を優先）
+                        const textPayload = `OracleForge backup (${new Date().toISOString()})\n\n${jsonStr}`;
+                        await navigator.share({
+                            title: 'OracleForge Backup',
+                            text: textPayload
+                        });
+                    }
+                    const msg = currentLang === 'ja'
+                        ? 'エクスポート完了！'
+                        : 'Export complete!';
+                    alert(msg);
                     return;
+                } catch(e) {
+                    // ユーザーがキャンセルした場合は何もしない
+                    if (e.name === 'AbortError') return;
+                    console.warn('Share failed, falling back to download:', e);
                 }
             }
 
