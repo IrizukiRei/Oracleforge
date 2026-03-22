@@ -7199,7 +7199,27 @@ sigBadge + '</strong><br>' + (descText || noDescText) + '</div>';
             const blob = new Blob([jsonStr], {type: 'application/json'});
             const fileName = 'mayumayan-oracle-backup.json';
 
-            // 直接ダウンロードを優先
+            // Web Share APIでファイル共有（Android/iOS向け）
+            // テキスト共有フォールバックは使わない（ファイルとして保存できないため）
+            if (navigator.share) {
+                try {
+                    const file = new File([blob], fileName, {type: 'application/json'});
+                    const canShareFiles = !navigator.canShare || navigator.canShare({files: [file]});
+                    if (canShareFiles) {
+                        await navigator.share({
+                            title: 'OracleForge Backup',
+                            files: [file]
+                        });
+                        // キャンセルせずに完了した場合
+                        return;
+                    }
+                } catch(e) {
+                    if (e.name === 'AbortError') return;
+                    console.warn('Share failed, falling back to download:', e);
+                }
+            }
+
+            // フォールバック：ダウンロード（デスクトップ向け）
             downloadExportFile(blob, fileName);
         }
 
