@@ -7199,38 +7199,7 @@ sigBadge + '</strong><br>' + (descText || noDescText) + '</div>';
             const blob = new Blob([jsonStr], {type: 'application/json'});
             const fileName = 'mayumayan-oracle-backup.json';
 
-            // Web Share API対応（モバイル向け）
-            // Android WebViewではnavigator.canShareが未実装でもnavigator.shareだけ使える場合がある
-            if (navigator.share) {
-                try {
-                    const file = new File([blob], fileName, {type: 'application/json'});
-                    if (!navigator.canShare || navigator.canShare({files: [file]})) {
-                        await navigator.share({
-                            title: 'OracleForge Backup',
-                            text: 'OracleForge backup data',
-                            files: [file]
-                        });
-                    } else {
-                        // files共有不可な環境向けフォールバック（共有シート起動を優先）
-                        const textPayload = `OracleForge backup (${new Date().toISOString()})\n\n${jsonStr}`;
-                        await navigator.share({
-                            title: 'OracleForge Backup',
-                            text: textPayload
-                        });
-                    }
-                    const msg = currentLang === 'ja'
-                        ? 'エクスポート完了！'
-                        : 'Export complete!';
-                    alert(msg);
-                    return;
-                } catch(e) {
-                    // ユーザーがキャンセルした場合は何もしない
-                    if (e.name === 'AbortError') return;
-                    console.warn('Share failed, falling back to download:', e);
-                }
-            }
-
-            // フォールバック：ダウンロード
+            // 直接ダウンロードを優先
             downloadExportFile(blob, fileName);
         }
 
