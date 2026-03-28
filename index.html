@@ -2197,7 +2197,7 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
                 <p><span data-ja="有効カード" data-en="Active Cards">有効カード</span>: <span id="spread-active-count">0</span><span data-ja="枚" data-en=""></span></p>
             </div>
 
-            <div class="info-box" id="sig-toggle-box" style="display:none;">
+            <div class="info-box" id="sig-toggle-box">
                 <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
                     <input type="checkbox" id="use-sig-toggle" onchange="toggleSignificator()" style="width:20px;height:20px;">
                     <span data-ja="シグニフィケーターを使用" data-en="Use Significator">シグニフィケーターを使用</span>
@@ -2205,6 +2205,10 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
                 </label>
                 <div style="font-size:11px;color:#888;margin-top:5px;" data-ja="グランタブローで使用: シグニフィケーターの出た位置をハイライト" data-en="For Grand Tableau: Highlights significator positions">
                     グランタブローで使用: シグニフィケーターの出た位置をハイライト
+                </div>
+                <div style="margin-top:8px;display:flex;gap:8px;align-items:center;">
+                    <button class="btn" onclick="openSignificatorSelect()" style="font-size:12px;padding:4px 10px;" data-ja="カード選択" data-en="Select Card">カード選択</button>
+                    <button class="btn" onclick="clearSignificator()" style="font-size:12px;padding:4px 10px;background:rgba(220,53,69,0.3);border-color:#dc3545;" data-ja="解除" data-en="Clear">解除</button>
                 </div>
             </div>
 
@@ -4799,9 +4803,13 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
                 preview2.innerHTML = notSetText;
             }
             
-            // トグルボックスの表示（グランタブローのみ）
+            // トグルボックスは常に表示、チェック状態を同期
             if (toggleBox) {
-                toggleBox.style.display = significatorIds.length > 0 ? 'block' : 'none';
+                const toggle = document.getElementById('use-sig-toggle');
+                if (toggle) {
+                    toggle.checked = useSignificator && significatorIds.length > 0;
+                    if (significatorIds.length === 0) useSignificator = false;
+                }
             }
             
             // 名前表示
