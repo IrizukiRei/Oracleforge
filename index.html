@@ -2409,7 +2409,7 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
                 <div class="ritual-section">
                     <h3 data-ja="4. 振り返り" data-en="4. Reflect">4. 振り返り</h3>
                     <p data-ja="リーディングから得た気づきを書き留めます。" data-en="Write down the key insight from your reading.">リーディングから得た気づきを書き留めます。</p>
-                    <p id="crystal-save-limit-note" style="font-size:11px;color:#888;margin-top:5px;" data-ja="※通常は3件まで保存できます（保存無制限プランで制限解除）" data-en="※Standard plan saves up to 3 entries (Unlimited Saves plan removes the limit)">※通常は3件まで保存できます（保存無制限プランで制限解除）</p>
+                    <p id="crystal-save-limit-note" style="font-size:11px;color:#888;margin-top:5px;" data-ja="※最新20件まで保存されます（古いものは自動削除）" data-en="※Up to 20 entries saved (older ones auto-deleted)">※最新20件まで保存されます（古いものは自動削除）</p>
                     <textarea id="crystalNote" data-ja-placeholder="気づきを記録..." data-en-placeholder="Your insight..."></textarea>
                     <button class="btn" onclick="saveCrystal()" style="margin-top:10px;" data-ja="保存" data-en="Save">保存</button>
                     
@@ -2505,30 +2505,6 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
     </div>
 
     <script>
-        // App-only distribution gate: block hosted web usage except explicit local debug override.
-        (function enforceAppOnlyMode() {
-            const isNative = typeof window.Capacitor !== 'undefined' && window.Capacitor.isNativePlatform();
-            const allowWebDebug = new URLSearchParams(window.location.search).get('allowWebDebug') === '1';
-            if (isNative || allowWebDebug) return;
-
-            const lang = (navigator.language || '').toLowerCase().startsWith('ja') ? 'ja' : 'en';
-            const title = lang === 'ja' ? 'アプリ版のみ提供中です' : 'App-only release';
-            const body = lang === 'ja'
-                ? 'このサービスのWeb公開は終了しました。引き続きアプリ版をご利用ください。'
-                : 'The web version has been closed. Please continue using the mobile app.';
-
-            document.body.innerHTML = `
-                <main style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#10141f;color:#fff;padding:24px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-                    <section style="max-width:520px;text-align:center;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.16);border-radius:16px;padding:24px 20px;line-height:1.6;">
-                        <h1 style="margin:0 0 12px;font-size:1.4rem;">${title}</h1>
-                        <p style="margin:0;">${body}</p>
-                    </section>
-                </main>
-            `;
-
-            throw new Error('App-only mode: web runtime blocked');
-        })();
-
         // ====== IAP（アプリ内課金）管理 ======
         const IAP_CONFIG = {
             platform: 'google_play_billing_v6',
@@ -5395,7 +5371,7 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
         }
 
         // セット管理
-        function createNewSet() {
+        async function createNewSet() {
             const setName = document.getElementById('new-set-name').value.trim();
             if (!setName) {
                 alert('セット名を入力');
@@ -5403,6 +5379,35 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
             }
             if (cardSets[setName]) {
                 alert('既に存在します');
+                return;
+            }
+
+            // セット保存上限チェック（無料: 3件、保存無制限プラン: 無制限）
+            const setLimit = getSetSaveLimit();
+            const currentSetCount = Object.keys(cardSets).length;
+            if (Number.isFinite(setLimit) && currentSetCount >= setLimit) {
+                const decision = await showModal({
+                    title: currentLang === 'ja' ? 'セット保存上限' : 'Set limit reached',
+                    bodyHtml: currentLang === 'ja'
+                        ? `<p>無料プランでは最大${setLimit}件までセットを保存できます。</p><p>保存無制限プランを購入すると無制限に保存できます。</p>`
+                        : `<p>Free plan allows up to ${setLimit} saved sets.</p><p>Purchase Unlimited Saves to save unlimited sets.</p>`,
+                    closeOnBackdrop: true,
+                    buttons: [
+                        {
+                            label: currentLang === 'ja' ? '保存無制限を購入' : 'Buy Unlimited Saves',
+                            variant: 'primary',
+                            value: 'purchase'
+                        },
+                        {
+                            label: currentLang === 'ja' ? 'キャンセル' : 'Cancel',
+                            variant: 'ghost',
+                            value: 'cancel'
+                        }
+                    ]
+                });
+                if (decision === 'purchase') {
+                    await purchaseSavePlus();
+                }
                 return;
             }
 
@@ -6655,26 +6660,17 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
             });
         }
 
-        function getCrystalSaveLimit() {
-            if (iapManager) {
-                return iapManager.getSaveLimit();
-            }
+        function getSetSaveLimit() {
+            if (iapManager) return iapManager.getSaveLimit();
             return IAP_CONFIG.freeSaveLimit;
         }
 
         function updateCrystalSaveLimitNote() {
             const limitNote = document.getElementById('crystal-save-limit-note');
             if (!limitNote) return;
-            const limit = getCrystalSaveLimit();
-            if (Number.isFinite(limit)) {
-                limitNote.textContent = currentLang === 'ja'
-                    ? `※通常は${limit}件まで保存できます（保存無制限プランで制限解除）`
-                    : `※Standard plan saves up to ${limit} entries (Unlimited Saves plan removes the limit)`;
-            } else {
-                limitNote.textContent = currentLang === 'ja'
-                    ? '※保存は無制限です（保存無制限プラン有効）'
-                    : '※Unlimited saves are enabled';
-            }
+            limitNote.textContent = currentLang === 'ja'
+                ? '※最新20件まで保存されます（古いものは自動削除）'
+                : '※Up to 20 entries saved (older ones auto-deleted)';
         }
 
         function showConfirmModal(message, titleText) {
@@ -7072,52 +7068,11 @@ sigBadge + '</strong><br>' + (descText || noDescText) + '</div>';
                 showAlertModal(currentLang === 'ja' ? 'メモを入力してください' : 'Please enter a note');
                 return;
             }
-            
+
             const crystals = await loadCrystalsFromStorage();
-            const saveLimit = getCrystalSaveLimit();
-
-            if (Number.isFinite(saveLimit) && crystals.length >= saveLimit) {
-                const decision = await showModal({
-                    title: currentLang === 'ja' ? '保存上限に達しました' : 'Save limit reached',
-                    bodyHtml: currentLang === 'ja'
-                        ? `<p>通常プランでは最大${saveLimit}件まで保存できます。</p><p>保存無制限プランを購入するか、最古の保存を削除して続けてください。</p>`
-                        : `<p>The standard plan allows up to ${saveLimit} saved entries.</p><p>Purchase Unlimited Saves, or remove the oldest save to continue.</p>`,
-                    closeOnBackdrop: false,
-                    buttons: [
-                        {
-                            label: currentLang === 'ja' ? '保存無制限を購入' : 'Buy Unlimited Saves',
-                            variant: 'primary',
-                            value: 'purchase'
-                        },
-                        {
-                            label: currentLang === 'ja' ? '最古を削除して保存' : 'Delete oldest and save',
-                            variant: 'secondary',
-                            value: 'replace'
-                        },
-                        {
-                            label: currentLang === 'ja' ? 'キャンセル' : 'Cancel',
-                            variant: 'ghost',
-                            value: 'cancel'
-                        }
-                    ]
-                });
-
-                if (decision === 'purchase') {
-                    const success = await purchaseSavePlus();
-                    if (!success || Number.isFinite(getCrystalSaveLimit())) {
-                        return;
-                    }
-                } else if (decision === 'replace') {
-                    crystals.pop();
-                } else {
-                    return;
-                }
-            }
-
             crystals.unshift({date: new Date().toLocaleDateString('ja-JP'), text: note});
-            const activeSaveLimit = getCrystalSaveLimit();
-            if (Number.isFinite(activeSaveLimit) && crystals.length > activeSaveLimit) crystals.pop();
-            
+            if (crystals.length > 20) crystals.pop();
+
             await saveCrystalsToStorage(crystals);
             document.getElementById('crystalNote').value = '';
             await loadCrystals();
