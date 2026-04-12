@@ -3349,7 +3349,8 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
                     { oldKey: 'oracleBackImage', newKey: 'backCardImage', transform: (v) => v },
                     { oldKey: 'oracleSignificators', newKey: 'significatorIds', transform: JSON.parse },
                     { oldKey: 'oracleIsPreset', newKey: 'isUsingPreset', transform: (v) => v === 'true' },
-                    { oldKey: 'oracleLenormandOptional', newKey: 'lenormandOptional', transform: JSON.parse }
+                    { oldKey: 'oracleLenormandOptional', newKey: 'lenormandOptional', transform: JSON.parse },
+                    { oldKey: 'oracleCrystals', newKey: 'oracleCrystals', transform: JSON.parse }
                 ];
 
                 for (const setting of settingsToMigrate) {
@@ -3468,6 +3469,36 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
         async function saveSettingToIndexedDB(key, value) {
             if (!oracleDB || !oracleDB.ready) return;
             await oracleDB.putSetting(key, value);
+        }
+
+        async function loadCrystalsFromStorage() {
+            if (oracleDB && oracleDB.ready) {
+                try {
+                    const idbCrystals = await oracleDB.getSetting('oracleCrystals');
+                    if (Array.isArray(idbCrystals)) return idbCrystals;
+                } catch (e) {
+                    console.warn('Failed to load crystals from IndexedDB:', e);
+                }
+            }
+            try {
+                const crystals = JSON.parse(localStorage.getItem('oracleCrystals') || '[]');
+                return Array.isArray(crystals) ? crystals : [];
+            } catch (e) {
+                console.warn('Failed to parse oracleCrystals from localStorage:', e);
+                return [];
+            }
+        }
+
+        async function saveCrystalsToStorage(crystals) {
+            const safeCrystals = Array.isArray(crystals) ? crystals : [];
+            if (oracleDB && oracleDB.ready) {
+                try {
+                    await saveSettingToIndexedDB('oracleCrystals', safeCrystals);
+                } catch (e) {
+                    console.warn('Failed to save crystals to IndexedDB:', e);
+                }
+            }
+            localStorage.setItem('oracleCrystals', JSON.stringify(safeCrystals));
         }
 
         let audioManager = null; // 後で初期化
@@ -4914,7 +4945,7 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
         // 大量カード保存時の容量オーバーを防ぐ
         function imageToBase64(file, maxSize, callback) {
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = async function(e) {
                 const img = new Image();
                 img.onload = function() {
                     const canvas = document.createElement('canvas');
@@ -7042,7 +7073,7 @@ sigBadge + '</strong><br>' + (descText || noDescText) + '</div>';
                 return;
             }
             
-            const crystals = JSON.parse(localStorage.getItem('oracleCrystals') || '[]');
+            const crystals = await loadCrystalsFromStorage();
             const saveLimit = getCrystalSaveLimit();
 
             if (Number.isFinite(saveLimit) && crystals.length >= saveLimit) {
@@ -7087,14 +7118,14 @@ sigBadge + '</strong><br>' + (descText || noDescText) + '</div>';
             const activeSaveLimit = getCrystalSaveLimit();
             if (Number.isFinite(activeSaveLimit) && crystals.length > activeSaveLimit) crystals.pop();
             
-            localStorage.setItem('oracleCrystals', JSON.stringify(crystals));
+            await saveCrystalsToStorage(crystals);
             document.getElementById('crystalNote').value = '';
-            loadCrystals();
+            await loadCrystals();
             showAlertModal(currentLang === 'ja' ? '保存しました ✨' : 'Saved ✨');
         }
         
-        function loadCrystals() {
-            const crystals = JSON.parse(localStorage.getItem('oracleCrystals') || '[]');
+        async function loadCrystals() {
+            const crystals = await loadCrystalsFromStorage();
             const list = document.getElementById('crystalList');
             
             if (crystals.length === 0) {
@@ -7251,7 +7282,7 @@ sigBadge + '</strong><br>' + (descText || noDescText) + '</div>';
                     currentSetName: currentSetName,
                     backCardImage: backCardImage,
                     significatorIds: significatorIds,
-                    crystals: JSON.parse(localStorage.getItem('oracleCrystals') || '[]'),
+                    crystals: await loadCrystalsFromStorage(),
                     soundSettings: soundSettings // 音声設定
                 };
 
@@ -7389,7 +7420,7 @@ sigBadge + '</strong><br>' + (descText || noDescText) + '</div>';
                         localStorage.removeItem('oracleSignificators');
                     }
                     if (data.crystals) {
-                        localStorage.setItem('oracleCrystals', JSON.stringify(data.crystals));
+                        await saveCrystalsToStorage(data.crystals);
                     }
 
                     renderCards();
