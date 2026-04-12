@@ -2409,7 +2409,7 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
                 <div class="ritual-section">
                     <h3 data-ja="4. 振り返り" data-en="4. Reflect">4. 振り返り</h3>
                     <p data-ja="リーディングから得た気づきを書き留めます。" data-en="Write down the key insight from your reading.">リーディングから得た気づきを書き留めます。</p>
-                    <p id="crystal-save-limit-note" style="font-size:11px;color:#888;margin-top:5px;" data-ja="※通常は3件まで保存できます（保存無制限プランで制限解除）" data-en="※Standard plan saves up to 3 entries (Unlimited Saves plan removes the limit)">※通常は3件まで保存できます（保存無制限プランで制限解除）</p>
+                    <p id="crystal-save-limit-note" style="font-size:11px;color:#888;margin-top:5px;" data-ja="※最新20件まで保存されます（古いものは自動削除）" data-en="※Up to 20 entries saved (older ones auto-deleted)">※最新20件まで保存されます（古いものは自動削除）</p>
                     <textarea id="crystalNote" data-ja-placeholder="気づきを記録..." data-en-placeholder="Your insight..."></textarea>
                     <button class="btn" onclick="saveCrystal()" style="margin-top:10px;" data-ja="保存" data-en="Save">保存</button>
                     
@@ -2505,30 +2505,6 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
     </div>
 
     <script>
-        // App-only distribution gate: block hosted web usage except explicit local debug override.
-        (function enforceAppOnlyMode() {
-            const isNative = typeof window.Capacitor !== 'undefined' && window.Capacitor.isNativePlatform();
-            const allowWebDebug = new URLSearchParams(window.location.search).get('allowWebDebug') === '1';
-            if (isNative || allowWebDebug) return;
-
-            const lang = (navigator.language || '').toLowerCase().startsWith('ja') ? 'ja' : 'en';
-            const title = lang === 'ja' ? 'アプリ版のみ提供中です' : 'App-only release';
-            const body = lang === 'ja'
-                ? 'このサービスのWeb公開は終了しました。引き続きアプリ版をご利用ください。'
-                : 'The web version has been closed. Please continue using the mobile app.';
-
-            document.body.innerHTML = `
-                <main style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#10141f;color:#fff;padding:24px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-                    <section style="max-width:520px;text-align:center;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.16);border-radius:16px;padding:24px 20px;line-height:1.6;">
-                        <h1 style="margin:0 0 12px;font-size:1.4rem;">${title}</h1>
-                        <p style="margin:0;">${body}</p>
-                    </section>
-                </main>
-            `;
-
-            throw new Error('App-only mode: web runtime blocked');
-        })();
-
         // ====== IAP（アプリ内課金）管理 ======
         const IAP_CONFIG = {
             platform: 'google_play_billing_v6',
@@ -2539,7 +2515,7 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
             },
             legacyStorageKey: 'oracleforge_ads_removed',
             entitlementsStorageKey: 'app_entitlements',
-            freeSaveLimit: 3
+            freeSaveLimit: 20
         };
 
         class IAPManager {
@@ -6668,8 +6644,8 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
             const limit = getCrystalSaveLimit();
             if (Number.isFinite(limit)) {
                 limitNote.textContent = currentLang === 'ja'
-                    ? `※通常は${limit}件まで保存できます（保存無制限プランで制限解除）`
-                    : `※Standard plan saves up to ${limit} entries (Unlimited Saves plan removes the limit)`;
+                    ? `※最新${limit}件まで保存されます（古いものは自動削除）`
+                    : `※Up to ${limit} entries saved (older ones auto-deleted)`;
             } else {
                 limitNote.textContent = currentLang === 'ja'
                     ? '※保存は無制限です（保存無制限プラン有効）'
