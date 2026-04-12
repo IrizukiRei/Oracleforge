@@ -7311,7 +7311,7 @@ sigBadge + '</strong><br>' + (descText || noDescText) + '</div>';
             if (!file) return;
 
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = async function(e) {
                 try {
                     const data = JSON.parse(e.target.result);
 
