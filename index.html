@@ -2510,8 +2510,8 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
             platform: 'google_play_billing_v6',
             products: {
                 removeAds: 'remove_ads',
-                savePlus: 'save_pluss',
-                savePlusLegacy: 'save_plus'
+                savePlus: 'save_plus',
+                savePlusLegacy: 'save_pluss'
             },
             legacyStorageKey: 'oracleforge_ads_removed',
             entitlementsStorageKey: 'app_entitlements',
@@ -7173,48 +7173,60 @@ sigBadge + '</strong><br>' + (descText || noDescText) + '</div>';
 
         // エクスポート機能
         async function exportData() {
-            const data = {
-                version: 2, // バージョンアップ（activeCount追加）
-                exportDate: new Date().toISOString(),
-                masterCards: masterCards,
-                activeCount: activeCount, // 使用枚数
-                cardSets: cardSets,
-                currentSetName: currentSetName,
-                backCardImage: backCardImage,
-                significatorIds: significatorIds,
-                crystals: await loadCrystalsFromStorage(),
-                soundSettings: soundSettings // 音声設定
-            };
+            try {
+                const data = {
+                    version: 2, // バージョンアップ（activeCount追加）
+                    exportDate: new Date().toISOString(),
+                    masterCards: masterCards,
+                    activeCount: activeCount, // 使用枚数
+                    cardSets: cardSets,
+                    currentSetName: currentSetName,
+                    backCardImage: backCardImage,
+                    significatorIds: significatorIds,
+                    crystals: await loadCrystalsFromStorage(),
+                    soundSettings: soundSettings // 音声設定
+                };
 
-            const jsonStr = JSON.stringify(data, null, 2);
-            const blob = new Blob([jsonStr], {type: 'application/json'});
-            const fileName = 'mayumayan-oracle-backup.json';
+                const jsonStr = JSON.stringify(data, null, 2);
+                const blob = new Blob([jsonStr], {type: 'application/json'});
+                const fileName = 'mayumayan-oracle-backup.json';
 
-            // Web Share API対応（モバイル向け）
-            if (navigator.share && navigator.canShare) {
-                const file = new File([blob], fileName, {type: 'application/json'});
-                if (navigator.canShare({files: [file]})) {
-                    navigator.share({
-                        title: 'OracleForge Backup',
-                        files: [file]
-                    }).then(() => {
-                        const msg = currentLang === 'ja'
-                            ? 'エクスポート完了！'
-                            : 'Export complete!';
-                        alert(msg);
-                    }).catch(e => {
-                        // ユーザーがキャンセルした場合は何もしない
+                // Web Share API対応（モバイル向け）
+                if (navigator.share) {
+                    try {
+                        const file = new File([blob], fileName, {type: 'application/json'});
+                        const canShareFiles = typeof navigator.canShare === 'function'
+                            ? navigator.canShare({files: [file]})
+                            : false;
+
+                        if (canShareFiles) {
+                            await navigator.share({
+                                title: 'OracleForge Backup',
+                                files: [file]
+                            });
+                            const msg = currentLang === 'ja'
+                                ? 'エクスポート完了！'
+                                : 'Export complete!';
+                            alert(msg);
+                            return;
+                        }
+                    } catch (e) {
+                        // ユーザーキャンセルや非対応端末の場合はダウンロードへフォールバック
                         if (e.name !== 'AbortError') {
                             console.warn('Share failed, falling back to download:', e);
-                            downloadExportFile(blob, fileName);
                         }
-                    });
-                    return;
+                    }
                 }
-            }
 
-            // フォールバック：ダウンロード
-            downloadExportFile(blob, fileName);
+                // フォールバック：ダウンロード
+                downloadExportFile(blob, fileName);
+            } catch (e) {
+                console.error('Export failed:', e);
+                const msg = currentLang === 'ja'
+                    ? `エクスポートに失敗しました: ${e.message}`
+                    : `Failed to export: ${e.message}`;
+                alert(msg);
+            }
         }
 
         function downloadExportFile(blob, fileName) {
