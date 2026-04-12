@@ -2515,7 +2515,7 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
             },
             legacyStorageKey: 'oracleforge_ads_removed',
             entitlementsStorageKey: 'app_entitlements',
-            freeSaveLimit: 20
+            freeSaveLimit: 3
         };
 
         class IAPManager {
@@ -5371,7 +5371,7 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
         }
 
         // セット管理
-        function createNewSet() {
+        async function createNewSet() {
             const setName = document.getElementById('new-set-name').value.trim();
             if (!setName) {
                 alert('セット名を入力');
@@ -5379,6 +5379,35 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
             }
             if (cardSets[setName]) {
                 alert('既に存在します');
+                return;
+            }
+
+            // セット保存上限チェック（無料: 3件、保存無制限プラン: 無制限）
+            const setLimit = getSetSaveLimit();
+            const currentSetCount = Object.keys(cardSets).length;
+            if (Number.isFinite(setLimit) && currentSetCount >= setLimit) {
+                const decision = await showModal({
+                    title: currentLang === 'ja' ? 'セット保存上限' : 'Set limit reached',
+                    bodyHtml: currentLang === 'ja'
+                        ? `<p>無料プランでは最大${setLimit}件までセットを保存できます。</p><p>保存無制限プランを購入すると無制限に保存できます。</p>`
+                        : `<p>Free plan allows up to ${setLimit} saved sets.</p><p>Purchase Unlimited Saves to save unlimited sets.</p>`,
+                    closeOnBackdrop: true,
+                    buttons: [
+                        {
+                            label: currentLang === 'ja' ? '保存無制限を購入' : 'Buy Unlimited Saves',
+                            variant: 'primary',
+                            value: 'purchase'
+                        },
+                        {
+                            label: currentLang === 'ja' ? 'キャンセル' : 'Cancel',
+                            variant: 'ghost',
+                            value: 'cancel'
+                        }
+                    ]
+                });
+                if (decision === 'purchase') {
+                    await purchaseSavePlus();
+                }
                 return;
             }
 
@@ -6631,26 +6660,17 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
             });
         }
 
-        function getCrystalSaveLimit() {
-            if (iapManager) {
-                return iapManager.getSaveLimit();
-            }
+        function getSetSaveLimit() {
+            if (iapManager) return iapManager.getSaveLimit();
             return IAP_CONFIG.freeSaveLimit;
         }
 
         function updateCrystalSaveLimitNote() {
             const limitNote = document.getElementById('crystal-save-limit-note');
             if (!limitNote) return;
-            const limit = getCrystalSaveLimit();
-            if (Number.isFinite(limit)) {
-                limitNote.textContent = currentLang === 'ja'
-                    ? `※最新${limit}件まで保存されます（古いものは自動削除）`
-                    : `※Up to ${limit} entries saved (older ones auto-deleted)`;
-            } else {
-                limitNote.textContent = currentLang === 'ja'
-                    ? '※保存は無制限です（保存無制限プラン有効）'
-                    : '※Unlimited saves are enabled';
-            }
+            limitNote.textContent = currentLang === 'ja'
+                ? '※最新20件まで保存されます（古いものは自動削除）'
+                : '※Up to 20 entries saved (older ones auto-deleted)';
         }
 
         function showConfirmModal(message, titleText) {
@@ -7048,52 +7068,11 @@ sigBadge + '</strong><br>' + (descText || noDescText) + '</div>';
                 showAlertModal(currentLang === 'ja' ? 'メモを入力してください' : 'Please enter a note');
                 return;
             }
-            
+
             const crystals = await loadCrystalsFromStorage();
-            const saveLimit = getCrystalSaveLimit();
-
-            if (Number.isFinite(saveLimit) && crystals.length >= saveLimit) {
-                const decision = await showModal({
-                    title: currentLang === 'ja' ? '保存上限に達しました' : 'Save limit reached',
-                    bodyHtml: currentLang === 'ja'
-                        ? `<p>通常プランでは最大${saveLimit}件まで保存できます。</p><p>保存無制限プランを購入するか、最古の保存を削除して続けてください。</p>`
-                        : `<p>The standard plan allows up to ${saveLimit} saved entries.</p><p>Purchase Unlimited Saves, or remove the oldest save to continue.</p>`,
-                    closeOnBackdrop: false,
-                    buttons: [
-                        {
-                            label: currentLang === 'ja' ? '保存無制限を購入' : 'Buy Unlimited Saves',
-                            variant: 'primary',
-                            value: 'purchase'
-                        },
-                        {
-                            label: currentLang === 'ja' ? '最古を削除して保存' : 'Delete oldest and save',
-                            variant: 'secondary',
-                            value: 'replace'
-                        },
-                        {
-                            label: currentLang === 'ja' ? 'キャンセル' : 'Cancel',
-                            variant: 'ghost',
-                            value: 'cancel'
-                        }
-                    ]
-                });
-
-                if (decision === 'purchase') {
-                    const success = await purchaseSavePlus();
-                    if (!success || Number.isFinite(getCrystalSaveLimit())) {
-                        return;
-                    }
-                } else if (decision === 'replace') {
-                    crystals.pop();
-                } else {
-                    return;
-                }
-            }
-
             crystals.unshift({date: new Date().toLocaleDateString('ja-JP'), text: note});
-            const activeSaveLimit = getCrystalSaveLimit();
-            if (Number.isFinite(activeSaveLimit) && crystals.length > activeSaveLimit) crystals.pop();
-            
+            if (crystals.length > 20) crystals.pop();
+
             await saveCrystalsToStorage(crystals);
             document.getElementById('crystalNote').value = '';
             await loadCrystals();
