@@ -2969,6 +2969,7 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
                 return;
             }
 
+
             const success = await iapManager.purchaseRemoveAds();
             if (!success && !iapManager.isAdsRemoved()) {
                 showGenericModal(
@@ -3002,6 +3003,7 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
                 );
                 return true;
             }
+
 
             const success = await iapManager.purchaseSavePlus();
             if (!success) {
@@ -7359,6 +7361,32 @@ sigBadge + '</strong><br>' + (descText || noDescText) + '</div>';
             if (!copied) {
                 throw new Error('Clipboard API unavailable');
             }
+        }
+
+        function showExportFallbackModal(jsonStr) {
+            const message = currentLang === 'ja'
+                ? 'この環境ではファイル保存ダイアログが出ない場合があります。下の「コピー」ボタンでバックアップJSONをクリップボードへ保存してください。'
+                : 'This environment may not show a file-save dialog. Use the Copy button to copy backup JSON to clipboard.';
+
+            showGenericModal(
+                currentLang === 'ja' ? 'エクスポート（代替手段）' : 'Export (Fallback)',
+                message,
+                [
+                    {
+                        text: currentLang === 'ja' ? 'コピー' : 'Copy',
+                        onClick: async () => {
+                            try {
+                                await navigator.clipboard.writeText(jsonStr);
+                                alert(currentLang === 'ja' ? 'コピーしました' : 'Copied');
+                            } catch (e) {
+                                console.error('Export fallback copy failed:', e);
+                                alert(currentLang === 'ja' ? 'コピーに失敗しました' : 'Copy failed');
+                            }
+                        }
+                    },
+                    { text: 'OK', onClick: closeGenericModal }
+                ]
+            );
         }
 
         // インポート機能
