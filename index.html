@@ -2955,6 +2955,11 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
                 return;
             }
 
+            if (!iapManager.isNative || !window.CdvPurchase) {
+                showIapUnavailableGuide();
+                return;
+            }
+
             const success = await iapManager.purchaseRemoveAds();
             if (!success && !iapManager.isAdsRemoved()) {
                 showGenericModal(
@@ -2972,6 +2977,11 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
                     currentLang === 'ja' ? '課金機能が利用できません' : 'In-app purchase is not available',
                     [{ text: 'OK', onClick: closeGenericModal }]
                 );
+                return false;
+            }
+
+            if (!iapManager.isNative || !window.CdvPurchase) {
+                showIapUnavailableGuide();
                 return false;
             }
 
@@ -2996,6 +3006,11 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
                 return;
             }
 
+            if (!iapManager.isNative || !window.CdvPurchase) {
+                showIapUnavailableGuide();
+                return;
+            }
+
             const success = await iapManager.restorePurchases();
             if (success) {
                 showGenericModal(
@@ -3010,6 +3025,23 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
                     [{ text: 'OK', onClick: closeGenericModal }]
                 );
             }
+        }
+
+        function showIapUnavailableGuide() {
+            const isNativeApp = typeof window.Capacitor !== 'undefined' && window.Capacitor.isNativePlatform();
+            const message = isNativeApp
+                ? (currentLang === 'ja'
+                    ? 'このビルドでは課金プラグインが初期化されていません。\n\nAndroid実機で課金を確認するには、Google Play Consoleに登録したテストアカウントで、内部テスト配信版（Playストア経由でインストール）を使う必要があります。USB直インストール（Android StudioのRun）では課金画面が出ないことがあります。'
+                    : 'Billing plugin is not initialized in this build.\n\nTo verify Android billing, install an internal test build from Google Play using a licensed tester account. Purchases may not appear on USB sideload builds from Android Studio.')
+                : (currentLang === 'ja'
+                    ? 'Web表示では課金は動作しません。Android/iOSのネイティブアプリで確認してください。'
+                    : 'In-app purchases are not available on web. Please test in the native Android/iOS app.');
+
+            showGenericModal(
+                currentLang === 'ja' ? '課金テストについて' : 'About Billing Test',
+                message,
+                [{ text: 'OK', onClick: closeGenericModal }]
+            );
         }
 
         // グローバル変数
@@ -7174,6 +7206,7 @@ sigBadge + '</strong><br>' + (descText || noDescText) + '</div>';
         // エクスポート機能
         async function exportData() {
             try {
+                const isNativeApp = typeof window.Capacitor !== 'undefined' && window.Capacitor.isNativePlatform();
                 const data = {
                     version: 2, // バージョンアップ（activeCount追加）
                     exportDate: new Date().toISOString(),
@@ -7218,6 +7251,11 @@ sigBadge + '</strong><br>' + (descText || noDescText) + '</div>';
                     }
                 }
 
+                if (isNativeApp) {
+                    showExportFallbackModal(jsonStr);
+                    return;
+                }
+
                 // フォールバック：ダウンロード
                 downloadExportFile(blob, fileName);
             } catch (e) {
@@ -7243,6 +7281,32 @@ sigBadge + '</strong><br>' + (descText || noDescText) + '</div>';
                 ? 'エクスポート完了！\nバックアップファイルが保存されました。'
                 : 'Export complete!\nBackup file has been saved.';
             alert(msg);
+        }
+
+        function showExportFallbackModal(jsonStr) {
+            const message = currentLang === 'ja'
+                ? 'この環境ではファイル保存ダイアログが出ない場合があります。下の「コピー」ボタンでバックアップJSONをクリップボードへ保存してください。'
+                : 'This environment may not show a file-save dialog. Use the Copy button to copy backup JSON to clipboard.';
+
+            showGenericModal(
+                currentLang === 'ja' ? 'エクスポート（代替手段）' : 'Export (Fallback)',
+                message,
+                [
+                    {
+                        text: currentLang === 'ja' ? 'コピー' : 'Copy',
+                        onClick: async () => {
+                            try {
+                                await navigator.clipboard.writeText(jsonStr);
+                                alert(currentLang === 'ja' ? 'コピーしました' : 'Copied');
+                            } catch (e) {
+                                console.error('Export fallback copy failed:', e);
+                                alert(currentLang === 'ja' ? 'コピーに失敗しました' : 'Copy failed');
+                            }
+                        }
+                    },
+                    { text: 'OK', onClick: closeGenericModal }
+                ]
+            );
         }
 
         // インポート機能
