@@ -2731,15 +2731,15 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
                 if (removeAdsBtn) {
                     const removeAdsPrice = removeAdsProduct?.price ? ` (${removeAdsProduct.price})` : '';
                     removeAdsBtn.textContent = (currentLang === 'ja' ? '広告を非表示にする' : 'Hide Ads') + removeAdsPrice;
-                    removeAdsBtn.disabled = this.entitlements.ads_removed;
-                    removeAdsBtn.style.opacity = this.entitlements.ads_removed ? '0.6' : '1';
+                    removeAdsBtn.disabled = false;
+                    removeAdsBtn.style.opacity = this.entitlements.ads_removed ? '0.75' : '1';
                 }
 
                 if (savePlusBtn) {
                     const savePlusPrice = savePlusProduct?.price ? ` (${savePlusProduct.price})` : '';
                     savePlusBtn.textContent = (currentLang === 'ja' ? '保存無制限＋広告削除' : 'Unlimited Saves + Remove Ads') + savePlusPrice;
-                    savePlusBtn.disabled = this.entitlements.save_plus;
-                    savePlusBtn.style.opacity = this.entitlements.save_plus ? '0.6' : '1';
+                    savePlusBtn.disabled = false;
+                    savePlusBtn.style.opacity = this.entitlements.save_plus ? '0.75' : '1';
                 }
 
                 if (restoreBtn) {
@@ -2960,6 +2960,16 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
                 return;
             }
 
+            if (iapManager.isAdsRemoved()) {
+                showGenericModal(
+                    currentLang === 'ja' ? '購入済み' : 'Already Active',
+                    currentLang === 'ja' ? 'このプランはすでに有効です。' : 'This plan is already active.',
+                    [{ text: 'OK', onClick: closeGenericModal }]
+                );
+                return;
+            }
+
+
             const success = await iapManager.purchaseRemoveAds();
             if (!success && !iapManager.isAdsRemoved()) {
                 showGenericModal(
@@ -2984,6 +2994,16 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
                 showIapUnavailableGuide();
                 return false;
             }
+
+            if (iapManager.hasUnlimitedSaves()) {
+                showGenericModal(
+                    currentLang === 'ja' ? '購入済み' : 'Already Active',
+                    currentLang === 'ja' ? '保存無制限プランはすでに有効です。' : 'Unlimited save plan is already active.',
+                    [{ text: 'OK', onClick: closeGenericModal }]
+                );
+                return true;
+            }
+
 
             const success = await iapManager.purchaseSavePlus();
             if (!success) {
@@ -7207,6 +7227,12 @@ sigBadge + '</strong><br>' + (descText || noDescText) + '</div>';
         async function exportData() {
             try {
                 const isNativeApp = typeof window.Capacitor !== 'undefined' && window.Capacitor.isNativePlatform();
+                let crystals = [];
+                try {
+                    crystals = await loadCrystalsFromStorage();
+                } catch (storageError) {
+                    console.warn('Export: Failed to load crystals, continuing with empty list', storageError);
+                }
                 const data = {
                     version: 2, // バージョンアップ（activeCount追加）
                     exportDate: new Date().toISOString(),
@@ -7216,7 +7242,7 @@ sigBadge + '</strong><br>' + (descText || noDescText) + '</div>';
                     currentSetName: currentSetName,
                     backCardImage: backCardImage,
                     significatorIds: significatorIds,
-                    crystals: await loadCrystalsFromStorage(),
+                    crystals: crystals,
                     soundSettings: soundSettings // 音声設定
                 };
 
@@ -7227,6 +7253,9 @@ sigBadge + '</strong><br>' + (descText || noDescText) + '</div>';
                 // Web Share API対応（モバイル向け）
                 if (navigator.share) {
                     try {
+                        if (typeof File === 'undefined') {
+                            throw new Error('File API is unavailable');
+                        }
                         const file = new File([blob], fileName, {type: 'application/json'});
                         const canShareFiles = typeof navigator.canShare === 'function'
                             ? navigator.canShare({files: [file]})
@@ -7257,7 +7286,7 @@ sigBadge + '</strong><br>' + (descText || noDescText) + '</div>';
                 }
 
                 // フォールバック：ダウンロード
-                downloadExportFile(blob, fileName);
+                downloadExportFile(blob, fileName, jsonStr);
             } catch (e) {
                 console.error('Export failed:', e);
                 const msg = currentLang === 'ja'
@@ -7267,20 +7296,71 @@ sigBadge + '</strong><br>' + (descText || noDescText) + '</div>';
             }
         }
 
-        function downloadExportFile(blob, fileName) {
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = fileName;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+        function downloadExportFile(blob, fileName, jsonStr = '') {
+            try {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
 
-            const msg = currentLang === 'ja'
-                ? 'エクスポート完了！\nバックアップファイルが保存されました。'
-                : 'Export complete!\nBackup file has been saved.';
-            alert(msg);
+                const msg = currentLang === 'ja'
+                    ? 'エクスポート完了！\nバックアップファイルが保存されました。'
+                    : 'Export complete!\nBackup file has been saved.';
+                alert(msg);
+            } catch (e) {
+                console.error('Download fallback failed:', e);
+                showExportFallbackModal(jsonStr);
+            }
+        }
+
+        function showExportFallbackModal(jsonStr) {
+            const message = currentLang === 'ja'
+                ? 'この環境ではファイル保存ダイアログが出ない場合があります。下の「コピー」ボタンでバックアップJSONをクリップボードへ保存してください。'
+                : 'This environment may not show a file-save dialog. Use the Copy button to copy backup JSON to clipboard.';
+
+            showGenericModal(
+                currentLang === 'ja' ? 'エクスポート（代替手段）' : 'Export (Fallback)',
+                message,
+                [
+                    {
+                        text: currentLang === 'ja' ? 'コピー' : 'Copy',
+                        onClick: async () => {
+                            try {
+                                await copyTextFallback(jsonStr);
+                                alert(currentLang === 'ja' ? 'コピーしました' : 'Copied');
+                            } catch (e) {
+                                console.error('Export fallback copy failed:', e);
+                                alert(currentLang === 'ja' ? 'コピーに失敗しました' : 'Copy failed');
+                            }
+                        }
+                    },
+                    { text: 'OK', onClick: closeGenericModal }
+                ]
+            );
+        }
+
+        async function copyTextFallback(text) {
+            if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+                await navigator.clipboard.writeText(text);
+                return;
+            }
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.left = '-9999px';
+            textarea.style.top = '0';
+            document.body.appendChild(textarea);
+            textarea.focus();
+            textarea.select();
+            const copied = document.execCommand('copy');
+            document.body.removeChild(textarea);
+            if (!copied) {
+                throw new Error('Clipboard API unavailable');
+            }
         }
 
         function showExportFallbackModal(jsonStr) {
