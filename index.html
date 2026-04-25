@@ -2993,14 +2993,8 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
             if (!iapManager) {
                 showGenericModal(
                     currentLang === 'ja' ? 'エラー' : 'Error',
-                    currentLang === 'ja' ? '課金機能が利用できません' : 'In-app purchase is not available',
-                    [{ text: 'OK', onClick: closeGenericModal }]
+                    currentLang === 'ja' ? '課金機能が利用できません' : 'In-app purchase is not available'
                 );
-                return;
-            }
-
-            if (!iapManager.isNative || !window.CdvPurchase) {
-                showIapUnavailableGuide();
                 return;
             }
 
@@ -3013,12 +3007,15 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
                 return;
             }
 
+            if (!iapManager.isNative || !window.CdvPurchase) {
+                showIapUnavailableGuide(IAP_CONFIG.products.removeAds);
+                return;
+            }
             const success = await iapManager.purchaseRemoveAds();
             if (!success && !iapManager.isAdsRemoved()) {
                 showGenericModal(
                     currentLang === 'ja' ? 'お知らせ' : 'Notice',
-                    currentLang === 'ja' ? 'アプリ内で購入を完了してください' : 'Please complete the purchase in the app',
-                    [{ text: 'OK', onClick: closeGenericModal }]
+                    currentLang === 'ja' ? 'アプリ内で購入を完了してください' : 'Please complete the purchase in the app'
                 );
             }
         }
@@ -3027,14 +3024,8 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
             if (!iapManager) {
                 showGenericModal(
                     currentLang === 'ja' ? 'エラー' : 'Error',
-                    currentLang === 'ja' ? '課金機能が利用できません' : 'In-app purchase is not available',
-                    [{ text: 'OK', onClick: closeGenericModal }]
+                    currentLang === 'ja' ? '課金機能が利用できません' : 'In-app purchase is not available'
                 );
-                return false;
-            }
-
-            if (!iapManager.isNative || !window.CdvPurchase) {
-                showIapUnavailableGuide();
                 return false;
             }
 
@@ -3047,12 +3038,15 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
                 return true;
             }
 
+            if (!iapManager.isNative || !window.CdvPurchase) {
+                showIapUnavailableGuide(iapManager.getPreferredSavePlusProduct());
+                return false;
+            }
             const success = await iapManager.purchaseSavePlus();
             if (!success) {
                 showGenericModal(
                     currentLang === 'ja' ? 'お知らせ' : 'Notice',
-                    currentLang === 'ja' ? 'アプリ内で購入を完了してください' : 'Please complete the purchase in the app',
-                    [{ text: 'OK', onClick: closeGenericModal }]
+                    currentLang === 'ja' ? 'アプリ内で購入を完了してください' : 'Please complete the purchase in the app'
                 );
             }
             return success;
@@ -3062,14 +3056,13 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
             if (!iapManager) {
                 showGenericModal(
                     currentLang === 'ja' ? 'エラー' : 'Error',
-                    currentLang === 'ja' ? '課金機能が利用できません' : 'In-app purchase is not available',
-                    [{ text: 'OK', onClick: closeGenericModal }]
+                    currentLang === 'ja' ? '課金機能が利用できません' : 'In-app purchase is not available'
                 );
                 return;
             }
 
             if (!iapManager.isNative || !window.CdvPurchase) {
-                showIapUnavailableGuide();
+                showIapUnavailableGuide(null);
                 return;
             }
 
@@ -3077,32 +3070,50 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
             if (success) {
                 showGenericModal(
                     currentLang === 'ja' ? '復元完了' : 'Restore Complete',
-                    currentLang === 'ja' ? '購入履歴を確認しました' : 'Purchase history has been verified',
-                    [{ text: 'OK', onClick: closeGenericModal }]
+                    currentLang === 'ja' ? '購入履歴を確認しました' : 'Purchase history has been verified'
                 );
             } else {
                 showGenericModal(
                     currentLang === 'ja' ? 'お知らせ' : 'Notice',
-                    currentLang === 'ja' ? '復元する購入履歴がありません' : 'No purchases to restore',
-                    [{ text: 'OK', onClick: closeGenericModal }]
+                    currentLang === 'ja' ? '復元する購入履歴がありません' : 'No purchases to restore'
                 );
             }
         }
 
-        function showIapUnavailableGuide() {
+        function showIapUnavailableGuide(pendingProductId = null) {
             const isNativeApp = typeof window.Capacitor !== 'undefined' && window.Capacitor.isNativePlatform();
             const message = isNativeApp
                 ? (currentLang === 'ja'
-                    ? 'このビルドでは課金プラグインが初期化されていません。\n\nAndroid実機で課金を確認するには、Google Play Consoleに登録したテストアカウントで、内部テスト配信版（Playストア経由でインストール）を使う必要があります。USB直インストール（Android StudioのRun）では課金画面が出ないことがあります。'
-                    : 'Billing plugin is not initialized in this build.\n\nTo verify Android billing, install an internal test build from Google Play using a licensed tester account. Purchases may not appear on USB sideload builds from Android Studio.')
+                    ? 'このビルドでは課金プラグイン（cordova-plugin-purchase）が読み込まれていません。\n\n実課金を確認するには:\n1) npm install && npx cap sync を実行\n2) Google Play Console で内部テスト配信を作成\n3) ライセンス テスターでインストール\n\nUSB直インストールでも UI 動作だけを確認したい場合は「テスト購入（ローカル）」を使ってください。'
+                    : 'The billing plugin (cordova-plugin-purchase) is not loaded in this build.\n\nTo verify real billing:\n1) Run npm install && npx cap sync\n2) Create an internal test track on Google Play Console\n3) Install via a licensed tester account\n\nTo only verify the UI on a USB build, use "Test Purchase (local)".')
                 : (currentLang === 'ja'
-                    ? 'Web表示では課金は動作しません。Android/iOSのネイティブアプリで確認してください。'
-                    : 'In-app purchases are not available on web. Please test in the native Android/iOS app.');
+                    ? 'Web表示では課金は動作しません。Android/iOSのネイティブアプリで確認してください。\nUI動作だけを確認したい場合は「テスト購入（ローカル）」を使ってください。'
+                    : 'In-app purchases are not available on web. Please test in the native app.\nUse "Test Purchase (local)" to verify the UI only.');
+
+            const buttons = [];
+            if (pendingProductId) {
+                buttons.push({
+                    text: currentLang === 'ja' ? 'テスト購入（ローカル）' : 'Test Purchase (local)',
+                    variant: 'primary',
+                    onClick: () => {
+                        if (iapManager) {
+                            iapManager.setEntitlementsFromPurchase(pendingProductId);
+                            showGenericModal(
+                                currentLang === 'ja' ? 'テスト購入を適用しました' : 'Test Purchase Applied',
+                                currentLang === 'ja'
+                                    ? 'この端末上でエンタイトルメントを有効にしました（Play課金は未処理）。リリース前に必ず実機＋Playテスト配信で検証してください。'
+                                    : 'Entitlement enabled locally (no real Play payment). Always verify with a Play test track before release.'
+                            );
+                        }
+                    }
+                });
+            }
+            buttons.push({ text: 'OK', variant: 'ghost' });
 
             showGenericModal(
                 currentLang === 'ja' ? '課金テストについて' : 'About Billing Test',
                 message,
-                [{ text: 'OK', onClick: closeGenericModal }]
+                buttons
             );
         }
 
@@ -6754,6 +6765,28 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
             }
         }
 
+        // 互換ラッパー: showGenericModal(title, message, [{ text, onClick }])
+        // 課金/エクスポート系のコードが呼び出す旧API形式を、現行の showModal に橋渡しする。
+        function showGenericModal(title, message, buttons = []) {
+            const normalized = (Array.isArray(buttons) && buttons.length ? buttons : [{ text: currentLang === 'ja' ? 'OK' : 'OK' }])
+                .map((btn, idx) => ({
+                    label: btn.label || btn.text || (currentLang === 'ja' ? 'OK' : 'OK'),
+                    variant: btn.variant || (idx === 0 ? 'primary' : 'ghost'),
+                    value: btn.value,
+                    onClick: btn.onClick,
+                    closeOnClick: btn.closeOnClick
+                }));
+            const bodyHtml = typeof message === 'string'
+                ? `<p style="white-space:pre-wrap;">${escapeHtml(message)}</p>`
+                : '';
+            return showModal({
+                title: title || '',
+                bodyHtml,
+                buttons: normalized,
+                closeOnBackdrop: true
+            });
+        }
+
         function showModal({ title = '', bodyHtml = '', buttons = [], closeOnBackdrop = true } = {}) {
             const modal = document.getElementById('genericModal');
             const titleEl = document.getElementById('genericModalTitle');
@@ -7345,6 +7378,30 @@ sigBadge + '</strong><br>' + (descText || noDescText) + '</div>';
                 const blob = new Blob([jsonStr], {type: 'application/json'});
                 const fileName = 'mayumayan-oracle-backup.json';
 
+                // Androidネイティブブリッジ経由で共有（WebView の Web Share よりも確実）
+                if (isNativeApp && window.NativeExport && typeof window.NativeExport.shareJson === 'function') {
+                    try {
+                        const nativeResult = await new Promise((resolve) => {
+                            window.onNativeExportResult = (success, message) => {
+                                window.onNativeExportResult = null;
+                                resolve({ success, message: message || '' });
+                            };
+                            try {
+                                window.NativeExport.shareJson(fileName, jsonStr);
+                            } catch (err) {
+                                window.onNativeExportResult = null;
+                                resolve({ success: false, message: err && err.message ? err.message : String(err) });
+                            }
+                        });
+                        if (nativeResult.success) {
+                            return;
+                        }
+                        console.warn('NativeExport.shareJson failed, falling back:', nativeResult.message);
+                    } catch (e) {
+                        console.warn('NativeExport bridge error, falling back:', e);
+                    }
+                }
+
                 // Web Share API対応（モバイル向け）
                 if (navigator.share) {
                     try {
@@ -7369,9 +7426,10 @@ sigBadge + '</strong><br>' + (descText || noDescText) + '</div>';
                         }
                     } catch (e) {
                         // ユーザーキャンセルや非対応端末の場合はダウンロードへフォールバック
-                        if (e.name !== 'AbortError') {
-                            console.warn('Share failed, falling back to download:', e);
+                        if (e.name === 'AbortError') {
+                            return;
                         }
+                        console.warn('Share failed, falling back:', e);
                     }
                 }
 
