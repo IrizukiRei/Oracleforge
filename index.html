@@ -2707,16 +2707,49 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                     return false;
                 }
 
+                const product = this.store.get(productId);
+                if (!product) {
+                    console.warn('IAP: Product not found', productId);
+                    showGenericModal(
+                        currentLang === 'ja' ? '購入できません' : 'Purchase Unavailable',
+                        currentLang === 'ja'
+                            ? `商品情報を取得できません（${productId}）。Play Console で商品が「アクティブ」になっているか、商品IDが一致しているか確認してください。`
+                            : `Could not load product info (${productId}). Verify the product is Active in Play Console and the product ID matches.`
+                    );
+                    return false;
+                }
+
+                const offer = (typeof product.getOffer === 'function' ? product.getOffer() : null)
+                    || (Array.isArray(product.offers) ? product.offers[0] : null);
+                if (!offer) {
+                    console.warn('IAP: No offer available for product', productId, product);
+                    showGenericModal(
+                        currentLang === 'ja' ? '購入できません' : 'Purchase Unavailable',
+                        currentLang === 'ja'
+                            ? `購入オファーが見つかりません（${productId}）。Play Console で価格と国別配信が設定されているか確認してください。`
+                            : `No purchase offer found (${productId}). Verify the product has a price and country availability set in Play Console.`
+                    );
+                    return false;
+                }
+
                 try {
-                    const product = this.store.get(productId);
-                    if (!product) {
-                        console.warn('IAP: Product not found', productId);
+                    const result = await this.store.order(offer);
+                    if (result && result.isError) {
+                        console.error('IAP: Order returned error', result);
+                        showGenericModal(
+                            currentLang === 'ja' ? '購入を開始できませんでした' : 'Could Not Start Purchase',
+                            `${result.message || result.code || 'Unknown error'}`
+                        );
                         return false;
                     }
-                    await this.store.order(product);
                     return true;
                 } catch (e) {
                     console.error('IAP: Purchase failed', e);
+                    const detail = (e && (e.message || e.code)) ? String(e.message || e.code) : String(e);
+                    showGenericModal(
+                        currentLang === 'ja' ? '購入エラー' : 'Purchase Error',
+                        detail
+                    );
                     return false;
                 }
             }
@@ -3014,13 +3047,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                 showIapUnavailableGuide(IAP_CONFIG.products.removeAds);
                 return;
             }
-            const success = await iapManager.purchaseRemoveAds();
-            if (!success && !iapManager.isAdsRemoved()) {
-                showGenericModal(
-                    currentLang === 'ja' ? 'お知らせ' : 'Notice',
-                    currentLang === 'ja' ? 'アプリ内で購入を完了してください' : 'Please complete the purchase in the app'
-                );
-            }
+            await iapManager.purchaseRemoveAds();
         }
 
         async function purchaseSavePlus() {
@@ -3045,14 +3072,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                 showIapUnavailableGuide(iapManager.getPreferredSavePlusProduct());
                 return false;
             }
-            const success = await iapManager.purchaseSavePlus();
-            if (!success) {
-                showGenericModal(
-                    currentLang === 'ja' ? 'お知らせ' : 'Notice',
-                    currentLang === 'ja' ? 'アプリ内で購入を完了してください' : 'Please complete the purchase in the app'
-                );
-            }
-            return success;
+            return await iapManager.purchaseSavePlus();
         }
 
         async function restorePurchases() {
