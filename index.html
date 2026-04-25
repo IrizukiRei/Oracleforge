@@ -699,7 +699,8 @@
             font-size: 12.5px;
             line-height: 1.6;
             margin: 0;
-            white-space: pre-line;
+            word-break: keep-all;
+            overflow-wrap: anywhere;
         }
         .guide-note {
             margin-top: 18px;
@@ -843,6 +844,8 @@
             font-size: 12.5px;
             line-height: 1.7;
             margin: 0;
+            word-break: keep-all;
+            overflow-wrap: anywhere;
         }
         .lenormand-chip-row {
             position: relative;
@@ -1091,6 +1094,8 @@
             margin-bottom: 15px;
             font-size: 13px;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            word-break: keep-all;
+            overflow-wrap: anywhere;
         }
 
         .info-box h3 {
@@ -1974,7 +1979,7 @@
                     <div class="guide-step-num">4</div>
                     <div class="guide-step-body">
                         <h4 data-ja="設定" data-en="Settings">設定</h4>
-                        <p data-ja="右上の⚙️ボタンから設定を開きます。\n音量調整、データのエクスポート／インポート（機種変更時に便利）、\n広告削除の購入ができます。" data-en="Open Settings from the ⚙️ button at top-right.\nAdjust volume, export/import data (useful for device transfers),\nand purchase ad removal.">右上の⚙️ボタンから設定を開きます。<br>音量調整、データのエクスポート／インポート（機種変更時に便利）、<br>広告削除の購入ができます。</p>
+                        <p data-ja="右上の⚙️ボタンから設定を開きます。音量調整、データのエクスポート／インポート（機種変更時に便利）、広告削除の購入ができます。" data-en="Open Settings from the ⚙️ button at top-right. Adjust volume, export/import data (useful for device transfers), and purchase ad removal.">右上の⚙️ボタンから設定を開きます。音量調整、データのエクスポート／インポート（機種変更時に便利）、広告削除の購入ができます。</p>
                     </div>
                 </div>
             </div>
@@ -2064,9 +2069,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
         <!-- カード編集画面 -->
         <div id="edit-screen" class="screen active">
             <div class="info-box" style="background:rgba(255,200,100,0.15);border-color:rgba(255,200,100,0.4);">
-                <p style="margin:0;" data-ja="♡ ルノルマンは、日常の出来事を具体的に読み解く占術です。
-このアプリでは39枚プリセットを「セット」タブに用意しているので、すぐに占いを始められます。" data-en="♡ Lenormand is an oracle style that reads everyday situations in a practical way.
-This app includes a ready-to-use 39-card preset in the Sets tab, so you can start right away.">♡ ルノルマンは、日常の出来事を具体的に読み解く占術です。<br>このアプリでは39枚プリセットを「セット」タブに用意しているので、すぐに占いを始められます。</p>
+                <p style="margin:0;" data-ja="♡ ルノルマンは、日常の出来事を具体的に読み解く占術です。このアプリでは39枚プリセットを「セット」タブに用意しているので、すぐに占いを始められます。" data-en="♡ Lenormand is an oracle style that reads everyday situations in a practical way. This app includes a ready-to-use 39-card preset in the Sets tab, so you can start right away.">♡ ルノルマンは、日常の出来事を具体的に読み解く占術です。このアプリでは39枚プリセットを「セット」タブに用意しているので、すぐに占いを始められます。</p>
             </div>
 
             <div id="storage-warning" class="storage-warning compact" style="display:none;">
@@ -6951,7 +6954,7 @@ This app includes a ready-to-use 39-card preset in the Sets tab, so you can star
         function showModalExample() {
             const title = currentLang === 'ja' ? 'モーダル例' : 'Modal Example';
             const bodyHtml = currentLang === 'ja'
-                ? '<p>課金ポップアップのように前面へ出す汎用モーダルです。<br>背景クリックで閉じる設定も可能です。</p>'
+                ? '<p>課金ポップアップのように前面へ出す汎用モーダルです。背景クリックで閉じる設定も可能です。</p>'
                 : '<p>This generic modal sits on top like a billing popup. You can also control backdrop closing.</p>';
             showModal({
                 title,
