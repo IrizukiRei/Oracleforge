@@ -2495,7 +2495,6 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                     <button class="btn" id="buy-remove-ads" onclick="purchaseRemoveAds()" style="padding:10px 15px;font-size:13px;background:rgba(100,200,100,0.2);border-color:rgba(100,200,100,0.5);" data-ja="広告を非表示にする" data-en="Hide Ads">広告を非表示にする</button>
                     <button class="btn" id="buy-save-plus" onclick="purchaseSavePlus()" style="padding:10px 15px;font-size:13px;background:rgba(100,160,255,0.2);border-color:rgba(100,160,255,0.5);" data-ja="保存無制限＋広告削除" data-en="Unlimited Saves + Remove Ads">保存無制限＋広告削除</button>
                     <button class="btn" id="restore-purchases" onclick="restorePurchases()" style="padding:10px 15px;font-size:13px;" data-ja="購入を復元" data-en="Restore Purchases">購入を復元</button>
-                    <button class="btn" id="billing-diagnostics" onclick="showBillingDiagnostics()" style="padding:10px 15px;font-size:13px;" data-ja="課金診断" data-en="Billing Diagnostics">課金診断</button>
                 </div>
             </div>
 
@@ -3137,59 +3136,6 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                 currentLang === 'ja' ? '課金テストについて' : 'About Billing Test',
                 message,
                 buttons
-            );
-        }
-
-        function showBillingDiagnostics() {
-            if (!iapManager) {
-                showGenericModal(
-                    currentLang === 'ja' ? '課金診断' : 'Billing Diagnostics',
-                    currentLang === 'ja' ? 'IAPマネージャーが初期化されていません。アプリを再起動してください。' : 'IAP manager is not initialized. Please restart the app.',
-                    [{ text: 'OK', onClick: closeGenericModal }]
-                );
-                return;
-            }
-
-            const state = iapManager.getDebugState();
-            const ok = currentLang === 'ja' ? '✅ OK' : '✅ OK';
-            const ng = currentLang === 'ja' ? '❌ NG' : '❌ NG';
-            const lines = [
-                `${currentLang === 'ja' ? 'ネイティブ実行' : 'Native runtime'}: ${state.isNative ? ok : ng}`,
-                `CdvPurchase: ${state.hasCdvPurchase ? ok : ng}`,
-                `${currentLang === 'ja' ? 'Store初期化' : 'Store initialized'}: ${state.hasStore ? ok : ng}`,
-                `${currentLang === 'ja' ? '広告削除権限' : 'Remove Ads entitlement'}: ${state.entitlements.ads_removed ? ok : ng}`,
-                `${currentLang === 'ja' ? '保存無制限権限' : 'Unlimited Saves entitlement'}: ${state.entitlements.save_plus ? ok : ng}`
-            ];
-
-            const productLines = state.products.map((p) => {
-                const status = p.loaded
-                    ? (p.owned ? (currentLang === 'ja' ? '購入済み' : 'Owned') : (currentLang === 'ja' ? '未購入' : 'Not owned'))
-                    : (currentLang === 'ja' ? '未取得' : 'Not loaded');
-                return `${p.id}: ${status} / ${currentLang === 'ja' ? '価格' : 'Price'}=${p.price}`;
-            });
-
-            const guide = currentLang === 'ja'
-                ? [
-                    '【確認手順】',
-                    '1) Play Console の内部テストに APK/AAB を配信',
-                    '2) テスターアカウントで Play ストアからインストール',
-                    '3) 同アカウントで Google Play にログイン',
-                    '4) 「購入を復元」を押して状態更新',
-                    '※ Android Studio の USB 直インストールでは課金UIが出ないことがあります'
-                ]
-                : [
-                    '[Verification Steps]',
-                    '1) Publish build to Play Console internal testing',
-                    '2) Install from Play Store with tester account',
-                    '3) Ensure same account is signed in to Google Play',
-                    '4) Tap Restore Purchases to refresh state',
-                    '* USB sideload from Android Studio may not show billing UI'
-                ];
-
-            showGenericModal(
-                currentLang === 'ja' ? '課金診断' : 'Billing Diagnostics',
-                [...lines, '', ...productLines, '', ...guide].join('\n'),
-                [{ text: 'OK', onClick: closeGenericModal }]
             );
         }
 
