@@ -2901,6 +2901,21 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                 return null;
             }
 
+            resolveAdMobBridge() {
+                // 1) Capacitor plugin bridge (works on plain index.html builds)
+                const bridgePlugin = window.Capacitor?.Plugins?.AdMob;
+                if (bridgePlugin) {
+                    return {
+                        AdMob: bridgePlugin,
+                        BannerAdSize: { ADAPTIVE_BANNER: 'ADAPTIVE_BANNER' },
+                        BannerAdPosition: { BOTTOM_CENTER: 'BOTTOM_CENTER' },
+                        source: 'capacitor-bridge'
+                    };
+                }
+
+                return null;
+            }
+
             async init() {
                 // 課金状態を確認
                 if (iapManager && iapManager.isAdsRemoved()) {
