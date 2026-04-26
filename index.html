@@ -2491,11 +2491,12 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                 <p style="font-size:12px;color:#aaa;margin-bottom:10px;" data-ja="広告を消すプランと、保存無制限＋広告削除プランを購入・復元できます。" data-en="You can purchase or restore two plans: Remove Ads, and Unlimited Saves + Remove Ads.">広告を消すプランと、保存無制限＋広告削除プランを購入・復元できます。</p>
                 <p id="ads-status" style="font-size:13px;color:#64c8ff;margin-bottom:6px;"></p>
                 <p id="save-plus-status" style="font-size:13px;color:#64c8ff;margin-bottom:10px;"></p>
+                <p id="ad-test-status" style="font-size:12px;color:#ffcc80;margin-bottom:8px;"></p>
                 <div style="display:flex;gap:10px;flex-wrap:wrap;">
                     <button class="btn" id="buy-remove-ads" onclick="purchaseRemoveAds()" style="padding:10px 15px;font-size:13px;background:rgba(100,200,100,0.2);border-color:rgba(100,200,100,0.5);" data-ja="広告を非表示にする" data-en="Hide Ads">広告を非表示にする</button>
                     <button class="btn" id="buy-save-plus" onclick="purchaseSavePlus()" style="padding:10px 15px;font-size:13px;background:rgba(100,160,255,0.2);border-color:rgba(100,160,255,0.5);" data-ja="保存無制限＋広告削除" data-en="Unlimited Saves + Remove Ads">保存無制限＋広告削除</button>
                     <button class="btn" id="restore-purchases" onclick="restorePurchases()" style="padding:10px 15px;font-size:13px;" data-ja="購入を復元" data-en="Restore Purchases">購入を復元</button>
-                    <button class="btn" id="billing-diagnostics" onclick="showBillingDiagnostics()" style="padding:10px 15px;font-size:13px;" data-ja="課金診断" data-en="Billing Diagnostics">課金診断</button>
+                    <button class="btn" id="toggle-ad-test-mode" onclick="toggleAdTestMode()" style="padding:10px 15px;font-size:13px;" data-ja="広告テストモード切替" data-en="Toggle Ad Test Mode">広告テストモード切替</button>
                 </div>
             </div>
 
@@ -2862,6 +2863,9 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
             // Production Ad IDs for Oracle Forge
             bannerId: 'ca-app-pub-3926825794244395/2282840259',
             interstitialId: 'ca-app-pub-3926825794244395/1659684417',
+            // Google official test ad unit IDs (Android)
+            testBannerId: 'ca-app-pub-3940256099942544/9214589741',
+            testInterstitialId: 'ca-app-pub-3940256099942544/1033173712',
             // Screens where banner should be hidden
             hideBannerScreens: ['reading', 'ritual'],
             // Frequency cap settings
@@ -2879,6 +2883,22 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                 // フリクエンシーキャップ用
                 this.lastInterstitialTime = 0;
                 this.interstitialCount = 0;
+                this.isTestMode = localStorage.getItem('admobTestMode') === 'true';
+            }
+
+            resolveAdMobBridge() {
+                // 1) Capacitor plugin bridge (works on plain index.html builds)
+                const bridgePlugin = window.Capacitor?.Plugins?.AdMob;
+                if (bridgePlugin) {
+                    return {
+                        AdMob: bridgePlugin,
+                        BannerAdSize: { ADAPTIVE_BANNER: 'ADAPTIVE_BANNER' },
+                        BannerAdPosition: { BOTTOM_CENTER: 'BOTTOM_CENTER' },
+                        source: 'capacitor-bridge'
+                    };
+                }
+
+                return null;
             }
 
             async init() {
@@ -2895,24 +2915,40 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                 }
 
                 try {
-                    // Dynamic import for Capacitor AdMob
-                    const { AdMob, BannerAdSize, BannerAdPosition } = await import('@capacitor-community/admob');
-                    this.AdMob = AdMob;
-                    this.BannerAdSize = BannerAdSize;
-                    this.BannerAdPosition = BannerAdPosition;
+                    let resolved = this.resolveAdMobBridge();
+
+                    // 2) Fallback: dynamic import (works when bundled)
+                    if (!resolved) {
+                        const imported = await import('@capacitor-community/admob');
+                        resolved = {
+                            AdMob: imported.AdMob,
+                            BannerAdSize: imported.BannerAdSize,
+                            BannerAdPosition: imported.BannerAdPosition,
+                            source: 'dynamic-import'
+                        };
+                    }
+
+                    if (!resolved || !resolved.AdMob) {
+                        throw new Error('AdMob plugin bridge not found');
+                    }
+
+                    this.AdMob = resolved.AdMob;
+                    this.BannerAdSize = resolved.BannerAdSize;
+                    this.BannerAdPosition = resolved.BannerAdPosition;
+                    console.log(`AdMob: Using ${resolved.source}`);
 
                     // Initialize AdMob
-                    await AdMob.initialize({
-                        initializeForTesting: false
+                    await this.AdMob.initialize({
+                        initializeForTesting: this.isTestMode
                     });
 
                     // Set up interstitial listener
-                    AdMob.addListener('onInterstitialAdLoaded', () => {
+                    this.AdMob.addListener('onInterstitialAdLoaded', () => {
                         this.interstitialLoaded = true;
                         console.log('AdMob: Interstitial ad loaded');
                     });
 
-                    AdMob.addListener('onInterstitialAdDismissed', () => {
+                    this.AdMob.addListener('onInterstitialAdDismissed', () => {
                         this.interstitialLoaded = false;
                         this.prepareInterstitial();
                     });
@@ -2942,7 +2978,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
 
                 try {
                     await this.AdMob.showBanner({
-                        adId: ADMOB_CONFIG.bannerId,
+                        adId: this.isTestMode ? ADMOB_CONFIG.testBannerId : ADMOB_CONFIG.bannerId,
                         adSize: this.BannerAdSize.ADAPTIVE_BANNER,
                         position: this.BannerAdPosition.BOTTOM_CENTER,
                         margin: 0
@@ -2973,7 +3009,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
 
                 try {
                     await this.AdMob.prepareInterstitial({
-                        adId: ADMOB_CONFIG.interstitialId
+                        adId: this.isTestMode ? ADMOB_CONFIG.testInterstitialId : ADMOB_CONFIG.interstitialId
                     });
                 } catch (e) {
                     console.error('AdMob: Failed to prepare interstitial', e);
@@ -3103,6 +3139,33 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
             }
         }
 
+        function updateAdTestStatusUI() {
+            const status = document.getElementById('ad-test-status');
+            if (!status) return;
+            const isTestMode = localStorage.getItem('admobTestMode') === 'true';
+            if (currentLang === 'ja') {
+                status.textContent = isTestMode
+                    ? '広告テストモード: ON（Google公式テスト広告ID）'
+                    : '広告テストモード: OFF（本番広告ID）';
+            } else {
+                status.textContent = isTestMode
+                    ? 'Ad test mode: ON (Google test ad unit IDs)'
+                    : 'Ad test mode: OFF (production ad unit IDs)';
+            }
+        }
+
+        function toggleAdTestMode() {
+            const current = localStorage.getItem('admobTestMode') === 'true';
+            localStorage.setItem('admobTestMode', current ? 'false' : 'true');
+            updateAdTestStatusUI();
+            showGenericModal(
+                currentLang === 'ja' ? '広告テストモード' : 'Ad Test Mode',
+                currentLang === 'ja'
+                    ? `広告テストモードを${current ? 'OFF' : 'ON'}にしました。反映のためアプリを再起動してください。`
+                    : `Ad test mode turned ${current ? 'OFF' : 'ON'}. Please restart the app to apply.`
+            );
+        }
+
         function showIapUnavailableGuide(pendingProductId = null) {
             const isNativeApp = typeof window.Capacitor !== 'undefined' && window.Capacitor.isNativePlatform();
             const message = isNativeApp
@@ -3137,59 +3200,6 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                 currentLang === 'ja' ? '課金テストについて' : 'About Billing Test',
                 message,
                 buttons
-            );
-        }
-
-        function showBillingDiagnostics() {
-            if (!iapManager) {
-                showGenericModal(
-                    currentLang === 'ja' ? '課金診断' : 'Billing Diagnostics',
-                    currentLang === 'ja' ? 'IAPマネージャーが初期化されていません。アプリを再起動してください。' : 'IAP manager is not initialized. Please restart the app.',
-                    [{ text: 'OK', onClick: closeGenericModal }]
-                );
-                return;
-            }
-
-            const state = iapManager.getDebugState();
-            const ok = currentLang === 'ja' ? '✅ OK' : '✅ OK';
-            const ng = currentLang === 'ja' ? '❌ NG' : '❌ NG';
-            const lines = [
-                `${currentLang === 'ja' ? 'ネイティブ実行' : 'Native runtime'}: ${state.isNative ? ok : ng}`,
-                `CdvPurchase: ${state.hasCdvPurchase ? ok : ng}`,
-                `${currentLang === 'ja' ? 'Store初期化' : 'Store initialized'}: ${state.hasStore ? ok : ng}`,
-                `${currentLang === 'ja' ? '広告削除権限' : 'Remove Ads entitlement'}: ${state.entitlements.ads_removed ? ok : ng}`,
-                `${currentLang === 'ja' ? '保存無制限権限' : 'Unlimited Saves entitlement'}: ${state.entitlements.save_plus ? ok : ng}`
-            ];
-
-            const productLines = state.products.map((p) => {
-                const status = p.loaded
-                    ? (p.owned ? (currentLang === 'ja' ? '購入済み' : 'Owned') : (currentLang === 'ja' ? '未購入' : 'Not owned'))
-                    : (currentLang === 'ja' ? '未取得' : 'Not loaded');
-                return `${p.id}: ${status} / ${currentLang === 'ja' ? '価格' : 'Price'}=${p.price}`;
-            });
-
-            const guide = currentLang === 'ja'
-                ? [
-                    '【確認手順】',
-                    '1) Play Console の内部テストに APK/AAB を配信',
-                    '2) テスターアカウントで Play ストアからインストール',
-                    '3) 同アカウントで Google Play にログイン',
-                    '4) 「購入を復元」を押して状態更新',
-                    '※ Android Studio の USB 直インストールでは課金UIが出ないことがあります'
-                ]
-                : [
-                    '[Verification Steps]',
-                    '1) Publish build to Play Console internal testing',
-                    '2) Install from Play Store with tester account',
-                    '3) Ensure same account is signed in to Google Play',
-                    '4) Tap Restore Purchases to refresh state',
-                    '* USB sideload from Android Studio may not show billing UI'
-                ];
-
-            showGenericModal(
-                currentLang === 'ja' ? '課金診断' : 'Billing Diagnostics',
-                [...lines, '', ...productLines, '', ...guide].join('\n'),
-                [{ text: 'OK', onClick: closeGenericModal }]
             );
         }
 
@@ -3818,6 +3828,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
             if (iapManager) {
                 iapManager.updateUI();
             }
+            updateAdTestStatusUI();
             updateCrystalSaveLimitNote();
         }
         
@@ -4655,6 +4666,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
             if (iapManager) {
                 iapManager.updateUI();
             }
+            updateAdTestStatusUI();
             updateCrystalSaveLimitNote();
 
             // 言語設定を読み込み（IndexedDB優先）
