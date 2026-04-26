@@ -2880,6 +2880,21 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                 this.interstitialCount = 0;
             }
 
+            resolveAdMobBridge() {
+                // 1) Capacitor plugin bridge (works on plain index.html builds)
+                const bridgePlugin = window.Capacitor?.Plugins?.AdMob;
+                if (bridgePlugin) {
+                    return {
+                        AdMob: bridgePlugin,
+                        BannerAdSize: { ADAPTIVE_BANNER: 'ADAPTIVE_BANNER' },
+                        BannerAdPosition: { BOTTOM_CENTER: 'BOTTOM_CENTER' },
+                        source: 'capacitor-bridge'
+                    };
+                }
+
+                return null;
+            }
+
             async init() {
                 // 課金状態を確認
                 if (iapManager && iapManager.isAdsRemoved()) {
@@ -2894,24 +2909,40 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                 }
 
                 try {
-                    // Dynamic import for Capacitor AdMob
-                    const { AdMob, BannerAdSize, BannerAdPosition } = await import('@capacitor-community/admob');
-                    this.AdMob = AdMob;
-                    this.BannerAdSize = BannerAdSize;
-                    this.BannerAdPosition = BannerAdPosition;
+                    let resolved = this.resolveAdMobBridge();
+
+                    // 2) Fallback: dynamic import (works when bundled)
+                    if (!resolved) {
+                        const imported = await import('@capacitor-community/admob');
+                        resolved = {
+                            AdMob: imported.AdMob,
+                            BannerAdSize: imported.BannerAdSize,
+                            BannerAdPosition: imported.BannerAdPosition,
+                            source: 'dynamic-import'
+                        };
+                    }
+
+                    if (!resolved || !resolved.AdMob) {
+                        throw new Error('AdMob plugin bridge not found');
+                    }
+
+                    this.AdMob = resolved.AdMob;
+                    this.BannerAdSize = resolved.BannerAdSize;
+                    this.BannerAdPosition = resolved.BannerAdPosition;
+                    console.log(`AdMob: Using ${resolved.source}`);
 
                     // Initialize AdMob
-                    await AdMob.initialize({
+                    await this.AdMob.initialize({
                         initializeForTesting: false
                     });
 
                     // Set up interstitial listener
-                    AdMob.addListener('onInterstitialAdLoaded', () => {
+                    this.AdMob.addListener('onInterstitialAdLoaded', () => {
                         this.interstitialLoaded = true;
                         console.log('AdMob: Interstitial ad loaded');
                     });
 
-                    AdMob.addListener('onInterstitialAdDismissed', () => {
+                    this.AdMob.addListener('onInterstitialAdDismissed', () => {
                         this.interstitialLoaded = false;
                         this.prepareInterstitial();
                     });
