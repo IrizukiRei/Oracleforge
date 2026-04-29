@@ -3936,10 +3936,13 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
         }
 
         function resolveBackImage() {
+            if (backCardImage) {
+                return backCardImage;
+            }
             if (isUsingPreset) {
                 return LENORMAND_BACK_IMAGE;
             }
-            return backCardImage || DEFAULT_BACK_IMAGE;
+            return DEFAULT_BACK_IMAGE;
         }
 
         function loadLenormandOptional() {
