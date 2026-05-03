@@ -2498,6 +2498,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                     <button class="btn" id="restore-purchases" onclick="restorePurchases()" style="padding:10px 15px;font-size:13px;" data-ja="購入を復元" data-en="Restore Purchases">購入を復元</button>
                     <button class="btn" id="toggle-ad-test-mode" onclick="toggleAdTestMode()" style="padding:10px 15px;font-size:13px;" data-ja="広告テストモード切替" data-en="Toggle Ad Test Mode">広告テストモード切替</button>
                 </div>
+                <p id="ad-debug-status" style="font-size:11px;color:#9fd8ff;margin-top:8px;line-height:1.5;"></p>
             </div>
 
             <div class="info-box" id="guide-settings-box" style="background:rgba(100,200,255,0.06);border-color:rgba(100,200,255,0.2);">
@@ -2694,6 +2695,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
 
                         await this.store.initialize([window.CdvPurchase.Platform.GOOGLE_PLAY]);
                         await this.store.update();
+                        await this.restorePurchases(true);
                         this.refreshManagedProducts();
                         console.log('IAP: Initialized successfully (Google Play Billing v6 managed products)');
                     }
@@ -2763,7 +2765,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                 return this.purchaseProduct(this.getPreferredSavePlusProduct());
             }
 
-            async restorePurchases() {
+            async restorePurchases(silent = false) {
                 if (!this.isNative || !this.store) {
                     console.log('IAP: Restore not available on web');
                     return false;
@@ -2773,6 +2775,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                     await this.store.restorePurchases();
                     await this.store.update();
                     this.refreshManagedProducts();
+                    if (!silent) console.log('IAP: Restore completed');
                     return true;
                 } catch (e) {
                     console.error('IAP: Restore failed', e);
@@ -2866,6 +2869,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
             // Google official test ad unit IDs (Android)
             testBannerId: 'ca-app-pub-3940256099942544/9214589741',
             testInterstitialId: 'ca-app-pub-3940256099942544/1033173712',
+            forceTestAds: true,
             // Screens where banner should be hidden
             hideBannerScreens: ['reading', 'ritual'],
             // Frequency cap settings
@@ -2884,6 +2888,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                 this.lastInterstitialTime = 0;
                 this.interstitialCount = 0;
                 this.isTestMode = localStorage.getItem('admobTestMode') === 'true';
+                this.bannerLastStatus = 'idle';
             }
 
             resolveAdMobBridge() {
@@ -2921,11 +2926,13 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                 if (iapManager && iapManager.isAdsRemoved()) {
                     this.adsDisabled = true;
                     console.log('AdMob: Ads disabled due to IAP');
+                    this.renderDebugStatus('init-skipped-ads-disabled');
                     return;
                 }
 
                 if (!this.isNative) {
                     console.log('AdMob: Not a native platform, skipping initialization');
+                    this.renderDebugStatus('init-skipped-web');
                     return;
                 }
 
@@ -2977,32 +2984,60 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                     if (!ADMOB_CONFIG.hideBannerScreens.includes(currentScreen || 'spread')) {
                         await this.showBanner();
                     }
+                    this.renderDebugStatus('init-complete');
 
                 } catch (e) {
                     console.error('AdMob: Initialization failed', e);
+                    this.bannerLastStatus = 'failed:init';
+                    this.renderDebugStatus('init-failed');
                 }
             }
 
             disableAds() {
                 this.adsDisabled = true;
                 this.hideBanner();
+                this.renderDebugStatus('disabled-by-iap');
+            }
+
+            getBannerAdId() {
+                return (ADMOB_CONFIG.forceTestAds || this.isTestMode) ? ADMOB_CONFIG.testBannerId : ADMOB_CONFIG.bannerId;
+            }
+
+            getInterstitialAdId() {
+                return (ADMOB_CONFIG.forceTestAds || this.isTestMode) ? ADMOB_CONFIG.testInterstitialId : ADMOB_CONFIG.interstitialId;
+            }
+
+            renderDebugStatus(reason = '') {
+                const statusEl = document.getElementById('ad-debug-status');
+                const savePlusOwned = !!iapManager?.hasUnlimitedSaves?.();
+                const adsEnabled = !(this.adsDisabled || savePlusOwned);
+                const modeLabel = (ADMOB_CONFIG.forceTestAds || this.isTestMode) ? 'TEST' : 'PROD';
+                const text = `AdMode:${modeLabel} / ads:${adsEnabled ? 'enabled' : 'disabled'} / save_plus:${savePlusOwned ? 'true' : 'false'} / banner:${this.bannerLastStatus}${reason ? ` / ${reason}` : ''}`;
+                console.log('AdMob Debug:', text);
+                if (statusEl) statusEl.textContent = text;
             }
 
             async showBanner() {
                 if (this.adsDisabled || !this.isNative || !this.AdMob || this.bannerVisible) return;
+                this.bannerLastStatus = 'requested';
+                this.renderDebugStatus('banner-requested');
 
                 try {
                     await this.AdMob.showBanner({
-                        adId: this.isTestMode ? ADMOB_CONFIG.testBannerId : ADMOB_CONFIG.bannerId,
+                        adId: this.getBannerAdId(),
                         adSize: this.BannerAdSize.ADAPTIVE_BANNER,
                         position: this.BannerAdPosition.BOTTOM_CENTER,
                         margin: 0
                     });
                     this.bannerVisible = true;
+                    this.bannerLastStatus = 'shown';
                     document.body.classList.add('has-banner-ad');
                     console.log('AdMob: Banner shown');
+                    this.renderDebugStatus('banner-shown');
                 } catch (e) {
+                    this.bannerLastStatus = 'failed:show';
                     console.error('AdMob: Failed to show banner', e);
+                    this.renderDebugStatus('banner-failed');
                 }
             }
 
@@ -3024,7 +3059,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
 
                 try {
                     await this.AdMob.prepareInterstitial({
-                        adId: this.isTestMode ? ADMOB_CONFIG.testInterstitialId : ADMOB_CONFIG.interstitialId
+                        adId: this.getInterstitialAdId()
                     });
                 } catch (e) {
                     console.error('AdMob: Failed to prepare interstitial', e);
