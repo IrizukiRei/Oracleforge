@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Auto Backup is disabled via android:allowBackup="false" in the manifest.
+  This file is referenced as a defense-in-depth measure so that even if
+  backup is ever re-enabled, no app data (including IAP entitlement
+  caches in WebView storage / SharedPreferences) is uploaded.
+-->
+<full-backup-content>
+    <exclude domain="root" path="." />
+    <exclude domain="file" path="." />
+    <exclude domain="database" path="." />
+    <exclude domain="sharedpref" path="." />
+    <exclude domain="external" path="." />
+</full-backup-content>
