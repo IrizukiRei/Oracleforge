@@ -47,20 +47,22 @@
             --cardGap: clamp(8px, 2vw, 16px);
             --cardLabelSize: clamp(12px, 3.2vw, 16px);
 
-            /* === OracleForge design tokens (dark + gold) === */
-            --ink-1: #0a0d18;
-            --ink-2: #11142a;
-            --ink-3: #1a1d38;
-            --ink-soft: rgba(26, 29, 56, 0.7);
-            --gold-1: #c9a96a;
-            --gold-2: #e8c878;
-            --gold-3: #8a7445;
-            --gold-line: rgba(201, 169, 106, 0.55);
-            --gold-faint: rgba(201, 169, 106, 0.18);
-            --gold-glow: rgba(232, 200, 120, 0.35);
-            --text: #efe7d0;
-            --text-soft: rgba(239, 231, 208, 0.72);
-            --text-faint: rgba(239, 231, 208, 0.42);
+            /* === OracleForge design tokens ===
+               コンセプト: 深層意識の海底 → 水面へカードが浮上する。
+               アクセントは「水面に差す月光・真珠光」。 */
+            --ink-1: #03070d;          /* abyss / 深淵 */
+            --ink-2: #07131c;          /* deep water / 深海 */
+            --ink-3: #0f2832;          /* twilight teal / 水深の青緑 */
+            --ink-soft: rgba(15, 40, 50, 0.7);
+            --accent-1: #9fd6e6;       /* moonlit cyan / 月光 */
+            --accent-2: #e6f4f9;       /* foam pearl / 水面のきらめき */
+            --accent-3: #4d7a8a;       /* deep slate-cyan / 深い水影 */
+            --accent-line: rgba(159, 214, 230, 0.50);
+            --accent-faint: rgba(159, 214, 230, 0.15);
+            --accent-glow: rgba(174, 230, 245, 0.45);
+            --text: #e6f4f9;
+            --text-soft: rgba(230, 244, 249, 0.72);
+            --text-faint: rgba(230, 244, 249, 0.42);
             --danger: #c66060;
         }
 
@@ -85,9 +87,12 @@
         body {
             font-family: 'Noto Serif JP', 'Hiragino Mincho ProN', 'Yu Mincho', 'YuMincho', serif;
             background:
-                radial-gradient(ellipse at 20% 0%, rgba(201, 169, 106, 0.08) 0%, transparent 55%),
-                radial-gradient(ellipse at 80% 100%, rgba(138, 116, 69, 0.10) 0%, transparent 60%),
-                linear-gradient(160deg, var(--ink-1) 0%, var(--ink-2) 55%, var(--ink-3) 100%);
+                /* 水面方向から差し込む光柱 */
+                radial-gradient(ellipse 75% 45% at 50% -8%, rgba(174, 230, 245, 0.12) 0%, transparent 62%),
+                radial-gradient(ellipse 30% 70% at 22% -10%, rgba(159, 214, 230, 0.06) 0%, transparent 70%),
+                radial-gradient(ellipse 30% 70% at 78% -10%, rgba(159, 214, 230, 0.06) 0%, transparent 70%),
+                /* 海底の藍 → 中層 → 水深ある青緑 */
+                linear-gradient(180deg, var(--ink-1) 0%, var(--ink-2) 50%, var(--ink-3) 100%);
             color: var(--text);
             margin: 0;
             padding: 15px;
@@ -135,11 +140,11 @@
             letter-spacing: 0.28em;
             font-weight: 500;
             font-family: 'Cormorant Garamond', 'Noto Serif JP', serif;
-            background: linear-gradient(180deg, var(--gold-2) 0%, var(--gold-1) 55%, var(--gold-3) 100%);
+            background: linear-gradient(180deg, var(--accent-2) 0%, var(--accent-1) 55%, var(--accent-3) 100%);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
-            color: var(--gold-1);
+            color: var(--accent-1);
             position: relative;
             padding-bottom: 14px;
         }
@@ -151,7 +156,7 @@
             transform: translateX(-50%);
             width: 80px;
             height: 1px;
-            background: linear-gradient(90deg, transparent, var(--gold-line), transparent);
+            background: linear-gradient(90deg, transparent, var(--accent-line), transparent);
         }
         
         @media (min-width: 768px) {
@@ -176,23 +181,23 @@
             height: 44px;
             border-radius: 50%;
             background: rgba(10, 13, 24, 0.85);
-            border: 1px solid var(--gold-line);
-            color: var(--gold-1);
+            border: 1px solid var(--accent-line);
+            color: var(--accent-1);
             font-size: 18px;
             line-height: 1;
             cursor: pointer;
             transition: all 0.3s;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.45), inset 0 0 12px rgba(201,169,106,0.05);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.45), inset 0 0 12px rgba(159,214,230,0.05);
             display: inline-flex;
             align-items: center;
             justify-content: center;
         }
         .side-buttons button:hover {
-            background: rgba(201, 169, 106, 0.12);
-            border-color: var(--gold-2);
-            color: var(--gold-2);
+            background: rgba(159, 214, 230, 0.12);
+            border-color: var(--accent-2);
+            color: var(--accent-2);
             transform: scale(1.06);
-            box-shadow: 0 2px 14px var(--gold-glow);
+            box-shadow: 0 2px 14px var(--accent-glow);
         }
         @media (min-width: 768px) {
             .side-buttons {
@@ -271,8 +276,8 @@
             flex-wrap: wrap;
             justify-content: center;
             padding: 6px 4px;
-            border-top: 1px solid var(--gold-faint);
-            border-bottom: 1px solid var(--gold-faint);
+            border-top: 1px solid var(--accent-faint);
+            border-bottom: 1px solid var(--accent-faint);
             background: linear-gradient(180deg, rgba(10,13,24,0.4), rgba(10,13,24,0));
         }
 
@@ -304,13 +309,13 @@
         }
 
         .nav-tabs button:hover {
-            color: var(--gold-2);
+            color: var(--accent-2);
         }
 
         .nav-tabs button.active {
-            color: var(--gold-2);
-            border-bottom-color: var(--gold-1);
-            text-shadow: 0 0 12px var(--gold-glow);
+            color: var(--accent-2);
+            border-bottom-color: var(--accent-1);
+            text-shadow: 0 0 12px var(--accent-glow);
         }
         .nav-tabs button.active::before {
             content: '✦';
@@ -319,7 +324,7 @@
             left: 50%;
             transform: translateX(-50%);
             font-size: 7px;
-            color: var(--gold-1);
+            color: var(--accent-1);
             opacity: 0.85;
         }
         
@@ -656,21 +661,21 @@
             height: 40px;
             border-radius: 50%;
             background: rgba(10, 13, 24, 0.9);
-            border: 1px solid var(--gold-line);
-            color: var(--gold-1);
+            border: 1px solid var(--accent-line);
+            color: var(--accent-1);
             font-size: 17px;
             font-weight: 500;
             font-family: 'Cormorant Garamond', serif;
             cursor: pointer;
             z-index: 55;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5), inset 0 0 12px rgba(201,169,106,0.06);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5), inset 0 0 12px rgba(159,214,230,0.06);
             transition: all 0.3s;
             display: flex;
             align-items: center;
             justify-content: center;
         }
         .app-guide-btn:active {
-            background: rgba(201, 169, 106, 0.18);
+            background: rgba(159, 214, 230, 0.18);
             transform: scale(1.08);
         }
         body.has-banner-ad .app-guide-btn {
@@ -1018,9 +1023,9 @@
         
         .btn {
             padding: 11px 22px;
-            background: linear-gradient(180deg, rgba(201,169,106,0.10), rgba(201,169,106,0.04));
-            border: 1px solid var(--gold-line);
-            color: var(--gold-2);
+            background: linear-gradient(180deg, rgba(159,214,230,0.10), rgba(159,214,230,0.04));
+            border: 1px solid var(--accent-line);
+            color: var(--accent-2);
             cursor: pointer;
             border-radius: 4px;
             font-size: 14px;
@@ -1030,13 +1035,13 @@
             box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02), 0 1px 0 rgba(0,0,0,0.3);
         }
         .btn:hover {
-            background: linear-gradient(180deg, rgba(201,169,106,0.22), rgba(201,169,106,0.08));
-            border-color: var(--gold-2);
-            color: var(--gold-2);
-            box-shadow: 0 0 14px var(--gold-glow), inset 0 0 0 1px rgba(232,200,120,0.08);
+            background: linear-gradient(180deg, rgba(159,214,230,0.22), rgba(159,214,230,0.08));
+            border-color: var(--accent-2);
+            color: var(--accent-2);
+            box-shadow: 0 0 14px var(--accent-glow), inset 0 0 0 1px rgba(174,230,245,0.08);
         }
         .btn:active {
-            background: rgba(201,169,106,0.28);
+            background: rgba(159,214,230,0.28);
             transform: translateY(1px);
         }
         .btn:disabled {
@@ -1600,9 +1605,11 @@
             width: 100%;
             height: 100%;
             background:
-                radial-gradient(circle at 50% 38%, rgba(201, 169, 106, 0.12) 0%, transparent 45%),
-                radial-gradient(circle at 50% 90%, rgba(138, 116, 69, 0.10) 0%, transparent 55%),
-                linear-gradient(180deg, #06070f 0%, var(--ink-2) 60%, #07091a 100%);
+                /* 水面から差し込む光 */
+                radial-gradient(ellipse 80% 35% at 50% 0%, rgba(174, 230, 245, 0.18) 0%, transparent 65%),
+                radial-gradient(ellipse 60% 60% at 50% 95%, rgba(15, 40, 50, 0.6) 0%, transparent 70%),
+                /* 海面〜中層〜深淵 */
+                linear-gradient(180deg, #0a2630 0%, var(--ink-3) 25%, var(--ink-2) 60%, var(--ink-1) 100%);
             z-index: 10000;
             display: flex;
             flex-direction: column;
@@ -1627,55 +1634,64 @@
             display: none !important;
         }
 
-        /* 背景の蜘蛛の巣アニメーション */
+        /* 水面オーバーレイ（占い時の overlay.webp と同じ画像を低不透明で重ね、世界観を連結） */
         .web-bg {
             position: absolute;
-            width: 100%;
-            height: 100%;
+            inset: 0;
+            background-image: url('overlay.webp');
+            background-size: cover;
+            background-position: center top;
             opacity: 0.22;
+            mix-blend-mode: screen;
             pointer-events: none;
-            background-image:
-                radial-gradient(circle at 50% 50%, transparent 0%, transparent 40%, rgba(201,169,106,0.12) 41%, transparent 42%),
-                radial-gradient(circle at 50% 50%, transparent 0%, transparent 60%, rgba(201,169,106,0.09) 61%, transparent 62%),
-                radial-gradient(circle at 50% 50%, transparent 0%, transparent 80%, rgba(201,169,106,0.06) 81%, transparent 82%);
-            background-size: 100% 100%;
-            animation: webPulse 8s ease-in-out infinite;
+            animation: waterShimmer 12s ease-in-out infinite;
         }
 
+        /* コースティック（水面の屈折光）を上から下へ流す */
         .web-bg::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             background:
-                linear-gradient(0deg, transparent 49.5%, rgba(201,169,106,0.08) 50%, transparent 50.5%),
-                linear-gradient(60deg, transparent 49.5%, rgba(201,169,106,0.08) 50%, transparent 50.5%),
-                linear-gradient(120deg, transparent 49.5%, rgba(201,169,106,0.08) 50%, transparent 50.5%);
-            background-size: 100% 100%;
+                radial-gradient(ellipse 40% 20% at 30% 10%, rgba(174,230,245,0.18) 0%, transparent 60%),
+                radial-gradient(ellipse 35% 18% at 70% 22%, rgba(174,230,245,0.14) 0%, transparent 60%),
+                radial-gradient(ellipse 30% 15% at 50% 5%, rgba(230,244,249,0.20) 0%, transparent 65%);
+            mix-blend-mode: screen;
+            animation: causticDrift 18s ease-in-out infinite;
+            pointer-events: none;
         }
 
-        @keyframes webPulse {
-            0%, 100% { transform: scale(1); opacity: 0.15; }
-            50% { transform: scale(1.05); opacity: 0.25; }
+        @keyframes waterShimmer {
+            0%, 100% { opacity: 0.20; transform: translateY(0) scale(1); }
+            50%      { opacity: 0.30; transform: translateY(-4px) scale(1.02); }
+        }
+        @keyframes causticDrift {
+            0%, 100% { transform: translate(0, 0); }
+            33%      { transform: translate(8px, 4px); }
+            66%      { transform: translate(-6px, 6px); }
         }
 
-        /* 浮遊する結晶 */
+        /* 深海から上昇する気泡 */
         .floating-crystal {
             position: absolute;
-            width: 18px;
-            height: 18px;
-            background: linear-gradient(135deg, rgba(232,200,120,0.65), rgba(138,116,69,0.55));
-            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
-            animation: floatCrystal 6s ease-in-out infinite;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background:
+                radial-gradient(circle at 35% 30%, rgba(230, 244, 249, 0.85) 0%, rgba(174, 230, 245, 0.35) 45%, transparent 70%);
+            box-shadow:
+                inset 0 0 4px rgba(255,255,255,0.4),
+                0 0 8px rgba(174, 230, 245, 0.35);
+            animation: bubbleRise 9s ease-in infinite;
             pointer-events: none;
-            filter: blur(0.6px) drop-shadow(0 0 6px rgba(232,200,120,0.4));
+            opacity: 0;
         }
 
-        @keyframes floatCrystal {
-            0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.6; }
-            50% { transform: translateY(-20px) rotate(180deg); opacity: 1; }
+        @keyframes bubbleRise {
+            0%   { transform: translateY(40vh) scale(0.6); opacity: 0; }
+            10%  { opacity: 0.45; }
+            55%  { opacity: 0.75; }
+            100% { transform: translateY(-80vh) scale(1.1); opacity: 0; }
         }
         
         @keyframes rippleExpand {
@@ -1729,15 +1745,15 @@
             font-size: 2.6em;
             letter-spacing: 0.28em;
             font-weight: 500;
-            background: linear-gradient(180deg, #f1d98a 0%, var(--gold-1) 55%, var(--gold-3) 100%);
+            background: linear-gradient(180deg, #cfecf5 0%, var(--accent-1) 55%, var(--accent-3) 100%);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
-            color: var(--gold-1);
+            color: var(--accent-1);
             margin-bottom: 6px;
             animation: titleGlow 4s ease-in-out infinite;
             font-family: 'Cormorant Garamond', 'Noto Serif JP', serif;
-            filter: drop-shadow(0 0 18px rgba(232,200,120,0.25));
+            filter: drop-shadow(0 0 18px rgba(174,230,245,0.25));
             text-align: center;
         }
 
@@ -1766,7 +1782,7 @@
             gap: 12px;
             margin: 6px auto 18px;
             max-width: 320px;
-            color: var(--gold-1);
+            color: var(--accent-1);
             opacity: 0.85;
         }
         .title-divider::before,
@@ -1774,10 +1790,10 @@
             content: '';
             flex: 1;
             height: 1px;
-            background: linear-gradient(90deg, transparent, var(--gold-line));
+            background: linear-gradient(90deg, transparent, var(--accent-line));
         }
         .title-divider::after {
-            background: linear-gradient(90deg, var(--gold-line), transparent);
+            background: linear-gradient(90deg, var(--accent-line), transparent);
         }
         .title-divider span { font-size: 12px; letter-spacing: 0.3em; }
 
@@ -1792,20 +1808,20 @@
         }
         .title-tagline em {
             font-style: normal;
-            color: var(--gold-2);
+            color: var(--accent-2);
             letter-spacing: 0.12em;
         }
 
         @keyframes titleGlow {
-            0%, 100% { filter: drop-shadow(0 0 14px rgba(232,200,120,0.20)); }
-            50%      { filter: drop-shadow(0 0 22px rgba(232,200,120,0.45)); }
+            0%, 100% { filter: drop-shadow(0 0 14px rgba(174,230,245,0.20)); }
+            50%      { filter: drop-shadow(0 0 22px rgba(174,230,245,0.45)); }
         }
 
         .start-btn {
             padding: 14px 56px;
-            background: linear-gradient(180deg, rgba(201,169,106,0.18), rgba(201,169,106,0.04));
-            border: 1px solid var(--gold-1);
-            color: var(--gold-2);
+            background: linear-gradient(180deg, rgba(159,214,230,0.18), rgba(159,214,230,0.04));
+            border: 1px solid var(--accent-1);
+            color: var(--accent-2);
             font-size: 1.05em;
             letter-spacing: 0.4em;
             font-family: 'Cormorant Garamond', 'Noto Serif JP', serif;
@@ -1816,7 +1832,7 @@
             overflow: hidden;
             z-index: 100;
             -webkit-tap-highlight-color: transparent;
-            box-shadow: 0 0 0 1px rgba(201,169,106,0.15), 0 0 22px rgba(0,0,0,0.5), inset 0 0 18px rgba(201,169,106,0.06);
+            box-shadow: 0 0 0 1px rgba(159,214,230,0.15), 0 0 22px rgba(0,0,0,0.5), inset 0 0 18px rgba(159,214,230,0.06);
         }
 
         .start-btn::before {
@@ -1826,15 +1842,15 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(232,200,120,0.35), transparent);
+            background: linear-gradient(90deg, transparent, rgba(174,230,245,0.35), transparent);
             transition: left 0.7s;
         }
 
         .start-btn:hover::before { left: 100%; }
         .start-btn:hover {
-            background: linear-gradient(180deg, rgba(232,200,120,0.28), rgba(201,169,106,0.08));
+            background: linear-gradient(180deg, rgba(174,230,245,0.28), rgba(159,214,230,0.08));
             color: #fff7df;
-            box-shadow: 0 0 0 1px var(--gold-2), 0 0 26px var(--gold-glow);
+            box-shadow: 0 0 0 1px var(--accent-2), 0 0 26px var(--accent-glow);
         }
 
         /* タイトル画面の3ステップガイド */
@@ -1862,7 +1878,7 @@
             position: absolute;
             left: -6px;
             top: 6px;
-            color: var(--gold-1);
+            color: var(--accent-1);
             font-size: 18px;
             opacity: 0.7;
         }
@@ -1872,9 +1888,9 @@
             justify-content: center;
             width: 26px;
             height: 26px;
-            border: 1px solid var(--gold-line);
+            border: 1px solid var(--accent-line);
             border-radius: 50%;
-            color: var(--gold-2);
+            color: var(--accent-2);
             font-family: 'Cormorant Garamond', serif;
             font-size: 14px;
             margin-bottom: 6px;
@@ -1886,19 +1902,19 @@
             margin-top: 22px;
             background: none;
             border: none;
-            color: var(--gold-1);
+            color: var(--accent-1);
             font-size: 12px;
             letter-spacing: 0.2em;
             cursor: pointer;
             text-decoration: underline;
-            text-decoration-color: var(--gold-faint);
+            text-decoration-color: var(--accent-faint);
             text-underline-offset: 4px;
             font-family: inherit;
             padding: 6px 10px;
             opacity: 0.85;
             transition: opacity 0.25s, color 0.25s;
         }
-        .title-guide-link:hover { color: var(--gold-2); opacity: 1; }
+        .title-guide-link:hover { color: var(--accent-2); opacity: 1; }
 
         /* 蝶のアニメーション */
         .butterfly {
@@ -2109,14 +2125,14 @@
         
         <!-- 言語選択 -->
         <div style="position:absolute;top:20px;right:20px;z-index:10001;">
-            <select id="lang-select" onchange="changeLang(this.value)" style="padding:8px 12px;background:rgba(10,13,24,0.7);border:1px solid var(--gold-line);color:var(--gold-2);border-radius:2px;font-size:13px;letter-spacing:0.08em;pointer-events:auto;font-family:inherit;">
+            <select id="lang-select" onchange="changeLang(this.value)" style="padding:8px 12px;background:rgba(10,13,24,0.7);border:1px solid var(--accent-line);color:var(--accent-2);border-radius:2px;font-size:13px;letter-spacing:0.08em;pointer-events:auto;font-family:inherit;">
                 <option value="ja" style="color:#000;">日本語</option>
                 <option value="en" style="color:#000;">English</option>
             </select>
         </div>
         
         <!-- アイコン -->
-        <div style="margin-bottom:18px;pointer-events:none;filter:drop-shadow(0 0 18px rgba(232,200,120,0.20));">
+        <div style="margin-bottom:18px;pointer-events:none;filter:drop-shadow(0 0 18px rgba(174,230,245,0.20));">
             <img src="icon.png" style="width:140px;height:140px;object-fit:contain;">
         </div>
 
@@ -2126,9 +2142,9 @@
         <div class="title-divider" style="pointer-events:none;"><span>✦</span></div>
 
         <p class="title-tagline" style="pointer-events:none;"
-           data-ja="ルノルマン39枚で導きを読む占術アプリ。問いを記し、カードを並べ、流れを読みます。"
-           data-en="A Lenormand oracle in 39 cards. Write a question, lay the cards, read the flow.">
-           ルノルマン39枚で導きを読む占術アプリ。問いを記し、カードを並べ、流れを読みます。
+           data-ja="集合無意識の海から、カードは静かに浮かび上がる。ルノルマン39枚で、深層からの導きを読み解く占術アプリ。"
+           data-en="From the sea of the collective unconscious, the cards quietly rise. A 39-card Lenormand oracle for guidance from the deep.">
+           集合無意識の海から、カードは静かに浮かび上がる。ルノルマン39枚で、深層からの導きを読み解く占術アプリ。
         </p>
 
         <button class="start-btn" id="startBtn" data-ja="はじめる" data-en="ENTER" onclick="startApp()" style="position:relative;z-index:10001;pointer-events:auto;touch-action:manipulation;">はじめる</button>
