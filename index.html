@@ -3416,13 +3416,29 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                         initializeForTesting: this.isTestMode
                     });
 
-                    // Set up interstitial listener
-                    this.AdMob.addListener('onInterstitialAdLoaded', () => {
+                    // インタースティシャルのイベント購読
+                    // 注意: @capacitor-community/admob のイベント名は "on" プレフィックス無し。
+                    // 旧コードは 'onInterstitialAdLoaded' を listen していて永遠に発火せず、
+                    // interstitialLoaded が true にならないため広告が出なかった。
+                    this.AdMob.addListener('interstitialAdLoaded', () => {
                         this.interstitialLoaded = true;
+                        this.renderDebugStatus('interstitial-loaded');
                         console.log('AdMob: Interstitial ad loaded');
                     });
 
-                    this.AdMob.addListener('onInterstitialAdDismissed', () => {
+                    this.AdMob.addListener('interstitialAdFailedToLoad', (err) => {
+                        this.interstitialLoaded = false;
+                        console.warn('AdMob: Interstitial failed to load', err);
+                        this.renderDebugStatus('interstitial-failed-load');
+                    });
+
+                    this.AdMob.addListener('interstitialAdFailedToShow', (err) => {
+                        this.interstitialLoaded = false;
+                        console.warn('AdMob: Interstitial failed to show', err);
+                        this.prepareInterstitial();
+                    });
+
+                    this.AdMob.addListener('interstitialAdDismissed', () => {
                         this.interstitialLoaded = false;
                         this.prepareInterstitial();
                     });
@@ -3578,8 +3594,13 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                     await this.AdMob.prepareInterstitial({
                         adId: this.getInterstitialAdId()
                     });
+                    // prepareInterstitial は読み込み完了で resolve するため、
+                    // interstitialAdLoaded イベントを取りこぼしても確実に true にできる保険。
+                    this.interstitialLoaded = true;
+                    this.renderDebugStatus('interstitial-prepared');
                 } catch (e) {
                     console.error('AdMob: Failed to prepare interstitial', e);
+                    this.renderDebugStatus('interstitial-prepare-failed');
                 } finally {
                     this.interstitialPreparing = false;
                 }
@@ -3611,9 +3632,15 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                     await this.AdMob.showInterstitial();
                     this.lastInterstitialTime = Date.now();
                     this.interstitialCount++;
+                    // 表示した広告は消費済み。dismissed イベントでも再ロードするが、
+                    // 取りこぼしに備えてここでも落として再ロードを促す。
+                    this.interstitialLoaded = false;
+                    this.prepareInterstitial();
                     return true;
                 } catch (e) {
                     console.error('AdMob: Failed to show interstitial', e);
+                    this.interstitialLoaded = false;
+                    this.prepareInterstitial();
                     return false;
                 }
             }
