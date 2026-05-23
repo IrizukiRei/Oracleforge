@@ -2172,12 +2172,6 @@
 
         <div class="title-divider" style="pointer-events:none;"><span>✦</span></div>
 
-        <p class="title-tagline" style="pointer-events:none;"
-           data-ja="集合無意識の海から、カードは静かに浮かび上がる。ルノルマン39枚で、深層からの導きを読み解く占術アプリ。"
-           data-en="From the sea of the collective unconscious, the cards quietly rise. A 39-card Lenormand oracle for guidance from the deep.">
-           集合無意識の海から、カードは静かに浮かび上がる。ルノルマン39枚で、深層からの導きを読み解く占術アプリ。
-        </p>
-
         <button class="start-btn" id="startBtn" data-ja="はじめる" data-en="ENTER" onclick="startApp()" style="position:relative;z-index:10001;pointer-events:auto;touch-action:manipulation;">はじめる</button>
 
         <!-- 初回ステップガイド -->
@@ -2613,7 +2607,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                 <div class="step-dot" data-step="3"></div>
             </div>
             <div id="reading-phase-banner" class="reading-phase-banner">
-                <button class="phase-dismiss-btn" onclick="dismissPhaseBanner()" title="閉じる">&times;</button>
+                <button class="phase-dismiss-btn" onclick="dismissPhaseBanner()" aria-label="Close" title="Close">&times;</button>
                 <span class="phase-step" data-ja="STEP 1 / 4" data-en="STEP 1 / 4">STEP 1 / 4</span><br>
                 <span class="phase-icon">🃏</span>
                 <span id="phase-text" data-ja="「シャッフル」を押してカードを混ぜましょう" data-en="Press &quot;Shuffle&quot; to mix the cards">「シャッフル」を押してカードを混ぜましょう</span>
@@ -4162,6 +4156,16 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
             return fallbackNumber;
         }
 
+        // デフォルト命名（"カード N" / "Card N"）を表示時にだけ現在言語へ寄せる。
+        // ユーザーが手で付けた名前はそのまま返す。
+        function localizeDefaultCardName(name) {
+            if (typeof name !== 'string') return name;
+            const m = name.match(/^(?:カード|Card)\s+(\d+)$/);
+            if (!m) return name;
+            const prefix = currentLang === 'ja' ? 'カード' : 'Card';
+            return prefix + ' ' + m[1];
+        }
+
         function normalizeDescription(desc) {
             if (!desc) return {ja: '', en: ''};
             if (typeof desc === 'string') {
@@ -5307,23 +5311,23 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
             if (significatorIds.length > 0) {
                 const card = activeCards.find(c => c.id === significatorIds[0]);
                 if (card) {
-                    preview1.innerHTML = card.imageData 
+                    preview1.innerHTML = card.imageData
                         ? `<img src="${card.imageData}" style="width:100%;height:100%;object-fit:cover;">`
-                        : card.name;
+                        : localizeDefaultCardName(card.name);
                 } else {
                     preview1.innerHTML = notSetText;
                 }
             } else {
                 preview1.innerHTML = notSetText;
             }
-            
+
             // プレビュー2
             if (significatorIds.length > 1) {
                 const card = activeCards.find(c => c.id === significatorIds[1]);
                 if (card) {
-                    preview2.innerHTML = card.imageData 
+                    preview2.innerHTML = card.imageData
                         ? `<img src="${card.imageData}" style="width:100%;height:100%;object-fit:cover;">`
-                        : card.name;
+                        : localizeDefaultCardName(card.name);
                 } else {
                     preview2.innerHTML = notSetText;
                 }
@@ -5340,7 +5344,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
             if (nameDisplay) {
                 const names = significatorIds.map(id => {
                     const card = activeCards.find(c => c.id === id);
-                    return card ? card.name : '';
+                    return card ? localizeDefaultCardName(card.name) : '';
                 }).filter(n => n);
                 nameDisplay.textContent = names.length > 0 ? `(${names.join(', ')})` : '';
             }
@@ -5359,16 +5363,17 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                 const isSelected = significatorIds.includes(card.id);
                 const selected = isSelected ? 'border-color:rgba(255,200,100,0.8);background:rgba(255,200,100,0.2);' : '';
                 const checkMark = isSelected ? '<div style="position:absolute;top:5px;right:5px;color:#ffcc66;font-size:18px;">✓</div>' : '';
-                const preview = card.imageData 
+                const sigDisplayName = localizeDefaultCardName(card.name);
+                const preview = card.imageData
                     ? `<img src="${card.imageData}" style="width:100%;height:100%;object-fit:cover;">`
-                    : card.name;
+                    : sigDisplayName;
                 cardList += `
                     <div onclick="toggleSignificatorCard(${card.id})" style="cursor:pointer;padding:10px;background:rgba(255,255,255,0.05);border:2px solid rgba(255,255,255,0.2);border-radius:8px;text-align:center;position:relative;${selected}">
                         ${checkMark}
                         <div style="width:60px;height:90px;margin:0 auto 8px;background:#2a2a4a;border-radius:4px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:10px;color:#888;">
                             ${preview}
                         </div>
-                        <div style="font-size:12px;">${card.name}</div>
+                        <div style="font-size:12px;">${sigDisplayName}</div>
                     </div>
                 `;
             });
@@ -5657,7 +5662,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                 item.innerHTML = `
                     <div class="card-number">No.${numberLabel}</div>
                     <div class="card-preview" id="preview-${index}">${previewContent}</div>
-                    <input type="text" placeholder="${namePlaceholder}" value="${card.name}" 
+                    <input type="text" placeholder="${namePlaceholder}" value="${localizeDefaultCardName(card.name)}"
                            onchange="updateCardName(${index}, this.value)">
                     <textarea placeholder="${descPlaceholder}" onchange="updateCardDesc(${index}, this.value)">${getDescriptionForLang(card.description)}</textarea>
                     <input type="file" accept="image/*" style="display:none" 
@@ -5874,17 +5879,18 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                 const cardInner = document.createElement('div');
                 cardInner.className = 'lottery-card-inner';
                 
+                const lotteryDisplayName = localizeDefaultCardName(card.name);
                 if (card.imageData) {
                     cardInner.innerHTML = `<img src="${card.imageData}" style="width:100%;height:100%;object-fit:cover;">`;
                 } else {
-                    cardInner.innerHTML = `<div style="width:100%;height:100%;background:linear-gradient(135deg,#2a2a4a,#1a1a2e);display:flex;align-items:center;justify-content:center;font-size:14px;color:#64c8ff;padding:10px;text-align:center;">${card.name}</div>`;
+                    cardInner.innerHTML = `<div style="width:100%;height:100%;background:linear-gradient(135deg,#2a2a4a,#1a1a2e);display:flex;align-items:center;justify-content:center;font-size:14px;color:#64c8ff;padding:10px;text-align:center;">${lotteryDisplayName}</div>`;
                 }
-                
+
                 cardInner.onclick = () => { if (audioManager) audioManager.playTap(); showCardModal(card); };
-                
+
                 const label = document.createElement('div');
                 label.className = 'lottery-card-label';
-                label.textContent = card.name;
+                label.textContent = lotteryDisplayName;
                 
                 cardDiv.appendChild(cardInner);
                 cardDiv.appendChild(label);
@@ -5899,11 +5905,11 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
         async function createNewSet() {
             const setName = document.getElementById('new-set-name').value.trim();
             if (!setName) {
-                alert('セット名を入力');
+                alert(currentLang === 'ja' ? 'セット名を入力してください' : 'Please enter a set name');
                 return;
             }
             if (cardSets[setName]) {
-                alert('既に存在します');
+                alert(currentLang === 'ja' ? '同じ名前のセットが既に存在します' : 'A set with this name already exists');
                 return;
             }
 
@@ -6257,7 +6263,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                 checkboxes += `
                     <label style="display:flex;align-items:center;padding:10px;background:rgba(255,255,255,0.05);margin:5px 0;border-radius:4px;">
                         <input type="checkbox" value="${card.id}" ${checked} style="margin-right:10px;width:20px;height:20px;" onchange="onSetEditCheckboxChange(this)">
-                        <span style="font-size:14px;">No.${numberLabel}: ${card.name}</span>
+                        <span style="font-size:14px;">No.${numberLabel}: ${localizeDefaultCardName(card.name)}</span>
                     </label>
                 `;
             });
@@ -6533,7 +6539,10 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
             const errorContainer = document.getElementById('error-container');
             
             if (activeCards.length < size) {
-                errorContainer.innerHTML = `<div class="error-message">${size}枚必要です（現在${activeCards.length}枚）</div>`;
+                const errMsg = currentLang === 'ja'
+                    ? `${size}枚必要です（現在${activeCards.length}枚）`
+                    : `${size} cards required (currently ${activeCards.length})`;
+                errorContainer.innerHTML = `<div class="error-message">${errMsg}</div>`;
                 return;
             }
             
@@ -6811,7 +6820,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
             
             const requiredCount = currentSpreadSize;
             if (shufflePool.length < requiredCount) {
-                alert('カード不足');
+                alert(currentLang === 'ja' ? 'カードが足りません' : 'Not enough cards');
                 return;
             }
             
@@ -7018,7 +7027,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
             
             const requiredCount = currentSpreadSize;
             if (shufflePool.length < requiredCount) {
-                alert('カード不足');
+                alert(currentLang === 'ja' ? 'カードが足りません' : 'Not enough cards');
                 return;
             }
             
@@ -7067,7 +7076,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                 img.src = card.imageData;
                 cardFront.appendChild(img);
             } else {
-                cardFront.innerHTML = `<div class="card-text">${card.name}</div>`;
+                cardFront.innerHTML = `<div class="card-text">${localizeDefaultCardName(card.name)}</div>`;
             }
             
             cardFront.onclick = function(e) {
@@ -7404,7 +7413,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                 const descText = isUsingPreset
                     ? getDescriptionForLang(card.description, card.id)
                     : getDescriptionForLang(card.description);
-      html += '<div class="card-meaning" style="' + sigStyle + '"><strong>' + label + ': ' + card.name + ' (' + pos + '), ' +
+      html += '<div class="card-meaning" style="' + sigStyle + '"><strong>' + label + ': ' + localizeDefaultCardName(card.name) + ' (' + pos + '), ' +
 sigBadge + '</strong><br>' + (descText || noDescText) + '</div>';
             });
             
@@ -7418,7 +7427,7 @@ sigBadge + '</strong><br>' + (descText || noDescText) + '</div>';
                     const supDescText = isUsingPreset
                         ? getDescriptionForLang(card.description, card.id)
                         : getDescriptionForLang(card.description);
-                    html += `<div class="card-meaning" style="border-left:3px solid rgba(255,200,100,0.5);"><strong>${supLabel}: ${card.name} (${pos})</strong><br>${supDescText || noDescText}</div>`;
+                    html += `<div class="card-meaning" style="border-left:3px solid rgba(255,200,100,0.5);"><strong>${supLabel}: ${localizeDefaultCardName(card.name)} (${pos})</strong><br>${supDescText || noDescText}</div>`;
                 });
             }
             
