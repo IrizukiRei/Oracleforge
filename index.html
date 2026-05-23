@@ -46,10 +46,26 @@
             --cardRadius: 12px;
             --cardGap: clamp(8px, 2vw, 16px);
             --cardLabelSize: clamp(12px, 3.2vw, 16px);
+
+            /* === OracleForge design tokens (dark + gold) === */
+            --ink-1: #0a0d18;
+            --ink-2: #11142a;
+            --ink-3: #1a1d38;
+            --ink-soft: rgba(26, 29, 56, 0.7);
+            --gold-1: #c9a96a;
+            --gold-2: #e8c878;
+            --gold-3: #8a7445;
+            --gold-line: rgba(201, 169, 106, 0.55);
+            --gold-faint: rgba(201, 169, 106, 0.18);
+            --gold-glow: rgba(232, 200, 120, 0.35);
+            --text: #efe7d0;
+            --text-soft: rgba(239, 231, 208, 0.72);
+            --text-faint: rgba(239, 231, 208, 0.42);
+            --danger: #c66060;
         }
 
         html, body {
-            background-color: #0f2027;
+            background-color: var(--ink-1);
             overflow: hidden;
             height: 100%;
             height: 100dvh;
@@ -68,8 +84,11 @@
 
         body {
             font-family: 'Noto Serif JP', 'Hiragino Mincho ProN', 'Yu Mincho', 'YuMincho', serif;
-            background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
-            color: #fff;
+            background:
+                radial-gradient(ellipse at 20% 0%, rgba(201, 169, 106, 0.08) 0%, transparent 55%),
+                radial-gradient(ellipse at 80% 100%, rgba(138, 116, 69, 0.10) 0%, transparent 60%),
+                linear-gradient(160deg, var(--ink-1) 0%, var(--ink-2) 55%, var(--ink-3) 100%);
+            color: var(--text);
             margin: 0;
             padding: 15px;
             padding-bottom: 60px;
@@ -112,17 +131,33 @@
         h1 {
             text-align: center;
             margin-bottom: 20px;
-            font-size: 1.7em;
-            text-shadow: 0 0 10px rgba(100,200,255,0.5);
-            letter-spacing: 0.2em;
-            font-weight: 300;
+            font-size: 1.9em;
+            letter-spacing: 0.28em;
+            font-weight: 500;
             font-family: 'Cormorant Garamond', 'Noto Serif JP', serif;
+            background: linear-gradient(180deg, var(--gold-2) 0%, var(--gold-1) 55%, var(--gold-3) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: var(--gold-1);
+            position: relative;
+            padding-bottom: 14px;
+        }
+        h1::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            bottom: 0;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--gold-line), transparent);
         }
         
         @media (min-width: 768px) {
             h1 {
-                font-size: 2.4em;
-                letter-spacing: 0.3em;
+                font-size: 2.6em;
+                letter-spacing: 0.36em;
             }
         }
         
@@ -140,18 +175,24 @@
             width: 44px;
             height: 44px;
             border-radius: 50%;
-            background: rgba(20, 40, 50, 0.9);
-            border: 2px solid rgba(100, 200, 255, 0.4);
-            color: #fff;
+            background: rgba(10, 13, 24, 0.85);
+            border: 1px solid var(--gold-line);
+            color: var(--gold-1);
             font-size: 18px;
+            line-height: 1;
             cursor: pointer;
             transition: all 0.3s;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.45), inset 0 0 12px rgba(201,169,106,0.05);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
         .side-buttons button:hover {
-            background: rgba(100, 200, 255, 0.3);
-            border-color: rgba(100, 200, 255, 0.8);
-            transform: scale(1.1);
+            background: rgba(201, 169, 106, 0.12);
+            border-color: var(--gold-2);
+            color: var(--gold-2);
+            transform: scale(1.06);
+            box-shadow: 0 2px 14px var(--gold-glow);
         }
         @media (min-width: 768px) {
             .side-buttons {
@@ -225,42 +266,61 @@
         /* ナビゲーション */
         .nav-tabs {
             display: flex;
-            gap: 5px;
-            margin-bottom: 20px;
+            gap: 4px;
+            margin-bottom: 22px;
             flex-wrap: wrap;
             justify-content: center;
+            padding: 6px 4px;
+            border-top: 1px solid var(--gold-faint);
+            border-bottom: 1px solid var(--gold-faint);
+            background: linear-gradient(180deg, rgba(10,13,24,0.4), rgba(10,13,24,0));
         }
 
         .nav-tabs button {
-            padding: 10px 12px;
-            background: rgba(255,255,255,0.1);
-            border: 2px solid rgba(255,255,255,0.3);
-            color: #fff;
+            padding: 10px 14px 8px;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: var(--text-soft);
             cursor: pointer;
-            border-radius: 8px;
-            font-size: 12px;
-            transition: all 0.3s;
+            border-radius: 0;
+            font-size: 13px;
+            font-family: inherit;
+            letter-spacing: 0.08em;
+            transition: color 0.25s, border-color 0.25s, text-shadow 0.25s;
             flex: 0 1 110px;
             min-width: 60px;
             max-width: 130px;
+            position: relative;
         }
 
         @media (min-width: 768px) {
             .nav-tabs button {
-                padding: 12px 24px;
-                font-size: 16px;
+                padding: 12px 22px 10px;
+                font-size: 15px;
                 flex: 0 1 150px;
                 max-width: 160px;
             }
         }
 
         .nav-tabs button:hover {
-            background: rgba(255,255,255,0.2);
+            color: var(--gold-2);
         }
 
         .nav-tabs button.active {
-            background: rgba(100,200,255,0.3);
-            border-color: rgba(100,200,255,0.8);
+            color: var(--gold-2);
+            border-bottom-color: var(--gold-1);
+            text-shadow: 0 0 12px var(--gold-glow);
+        }
+        .nav-tabs button.active::before {
+            content: '✦';
+            position: absolute;
+            top: -2px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 7px;
+            color: var(--gold-1);
+            opacity: 0.85;
         }
         
         .screen {
@@ -595,22 +655,23 @@
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background: rgba(20, 40, 50, 0.9);
-            border: 2px solid rgba(100, 200, 255, 0.4);
-            color: #64c8ff;
-            font-size: 18px;
-            font-weight: 600;
+            background: rgba(10, 13, 24, 0.9);
+            border: 1px solid var(--gold-line);
+            color: var(--gold-1);
+            font-size: 17px;
+            font-weight: 500;
+            font-family: 'Cormorant Garamond', serif;
             cursor: pointer;
             z-index: 55;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5), inset 0 0 12px rgba(201,169,106,0.06);
             transition: all 0.3s;
             display: flex;
             align-items: center;
             justify-content: center;
         }
         .app-guide-btn:active {
-            background: rgba(100, 200, 255, 0.3);
-            transform: scale(1.1);
+            background: rgba(201, 169, 106, 0.18);
+            transform: scale(1.08);
         }
         body.has-banner-ad .app-guide-btn {
             bottom: 120px;
@@ -621,7 +682,7 @@
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(5, 15, 20, 0.92);
-            z-index: 9000;
+            z-index: 10100;
             display: none;
             flex-direction: column;
             align-items: center;
@@ -956,23 +1017,30 @@
         }
         
         .btn {
-            padding: 12px 20px;
-            background: rgba(100,200,255,0.2);
-            border: 2px solid rgba(100,200,255,0.5);
-            color: #fff;
+            padding: 11px 22px;
+            background: linear-gradient(180deg, rgba(201,169,106,0.10), rgba(201,169,106,0.04));
+            border: 1px solid var(--gold-line);
+            color: var(--gold-2);
             cursor: pointer;
-            border-radius: 8px;
+            border-radius: 4px;
             font-size: 14px;
-            transition: all 0.3s;
-            letter-spacing: 0.1em;
+            font-family: inherit;
+            transition: all 0.25s;
+            letter-spacing: 0.14em;
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02), 0 1px 0 rgba(0,0,0,0.3);
         }
-        
+        .btn:hover {
+            background: linear-gradient(180deg, rgba(201,169,106,0.22), rgba(201,169,106,0.08));
+            border-color: var(--gold-2);
+            color: var(--gold-2);
+            box-shadow: 0 0 14px var(--gold-glow), inset 0 0 0 1px rgba(232,200,120,0.08);
+        }
         .btn:active {
-            background: rgba(100,200,255,0.4);
+            background: rgba(201,169,106,0.28);
+            transform: translateY(1px);
         }
-        
         .btn:disabled {
-            opacity: 0.5;
+            opacity: 0.4;
             cursor: not-allowed;
         }
 
@@ -1531,13 +1599,28 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, #0a0f14 0%, #1a1f2e 50%, #0f1a20 100%);
+            background:
+                radial-gradient(circle at 50% 38%, rgba(201, 169, 106, 0.12) 0%, transparent 45%),
+                radial-gradient(circle at 50% 90%, rgba(138, 116, 69, 0.10) 0%, transparent 55%),
+                linear-gradient(180deg, #06070f 0%, var(--ink-2) 60%, #07091a 100%);
             z-index: 10000;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            overflow: hidden;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 28px 20px 40px;
+            -webkit-overflow-scrolling: touch;
+        }
+        .title-screen::-webkit-scrollbar { display: none; }
+        .title-screen { scrollbar-width: none; }
+        @media (max-height: 720px) {
+            .title-screen { justify-content: flex-start; }
+            .title-screen > div:first-of-type img { width: 110px !important; height: 110px !important; }
+            .title-text { font-size: 2.2em; margin-bottom: 4px; }
+            .title-tagline { margin-bottom: 18px; font-size: 0.88em; }
+            .title-steps { margin-top: 22px; }
         }
 
         .title-screen.hidden {
@@ -1549,12 +1632,12 @@
             position: absolute;
             width: 100%;
             height: 100%;
-            opacity: 0.15;
+            opacity: 0.22;
             pointer-events: none;
-            background-image: 
-                radial-gradient(circle at 50% 50%, transparent 0%, transparent 40%, rgba(100,200,255,0.1) 41%, transparent 42%),
-                radial-gradient(circle at 50% 50%, transparent 0%, transparent 60%, rgba(100,200,255,0.08) 61%, transparent 62%),
-                radial-gradient(circle at 50% 50%, transparent 0%, transparent 80%, rgba(100,200,255,0.05) 81%, transparent 82%);
+            background-image:
+                radial-gradient(circle at 50% 50%, transparent 0%, transparent 40%, rgba(201,169,106,0.12) 41%, transparent 42%),
+                radial-gradient(circle at 50% 50%, transparent 0%, transparent 60%, rgba(201,169,106,0.09) 61%, transparent 62%),
+                radial-gradient(circle at 50% 50%, transparent 0%, transparent 80%, rgba(201,169,106,0.06) 81%, transparent 82%);
             background-size: 100% 100%;
             animation: webPulse 8s ease-in-out infinite;
         }
@@ -1566,10 +1649,10 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: 
-                linear-gradient(0deg, transparent 49.5%, rgba(100,200,255,0.1) 50%, transparent 50.5%),
-                linear-gradient(60deg, transparent 49.5%, rgba(100,200,255,0.1) 50%, transparent 50.5%),
-                linear-gradient(120deg, transparent 49.5%, rgba(100,200,255,0.1) 50%, transparent 50.5%);
+            background:
+                linear-gradient(0deg, transparent 49.5%, rgba(201,169,106,0.08) 50%, transparent 50.5%),
+                linear-gradient(60deg, transparent 49.5%, rgba(201,169,106,0.08) 50%, transparent 50.5%),
+                linear-gradient(120deg, transparent 49.5%, rgba(201,169,106,0.08) 50%, transparent 50.5%);
             background-size: 100% 100%;
         }
 
@@ -1581,13 +1664,13 @@
         /* 浮遊する結晶 */
         .floating-crystal {
             position: absolute;
-            width: 20px;
-            height: 20px;
-            background: linear-gradient(135deg, rgba(100,200,255,0.6), rgba(180,100,255,0.6));
+            width: 18px;
+            height: 18px;
+            background: linear-gradient(135deg, rgba(232,200,120,0.65), rgba(138,116,69,0.55));
             clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
             animation: floatCrystal 6s ease-in-out infinite;
             pointer-events: none;
-            filter: blur(1px);
+            filter: blur(0.6px) drop-shadow(0 0 6px rgba(232,200,120,0.4));
         }
 
         @keyframes floatCrystal {
@@ -1643,51 +1726,97 @@
 
         /* タイトルテキスト */
         .title-text {
-            font-size: 2.3em;
-            letter-spacing: 0.2em;
-            color: #fff;
-            text-shadow: 
-                0 0 10px rgba(100,200,255,0.8),
-                0 0 20px rgba(100,200,255,0.5),
-                0 0 40px rgba(100,200,255,0.3);
-            margin-bottom: 10px;
-            animation: titleGlow 3s ease-in-out infinite;
+            font-size: 2.6em;
+            letter-spacing: 0.28em;
+            font-weight: 500;
+            background: linear-gradient(180deg, #f1d98a 0%, var(--gold-1) 55%, var(--gold-3) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: var(--gold-1);
+            margin-bottom: 6px;
+            animation: titleGlow 4s ease-in-out infinite;
             font-family: 'Cormorant Garamond', 'Noto Serif JP', serif;
+            filter: drop-shadow(0 0 18px rgba(232,200,120,0.25));
+            text-align: center;
         }
-        
+
         @media (min-width: 500px) {
             .title-text {
-                font-size: 2.8em;
+                font-size: 3.1em;
                 letter-spacing: 0.4em;
             }
         }
 
         .title-sub {
-            font-size: 1em;
-            letter-spacing: 0.3em;
-            color: rgba(200,220,255,0.7);
-            margin-bottom: 40px;
+            font-size: 0.95em;
+            letter-spacing: 0.45em;
+            color: var(--text-soft);
+            margin-bottom: 14px;
+            font-family: 'Cormorant Garamond', 'Noto Serif JP', serif;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        /* タイトル下の説明 + 装飾線 */
+        .title-divider {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin: 6px auto 18px;
+            max-width: 320px;
+            color: var(--gold-1);
+            opacity: 0.85;
+        }
+        .title-divider::before,
+        .title-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--gold-line));
+        }
+        .title-divider::after {
+            background: linear-gradient(90deg, var(--gold-line), transparent);
+        }
+        .title-divider span { font-size: 12px; letter-spacing: 0.3em; }
+
+        .title-tagline {
+            color: var(--text);
+            font-size: 0.95em;
+            line-height: 1.6;
+            max-width: 340px;
+            text-align: center;
+            margin: 0 auto 28px;
+            letter-spacing: 0.05em;
+        }
+        .title-tagline em {
+            font-style: normal;
+            color: var(--gold-2);
+            letter-spacing: 0.12em;
         }
 
         @keyframes titleGlow {
-            0%, 100% { text-shadow: 0 0 10px rgba(100,200,255,0.8), 0 0 20px rgba(100,200,255,0.5); }
-            50% { text-shadow: 0 0 20px rgba(100,200,255,1), 0 0 40px rgba(100,200,255,0.8), 0 0 60px rgba(180,100,255,0.5); }
+            0%, 100% { filter: drop-shadow(0 0 14px rgba(232,200,120,0.20)); }
+            50%      { filter: drop-shadow(0 0 22px rgba(232,200,120,0.45)); }
         }
 
         .start-btn {
-            padding: 15px 50px;
-            background: transparent;
-            border: 2px solid rgba(100,200,255,0.5);
-            color: #fff;
-            font-size: 1.1em;
-            letter-spacing: 0.2em;
+            padding: 14px 56px;
+            background: linear-gradient(180deg, rgba(201,169,106,0.18), rgba(201,169,106,0.04));
+            border: 1px solid var(--gold-1);
+            color: var(--gold-2);
+            font-size: 1.05em;
+            letter-spacing: 0.4em;
+            font-family: 'Cormorant Garamond', 'Noto Serif JP', serif;
             cursor: pointer;
-            border-radius: 30px;
+            border-radius: 2px;
             transition: all 0.3s;
             position: relative;
             overflow: hidden;
             z-index: 100;
             -webkit-tap-highlight-color: transparent;
+            box-shadow: 0 0 0 1px rgba(201,169,106,0.15), 0 0 22px rgba(0,0,0,0.5), inset 0 0 18px rgba(201,169,106,0.06);
         }
 
         .start-btn::before {
@@ -1697,18 +1826,79 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(100,200,255,0.3), transparent);
-            transition: left 0.5s;
+            background: linear-gradient(90deg, transparent, rgba(232,200,120,0.35), transparent);
+            transition: left 0.7s;
         }
 
-        .start-btn:hover::before {
-            left: 100%;
-        }
-
+        .start-btn:hover::before { left: 100%; }
         .start-btn:hover {
-            background: rgba(100,200,255,0.2);
-            box-shadow: 0 0 20px rgba(100,200,255,0.5);
+            background: linear-gradient(180deg, rgba(232,200,120,0.28), rgba(201,169,106,0.08));
+            color: #fff7df;
+            box-shadow: 0 0 0 1px var(--gold-2), 0 0 26px var(--gold-glow);
         }
+
+        /* タイトル画面の3ステップガイド */
+        .title-steps {
+            display: flex;
+            align-items: stretch;
+            justify-content: center;
+            gap: 0;
+            margin: 32px auto 0;
+            max-width: 440px;
+            width: 100%;
+            color: var(--text-soft);
+            font-size: 12px;
+            letter-spacing: 0.1em;
+            line-height: 1.5;
+        }
+        .title-step {
+            flex: 1;
+            text-align: center;
+            padding: 0 8px;
+            position: relative;
+        }
+        .title-step + .title-step::before {
+            content: '›';
+            position: absolute;
+            left: -6px;
+            top: 6px;
+            color: var(--gold-1);
+            font-size: 18px;
+            opacity: 0.7;
+        }
+        .title-step-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 26px;
+            height: 26px;
+            border: 1px solid var(--gold-line);
+            border-radius: 50%;
+            color: var(--gold-2);
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+        .title-step-label { color: var(--text); font-size: 12px; }
+        .title-step-desc { color: var(--text-faint); font-size: 11px; margin-top: 2px; }
+
+        .title-guide-link {
+            margin-top: 22px;
+            background: none;
+            border: none;
+            color: var(--gold-1);
+            font-size: 12px;
+            letter-spacing: 0.2em;
+            cursor: pointer;
+            text-decoration: underline;
+            text-decoration-color: var(--gold-faint);
+            text-underline-offset: 4px;
+            font-family: inherit;
+            padding: 6px 10px;
+            opacity: 0.85;
+            transition: opacity 0.25s, color 0.25s;
+        }
+        .title-guide-link:hover { color: var(--gold-2); opacity: 1; }
 
         /* 蝶のアニメーション */
         .butterfly {
@@ -1919,27 +2109,56 @@
         
         <!-- 言語選択 -->
         <div style="position:absolute;top:20px;right:20px;z-index:10001;">
-            <select id="lang-select" onchange="changeLang(this.value)" style="padding:8px 12px;background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.4);color:#fff;border-radius:6px;font-size:14px;pointer-events:auto;">
+            <select id="lang-select" onchange="changeLang(this.value)" style="padding:8px 12px;background:rgba(10,13,24,0.7);border:1px solid var(--gold-line);color:var(--gold-2);border-radius:2px;font-size:13px;letter-spacing:0.08em;pointer-events:auto;font-family:inherit;">
                 <option value="ja" style="color:#000;">日本語</option>
                 <option value="en" style="color:#000;">English</option>
             </select>
         </div>
         
         <!-- アイコン -->
-        <div style="margin-bottom:20px;pointer-events:none;">
-            <img src="icon.png" style="width:150px;height:150px;object-fit:contain;">
+        <div style="margin-bottom:18px;pointer-events:none;filter:drop-shadow(0 0 18px rgba(232,200,120,0.20));">
+            <img src="icon.png" style="width:140px;height:140px;object-fit:contain;">
         </div>
-        
-        <div class="title-text" style="pointer-events:none;">OracleForge</div>
-        <div class="title-sub" style="pointer-events:none;">Card Shuffler</div>
 
-        <button class="start-btn" id="startBtn" data-ja="はじめる" data-en="START" onclick="startApp()" style="position:relative;z-index:10001;pointer-events:auto;touch-action:manipulation;">はじめる</button>
+        <div class="title-text" style="pointer-events:none;">OracleForge</div>
+        <div class="title-sub" style="pointer-events:none;" data-ja="Card Oracle" data-en="Card Oracle">Card Oracle</div>
+
+        <div class="title-divider" style="pointer-events:none;"><span>✦</span></div>
+
+        <p class="title-tagline" style="pointer-events:none;"
+           data-ja="ルノルマン39枚で導きを読む占術アプリ。問いを記し、カードを並べ、流れを読みます。"
+           data-en="A Lenormand oracle in 39 cards. Write a question, lay the cards, read the flow.">
+           ルノルマン39枚で導きを読む占術アプリ。問いを記し、カードを並べ、流れを読みます。
+        </p>
+
+        <button class="start-btn" id="startBtn" data-ja="はじめる" data-en="ENTER" onclick="startApp()" style="position:relative;z-index:10001;pointer-events:auto;touch-action:manipulation;">はじめる</button>
+
+        <!-- 初回ステップガイド -->
+        <div class="title-steps" style="pointer-events:none;">
+            <div class="title-step">
+                <div class="title-step-num">I</div>
+                <div class="title-step-label" data-ja="問いを記す" data-en="Ask">問いを記す</div>
+                <div class="title-step-desc" data-ja="記録タブ" data-en="Notes tab">記録タブ</div>
+            </div>
+            <div class="title-step">
+                <div class="title-step-num">II</div>
+                <div class="title-step-label" data-ja="展開を選ぶ" data-en="Choose spread">展開を選ぶ</div>
+                <div class="title-step-desc" data-ja="14種から" data-en="14 layouts">14種から</div>
+            </div>
+            <div class="title-step">
+                <div class="title-step-num">III</div>
+                <div class="title-step-label" data-ja="カードを引く" data-en="Draw">カードを引く</div>
+                <div class="title-step-desc" data-ja="占うタブ" data-en="Read tab">占うタブ</div>
+            </div>
+        </div>
+
+        <button class="title-guide-link" type="button" onclick="openAppGuide()" data-ja="✦ 使い方をくわしく見る" data-en="✦ View full guide" style="position:relative;z-index:10001;pointer-events:auto;">✦ 使い方をくわしく見る</button>
     </div>
 
     <!-- 左サイドバー（ホーム・設定ボタン） -->
     <div class="side-buttons">
-        <button onclick="goHome()" title="Home">🏠</button>
-        <button onclick="openSettingsDrawer()" title="Settings">⚙️</button>
+        <button onclick="goHome()" title="Home" aria-label="Home" style="font-family:'Cormorant Garamond',serif;font-size:22px;">⌂</button>
+        <button onclick="openSettingsDrawer()" title="Settings" aria-label="Settings" style="font-size:18px;">⚙</button>
     </div>
 
     <!-- 操作ガイドボタン（?）- 全画面共通 / body直下でposition:fixed -->
