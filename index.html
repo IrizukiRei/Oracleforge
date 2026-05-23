@@ -262,15 +262,37 @@
             left: 0;
             width: min(85vw, 400px);
             height: 100%;
-            background: linear-gradient(180deg, #0f2027 0%, #1a3a4a 100%);
+            background:
+                /* 上方からの淡い光柱（水面寄り） */
+                radial-gradient(ellipse 80% 30% at 50% -8%, rgba(174, 230, 245, 0.10) 0%, transparent 60%),
+                linear-gradient(180deg, var(--ink-3) 0%, var(--ink-2) 55%, var(--ink-1) 100%);
             z-index: 210;
             transform: translateX(-100%);
             transition: transform 0.3s ease-out;
             overflow-y: auto;
-            padding: 20px;
+            padding: 24px 20px 32px;
             box-sizing: border-box;
-            box-shadow: 4px 0 20px rgba(0,0,0,0.5);
+            box-shadow: 4px 0 24px rgba(0,0,0,0.6);
+            border-right: 1px solid var(--accent-faint);
         }
+        /* 設定ドロワーの上端に占い時と同じ水面オーバーレイを薄く敷いて世界観を継続 */
+        .settings-drawer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 30vh;
+            background-image: url('overlay.webp');
+            background-size: cover;
+            background-position: center top;
+            opacity: 0.10;
+            mix-blend-mode: screen;
+            pointer-events: none;
+            mask-image: linear-gradient(180deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.5) 55%, transparent 100%);
+            -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.5) 55%, transparent 100%);
+        }
+        .settings-drawer > * { position: relative; z-index: 1; }
         .settings-drawer.open {
             transform: translateX(0);
         }
@@ -278,19 +300,22 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid rgba(100,200,255,0.3);
+            margin-bottom: 22px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--accent-faint);
         }
         .settings-drawer-header h2 {
             margin: 0;
-            font-size: 1.3em;
-            color: #64c8ff;
+            font-size: 1.35em;
+            color: var(--accent-2);
+            font-family: 'Cormorant Garamond', 'Noto Serif JP', serif;
+            font-weight: 500;
+            letter-spacing: 0.18em;
         }
         .settings-drawer-close {
             background: none;
             border: none;
-            color: #fff;
+            color: var(--accent-1);
             font-size: 28px;
             cursor: pointer;
             padding: 5px;
@@ -731,70 +756,101 @@
             display: flex;
         }
         .reading-guide-panel {
-            width: min(420px, 90vw);
-            max-height: 80vh;
+            position: relative;
+            width: min(440px, 92vw);
+            max-height: 84vh;
             overflow-y: auto;
-            background: rgba(15, 32, 39, 0.97);
-            border: 2px solid rgba(100, 200, 255, 0.4);
-            border-radius: 16px;
-            padding: 24px 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            background:
+                radial-gradient(ellipse 80% 30% at 50% -8%, rgba(174, 230, 245, 0.12) 0%, transparent 60%),
+                linear-gradient(180deg, var(--ink-3) 0%, var(--ink-2) 55%, var(--ink-1) 100%);
+            border: 1px solid var(--accent-faint);
+            border-top: 1px solid var(--accent-line);
+            border-radius: 4px;
+            padding: 26px 22px 22px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(174,230,245,0.04);
         }
-        .reading-guide-panel::-webkit-scrollbar {
-            width: 4px;
+        /* ガイド上端にも水面オーバーレイを薄く */
+        .reading-guide-panel::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 32%;
+            background-image: url('overlay.webp');
+            background-size: cover;
+            background-position: center top;
+            opacity: 0.10;
+            mix-blend-mode: screen;
+            pointer-events: none;
+            mask-image: linear-gradient(180deg, rgba(0,0,0,1) 0%, transparent 100%);
+            -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,1) 0%, transparent 100%);
+            border-radius: 4px 4px 0 0;
         }
+        .reading-guide-panel > * { position: relative; z-index: 1; }
+        .reading-guide-panel::-webkit-scrollbar { width: 4px; }
         .reading-guide-panel::-webkit-scrollbar-thumb {
-            background: rgba(100, 200, 255, 0.3);
+            background: var(--accent-faint);
             border-radius: 2px;
         }
         .guide-title {
             text-align: center;
-            color: #64c8ff;
-            font-size: clamp(16px, 4vw, 20px);
-            margin-bottom: 20px;
-            font-weight: 600;
-            letter-spacing: 0.15em;
+            color: var(--accent-2);
+            font-size: clamp(18px, 4.4vw, 22px);
+            margin-bottom: 8px;
+            font-weight: 500;
+            letter-spacing: 0.22em;
+            font-family: 'Cormorant Garamond', 'Noto Serif JP', serif;
+        }
+        .guide-title::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 1px;
+            margin: 10px auto 18px;
+            background: linear-gradient(90deg, transparent, var(--accent-line), transparent);
         }
         .guide-step-list {
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 12px;
         }
         .guide-step {
             display: flex;
             align-items: flex-start;
             gap: 14px;
-            padding: 14px;
-            background: rgba(100, 200, 255, 0.06);
-            border: 1px solid rgba(100, 200, 255, 0.15);
-            border-radius: 12px;
-            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.06);
-            transition: all 0.3s;
+            padding: 12px 14px;
+            background: linear-gradient(180deg, rgba(15, 40, 50, 0.45) 0%, rgba(7, 19, 28, 0.4) 100%);
+            border: 1px solid var(--accent-faint);
+            border-left: 1px solid var(--accent-line);
+            border-radius: 3px;
+            transition: border-color 0.25s;
         }
+        .guide-step:hover { border-left-color: var(--accent-1); }
         .guide-step-num {
             flex-shrink: 0;
-            width: 44px;
-            height: 44px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
-            background: rgba(100, 200, 255, 0.2);
-            border: 2px solid rgba(100, 200, 255, 0.5);
-            color: #64c8ff;
+            background: transparent;
+            border: 1px solid var(--accent-line);
+            color: var(--accent-2);
             font-size: 14px;
-            font-weight: 700;
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 500;
             display: flex;
             align-items: center;
             justify-content: center;
         }
         .guide-step-body h4 {
-            color: #e0f0ff;
+            color: var(--accent-2);
             font-size: 14px;
             margin-bottom: 4px;
-            font-weight: 600;
+            font-weight: 500;
+            letter-spacing: 0.06em;
         }
         .guide-step-body p {
-            color: #8ab8d0;
+            color: var(--text-soft);
             font-size: 12.5px;
-            line-height: 1.6;
+            line-height: 1.65;
             margin: 0;
             word-break: keep-all;
             overflow-wrap: anywhere;
@@ -802,51 +858,56 @@
         .guide-note {
             margin-top: 18px;
             padding: 12px 14px;
-            background: rgba(255, 200, 100, 0.08);
-            border: 1px solid rgba(255, 200, 100, 0.25);
-            border-radius: 10px;
+            background: linear-gradient(180deg, rgba(15, 40, 50, 0.45) 0%, rgba(7, 19, 28, 0.4) 100%);
+            border: 1px solid var(--accent-faint);
+            border-left: 1px solid var(--accent-1);
+            border-radius: 3px;
             font-size: 12px;
-            color: #c8a86e;
-            line-height: 1.6;
+            color: var(--text-soft);
+            line-height: 1.65;
         }
         .guide-note-title {
-            color: #ffcc66;
-            font-weight: 600;
+            color: var(--accent-2);
+            font-weight: 500;
             margin-bottom: 4px;
             font-size: 12.5px;
+            letter-spacing: 0.08em;
         }
         .guide-section-title {
-            font-size: 13px;
-            color: #64c8ff;
-            font-weight: 600;
-            letter-spacing: 0.12em;
-            margin-top: 20px;
-            margin-bottom: 10px;
+            font-size: 12px;
+            color: var(--accent-1);
+            font-weight: 500;
+            letter-spacing: 0.28em;
+            text-transform: uppercase;
+            margin-top: 22px;
+            margin-bottom: 12px;
             padding-bottom: 6px;
-            border-bottom: 1px solid rgba(100, 200, 255, 0.2);
+            border-bottom: 1px solid var(--accent-faint);
+            font-family: 'Cormorant Garamond', 'Noto Serif JP', serif;
         }
-        .guide-section-title:first-child {
-            margin-top: 0;
+        .guide-section-title:first-of-type {
+            margin-top: 6px;
         }
         .guide-flow-arrow {
             text-align: center;
-            color: rgba(100, 200, 255, 0.4);
-            font-size: 18px;
+            color: var(--accent-line);
+            font-size: 16px;
             margin: 6px 0;
             letter-spacing: 0.3em;
         }
         .guide-connection {
             padding: 10px 14px;
-            background: rgba(100, 200, 255, 0.06);
-            border: 1px dashed rgba(100, 200, 255, 0.25);
-            border-radius: 10px;
+            background: linear-gradient(180deg, rgba(15, 40, 50, 0.32) 0%, rgba(7, 19, 28, 0.28) 100%);
+            border: 1px solid var(--accent-faint);
+            border-radius: 3px;
             font-size: 12px;
-            color: #8ab8d0;
-            line-height: 1.6;
+            color: var(--text-soft);
+            line-height: 1.7;
             margin: 8px 0;
         }
         .guide-connection strong {
-            color: #c8e8ff;
+            color: var(--accent-2);
+            font-weight: 500;
         }
         .guide-reading-steps {
             white-space: pre-line;
@@ -854,30 +915,39 @@
         }
         .guide-tab-badge {
             display: inline-block;
-            background: rgba(100, 200, 255, 0.2);
-            border: 1px solid rgba(100, 200, 255, 0.4);
-            border-radius: 4px;
-            padding: 1px 6px;
+            background: rgba(159, 214, 230, 0.10);
+            border: 1px solid var(--accent-line);
+            border-radius: 2px;
+            padding: 1px 8px;
             font-size: 11px;
-            color: #64c8ff;
+            color: var(--accent-2);
             vertical-align: middle;
             margin: 0 2px;
+            letter-spacing: 0.08em;
+            font-family: 'Cormorant Garamond', 'Noto Serif JP', serif;
         }
         .guide-close-btn {
             display: block;
-            margin: 20px auto 0;
-            padding: 10px 32px;
-            background: rgba(100, 200, 255, 0.2);
-            border: 2px solid rgba(100, 200, 255, 0.5);
-            color: #fff;
-            border-radius: 8px;
+            margin: 22px auto 0;
+            padding: 11px 36px;
+            background: linear-gradient(180deg, rgba(159,214,230,0.12), rgba(159,214,230,0.04));
+            border: 1px solid var(--accent-line);
+            color: var(--accent-2);
+            border-radius: 4px;
             font-size: 14px;
+            font-family: inherit;
             cursor: pointer;
-            transition: all 0.3s;
-            letter-spacing: 0.1em;
+            transition: all 0.25s;
+            letter-spacing: 0.18em;
+        }
+        .guide-close-btn:hover {
+            background: linear-gradient(180deg, rgba(159,214,230,0.22), rgba(159,214,230,0.08));
+            border-color: var(--accent-2);
+            box-shadow: 0 0 14px var(--accent-glow);
         }
         .guide-close-btn:active {
-            background: rgba(100, 200, 255, 0.4);
+            background: rgba(159, 214, 230, 0.28);
+            transform: translateY(1px);
         }
 
         .lenormand-intro-card {
@@ -885,27 +955,22 @@
             overflow: hidden;
             margin-top: 12px;
             padding: 14px;
-            background: linear-gradient(135deg, rgba(255, 166, 215, 0.16), rgba(122, 209, 255, 0.14));
-            border: 1px solid rgba(255, 185, 232, 0.45);
-            border-radius: 12px;
-            box-shadow: 0 10px 22px rgba(0, 0, 0, 0.28), 0 0 0 1px rgba(255, 160, 220, 0.2), 0 18px 34px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.14);
-            animation: lenormandFloat 4.2s ease-in-out infinite;
+            background:
+                radial-gradient(ellipse 80% 40% at 50% 0%, rgba(174, 230, 245, 0.10) 0%, transparent 60%),
+                linear-gradient(180deg, rgba(15, 40, 50, 0.55) 0%, rgba(7, 19, 28, 0.5) 100%);
+            border: 1px solid var(--accent-faint);
+            border-top: 1px solid var(--accent-line);
+            border-radius: 3px;
+            box-shadow: 0 10px 22px rgba(0, 0, 0, 0.32);
+            animation: lenormandFloat 5s ease-in-out infinite;
         }
         .lenormand-intro-card::before {
             content: "";
             position: absolute;
             inset: -35% -65%;
-            background: linear-gradient(110deg, rgba(255, 255, 255, 0) 35%, rgba(255, 232, 245, 0.28) 49%, rgba(110, 220, 255, 0.15) 55%, rgba(255, 255, 255, 0) 65%);
-            transform: translateX(-55%) rotate(-8deg);
-            animation: lenormandSheen 4.8s ease-in-out infinite;
-            pointer-events: none;
-        }
-        .lenormand-intro-card::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            border-radius: inherit;
-            box-shadow: inset 0 0 28px rgba(255, 170, 227, 0.16), inset 0 0 54px rgba(110, 220, 255, 0.14);
+            background: linear-gradient(110deg, transparent 40%, rgba(174, 230, 245, 0.18) 50%, transparent 60%);
+            transform: translateX(-60%) rotate(-8deg);
+            animation: lenormandSheen 7s ease-in-out infinite;
             pointer-events: none;
         }
         .lenormand-intro-title {
@@ -914,32 +979,33 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            color: #ffd7ef;
-            font-weight: 700;
+            color: var(--accent-2);
+            font-weight: 500;
             font-size: 13px;
             margin-bottom: 8px;
+            letter-spacing: 0.06em;
         }
         .lenormand-intro-icon {
             display: inline-flex;
-            animation: lenormandIconBob 2.4s ease-in-out infinite;
+            animation: lenormandIconBob 2.8s ease-in-out infinite;
         }
         .lenormand-intro-badge {
             margin-left: auto;
             padding: 2px 8px;
-            border-radius: 999px;
-            border: 1px solid rgba(255, 210, 235, 0.5);
-            background: rgba(255, 206, 234, 0.14);
-            color: #ffe8f5;
+            border-radius: 2px;
+            border: 1px solid var(--accent-line);
+            background: rgba(159, 214, 230, 0.08);
+            color: var(--accent-2);
             font-size: 10px;
-            letter-spacing: 0.08em;
-            box-shadow: 0 4px 10px rgba(255, 166, 215, 0.2);
+            letter-spacing: 0.16em;
+            font-family: 'Cormorant Garamond', serif;
         }
         .lenormand-intro-body {
             position: relative;
             z-index: 1;
-            color: #d7efff;
+            color: var(--text-soft);
             font-size: 12.5px;
-            line-height: 1.7;
+            line-height: 1.75;
             margin: 0;
             word-break: keep-all;
             overflow-wrap: anywhere;
@@ -956,13 +1022,13 @@
             display: inline-flex;
             align-items: center;
             gap: 4px;
-            padding: 3px 8px;
-            border-radius: 999px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.22);
-            color: #f6fbff;
+            padding: 3px 10px;
+            border-radius: 2px;
+            background: rgba(159, 214, 230, 0.08);
+            border: 1px solid var(--accent-faint);
+            color: var(--accent-2);
             font-size: 11px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.16);
+            letter-spacing: 0.04em;
         }
 
         @keyframes lenormandFloat {
@@ -1191,21 +1257,31 @@
         }
 
         .info-box {
-            background: rgba(100,200,255,0.1);
-            border: 2px solid rgba(100,200,255,0.3);
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 15px;
+            position: relative;
+            background:
+                linear-gradient(180deg, rgba(15, 40, 50, 0.5) 0%, rgba(7, 19, 28, 0.45) 100%);
+            border: 1px solid var(--accent-faint);
+            border-top: 1px solid var(--accent-line);
+            padding: 14px 16px;
+            border-radius: 4px;
+            margin-bottom: 14px;
             font-size: 13px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.32), inset 0 0 0 1px rgba(255, 255, 255, 0.02);
             word-break: keep-all;
             overflow-wrap: anywhere;
+            backdrop-filter: blur(2px);
+            -webkit-backdrop-filter: blur(2px);
         }
 
         .info-box h3 {
-            color: #64c8ff;
-            margin-bottom: 8px;
+            color: var(--accent-2);
+            margin-bottom: 10px;
             font-size: 1em;
+            font-family: 'Cormorant Garamond', 'Noto Serif JP', serif;
+            font-weight: 500;
+            letter-spacing: 0.12em;
+            padding-bottom: 6px;
+            border-bottom: 1px solid var(--accent-faint);
         }
 
         .edit-settings-stack {
@@ -2184,7 +2260,7 @@
             <div class="title-step">
                 <div class="title-step-num">II</div>
                 <div class="title-step-label" data-ja="展開を選ぶ" data-en="Choose spread">展開を選ぶ</div>
-                <div class="title-step-desc" data-ja="14種から" data-en="14 layouts">14種から</div>
+                <div class="title-step-desc" data-ja="15種から" data-en="15 layouts">15種から</div>
             </div>
             <div class="title-step">
                 <div class="title-step-num">III</div>
@@ -2249,7 +2325,7 @@
             <div class="guide-connection">
                 <strong>★ </strong>
                 <span class="guide-tab-badge" data-ja="記録" data-en="Notes">記録</span> <span data-ja="で問いを入力 →" data-en="enter question →">で問いを入力 →</span>
-                <span class="guide-tab-badge" data-ja="展開" data-en="Spread">展開</span> <span data-ja="でスプレッドを選択（14種類） →" data-en="choose spread (14 types) →">でスプレッドを選択（14種類） →</span>
+                <span class="guide-tab-badge" data-ja="展開" data-en="Spread">展開</span> <span data-ja="でスプレッドを選択（15種類） →" data-en="choose spread (15 types) →">でスプレッドを選択（15種類） →</span>
                 <span class="guide-tab-badge" data-ja="占う" data-en="Read">占う</span> <span data-ja="に自動遷移" data-en="auto-navigates">に自動遷移</span>
             </div>
             <div class="guide-connection">
@@ -2715,7 +2791,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                 <p data-ja="アプリ全体の設定やデータ移行はこちら" data-en="App-wide settings and data transfer.">アプリ全体の設定やデータ移行はこちら</p>
             </div>
 
-            <div class="info-box" style="background:rgba(255,200,100,0.1);border-color:rgba(255,200,100,0.3);">
+            <div class="info-box">
                 <h3>💾 <span data-ja="データ移行" data-en="Data Transfer">データ移行</span></h3>
                 <p style="margin-bottom:10px;" data-ja="バックアップや端末間のデータ移行にエクスポート/インポートを使用" data-en="Use Export/Import for backup or transferring data between devices">バックアップや端末間のデータ移行にエクスポート/インポートを使用</p>
                 <div style="display:flex;gap:10px;flex-wrap:wrap;">
@@ -2746,24 +2822,22 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                 </div>
             </div>
 
-            <div class="info-box" id="ads-removal-section" style="background:rgba(100,200,100,0.1);border-color:rgba(100,200,100,0.3);">
+            <div class="info-box" id="ads-removal-section">
                 <h3>🚫 <span data-ja="課金プラン" data-en="Billing Plans">課金プラン</span></h3>
                 <p style="font-size:12px;color:#aaa;margin-bottom:10px;" data-ja="広告を消すプランと、保存無制限＋広告削除プランを購入・復元できます。" data-en="You can purchase or restore two plans: Remove Ads, and Unlimited Saves + Remove Ads.">広告を消すプランと、保存無制限＋広告削除プランを購入・復元できます。</p>
-                <p id="ads-status" style="font-size:13px;color:#64c8ff;margin-bottom:6px;"></p>
-                <p id="save-plus-status" style="font-size:13px;color:#64c8ff;margin-bottom:10px;"></p>
-                <p id="ad-test-status" style="font-size:12px;color:#ffcc80;margin-bottom:8px;"></p>
+                <p id="ads-status" style="font-size:13px;color:var(--accent-1);margin-bottom:6px;"></p>
+                <p id="save-plus-status" style="font-size:13px;color:var(--accent-1);margin-bottom:10px;"></p>
                 <div style="display:flex;gap:10px;flex-wrap:wrap;">
-                    <button class="btn" id="buy-remove-ads" onclick="purchaseRemoveAds()" style="padding:10px 15px;font-size:13px;background:rgba(100,200,100,0.2);border-color:rgba(100,200,100,0.5);" data-ja="広告を非表示にする" data-en="Hide Ads">広告を非表示にする</button>
-                    <button class="btn" id="buy-save-plus" onclick="purchaseSavePlus()" style="padding:10px 15px;font-size:13px;background:rgba(100,160,255,0.2);border-color:rgba(100,160,255,0.5);" data-ja="保存無制限＋広告削除" data-en="Unlimited Saves + Remove Ads">保存無制限＋広告削除</button>
+                    <button class="btn" id="buy-remove-ads" onclick="purchaseRemoveAds()" style="padding:10px 15px;font-size:13px;" data-ja="広告を非表示にする" data-en="Hide Ads">広告を非表示にする</button>
+                    <button class="btn" id="buy-save-plus" onclick="purchaseSavePlus()" style="padding:10px 15px;font-size:13px;" data-ja="保存無制限＋広告削除" data-en="Unlimited Saves + Remove Ads">保存無制限＋広告削除</button>
                     <button class="btn" id="restore-purchases" onclick="restorePurchases()" style="padding:10px 15px;font-size:13px;" data-ja="購入を復元" data-en="Restore Purchases">購入を復元</button>
-                    <button class="btn" id="toggle-ad-test-mode" onclick="toggleAdTestMode()" style="padding:10px 15px;font-size:13px;" data-ja="広告テストモード切替" data-en="Toggle Ad Test Mode">広告テストモード切替</button>
                 </div>
                 <p id="ad-debug-status" style="font-size:11px;color:#9fd8ff;margin-top:8px;line-height:1.5;"></p>
                 <p id="iap-verify-status" style="font-size:11px;color:#9fd8ff;margin-top:4px;line-height:1.5;word-break:break-all;"></p>
                 <p style="font-size:10px;color:#888;margin-top:4px;line-height:1.5;" data-ja="※「課金復元」を押すと、Google Play Billing に再問い合わせし、所有していなければ広告は復帰します。" data-en="Tip: pressing Restore queries Google Play Billing again; if no purchase is owned, ads come back.">※「課金復元」を押すと、Google Play Billing に再問い合わせし、所有していなければ広告は復帰します。</p>
             </div>
 
-            <div class="info-box" id="guide-settings-box" style="background:rgba(100,200,255,0.06);border-color:rgba(100,200,255,0.2);">
+            <div class="info-box" id="guide-settings-box">
                 <h3>❓ <span data-ja="操作ガイド" data-en="App Guide">操作ガイド</span></h3>
                 <p style="font-size:12px;color:#aaa;margin-bottom:10px;" data-ja="ガイドボタン（?）の表示を切り替えます" data-en="Toggle the guide button (?) visibility">ガイドボタン（?）の表示を切り替えます</p>
                 <div style="display:flex;gap:10px;flex-wrap:wrap;">
@@ -2772,7 +2846,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                 </div>
             </div>
 
-            <div class="info-box" style="background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.2);">
+            <div class="info-box">
                 <h3>📜 <span data-ja="ライセンス＆クレジット" data-en="Licenses & Credits">ライセンス＆クレジット</span></h3>
                 <p style="font-size:12px;color:#aaa;margin-bottom:10px;" data-ja="BGM/SE/画像/フォントの出典一覧" data-en="Sources for BGM/SE/images/fonts.">BGM/SE/画像/フォントの出典一覧</p>
                 <button class="btn" onclick="openCreditsModal()" style="padding:10px 16px;font-size:13px;" data-ja="一覧を見る" data-en="View List">一覧を見る</button>
@@ -3261,7 +3335,9 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                 this.isNative = typeof window.Capacitor !== 'undefined' && window.Capacitor.isNativePlatform();
                 this.AdMob = null;
                 this.bannerVisible = false;
+                this.bannerCreated = false; // 一度でも showBanner が成功したか（true なら resumeBanner で復帰）
                 this.interstitialLoaded = false;
+                this.interstitialPreparing = false;
                 this.adsDisabled = false;
                 // フリクエンシーキャップ用
                 this.lastInterstitialTime = 0;
@@ -3431,22 +3507,52 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                 this.bannerLastStatus = 'requested';
                 this.renderDebugStatus('banner-requested');
 
+                // 一度作成済みのバナーは hideBanner で内部的に止まっているだけ。
+                // 再度 showBanner() を呼ぶと「すでに表示中」と判定されて空振りすることが
+                // あるので、bannerCreated 後は resumeBanner() を優先する。
+                const tryResume = this.bannerCreated && typeof this.AdMob.resumeBanner === 'function';
+
                 try {
-                    await this.AdMob.showBanner({
-                        adId: this.getBannerAdId(),
-                        adSize: this.BannerAdSize.ADAPTIVE_BANNER,
-                        position: this.BannerAdPosition.BOTTOM_CENTER,
-                        margin: 0
-                    });
+                    if (tryResume) {
+                        await this.AdMob.resumeBanner();
+                    } else {
+                        await this.AdMob.showBanner({
+                            adId: this.getBannerAdId(),
+                            adSize: this.BannerAdSize.ADAPTIVE_BANNER,
+                            position: this.BannerAdPosition.BOTTOM_CENTER,
+                            margin: 0
+                        });
+                        this.bannerCreated = true;
+                    }
                     this.bannerVisible = true;
-                    this.bannerLastStatus = 'shown';
+                    this.bannerLastStatus = tryResume ? 'resumed' : 'shown';
                     document.body.classList.add('has-banner-ad');
-                    console.log('AdMob: Banner shown');
-                    this.renderDebugStatus('banner-shown');
+                    console.log('AdMob: Banner', this.bannerLastStatus);
+                    this.renderDebugStatus('banner-' + this.bannerLastStatus);
                 } catch (e) {
-                    this.bannerLastStatus = 'failed:show';
-                    console.error('AdMob: Failed to show banner', e);
-                    this.renderDebugStatus('banner-failed');
+                    // resume が失敗したら、いったん removeBanner して作り直す
+                    console.warn('AdMob: primary banner path failed, falling back', e);
+                    try {
+                        if (typeof this.AdMob.removeBanner === 'function') {
+                            try { await this.AdMob.removeBanner(); } catch (_) { /* ignore */ }
+                        }
+                        this.bannerCreated = false;
+                        await this.AdMob.showBanner({
+                            adId: this.getBannerAdId(),
+                            adSize: this.BannerAdSize.ADAPTIVE_BANNER,
+                            position: this.BannerAdPosition.BOTTOM_CENTER,
+                            margin: 0
+                        });
+                        this.bannerCreated = true;
+                        this.bannerVisible = true;
+                        this.bannerLastStatus = 'shown-fallback';
+                        document.body.classList.add('has-banner-ad');
+                        this.renderDebugStatus('banner-shown-fallback');
+                    } catch (e2) {
+                        this.bannerLastStatus = 'failed:show';
+                        console.error('AdMob: Failed to show banner', e2);
+                        this.renderDebugStatus('banner-failed');
+                    }
                 }
             }
 
@@ -3465,13 +3571,17 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
 
             async prepareInterstitial() {
                 if (this.adsDisabled || !this.isNative || !this.AdMob) return;
+                if (this.interstitialLoaded || this.interstitialPreparing) return;
 
+                this.interstitialPreparing = true;
                 try {
                     await this.AdMob.prepareInterstitial({
                         adId: this.getInterstitialAdId()
                     });
                 } catch (e) {
                     console.error('AdMob: Failed to prepare interstitial', e);
+                } finally {
+                    this.interstitialPreparing = false;
                 }
             }
 
@@ -3515,6 +3625,12 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                     this.hideBanner();
                 } else {
                     this.showBanner();
+                }
+
+                // 結果が出る画面（くじ / 占う）に入った時点でインタースティシャルを先読み。
+                // ユーザーが結果を見てから別画面に移るまでに、広告のロードを終わらせておく。
+                if (['lottery', 'reading'].includes(screenName) && !this.interstitialLoaded) {
+                    this.prepareInterstitial();
                 }
             }
         }
