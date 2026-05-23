@@ -87,12 +87,12 @@
         body {
             font-family: 'Noto Serif JP', 'Hiragino Mincho ProN', 'Yu Mincho', 'YuMincho', serif;
             background:
-                /* 水面方向から差し込む光柱 */
-                radial-gradient(ellipse 75% 45% at 50% -8%, rgba(174, 230, 245, 0.12) 0%, transparent 62%),
+                /* 水面方向（上）から差し込む光柱 */
+                radial-gradient(ellipse 75% 45% at 50% -8%, rgba(174, 230, 245, 0.14) 0%, transparent 62%),
                 radial-gradient(ellipse 30% 70% at 22% -10%, rgba(159, 214, 230, 0.06) 0%, transparent 70%),
                 radial-gradient(ellipse 30% 70% at 78% -10%, rgba(159, 214, 230, 0.06) 0%, transparent 70%),
-                /* 海底の藍 → 中層 → 水深ある青緑 */
-                linear-gradient(180deg, var(--ink-1) 0%, var(--ink-2) 50%, var(--ink-3) 100%);
+                /* 上=水面寄りの青緑、下=深淵の藍黒 */
+                linear-gradient(180deg, var(--ink-3) 0%, var(--ink-2) 55%, var(--ink-1) 100%);
             color: var(--text);
             margin: 0;
             padding: 15px;
@@ -104,6 +104,35 @@
             right: 0;
             bottom: 0;
         }
+
+        /* 水面のさざ波 - 全画面の最上端に薄く敷く（タイトル画面の overlay.webp と直接連結） */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 38vh;
+            background-image: url('overlay.webp');
+            background-size: cover;
+            background-position: center top;
+            opacity: 0.10;
+            mix-blend-mode: screen;
+            pointer-events: none;
+            z-index: 0;
+            animation: bodySurface 14s ease-in-out infinite;
+            mask-image: linear-gradient(180deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.6) 55%, transparent 100%);
+            -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.6) 55%, transparent 100%);
+        }
+        body.title-visible::before { opacity: 0; }
+        @keyframes bodySurface {
+            0%, 100% { opacity: 0.09; transform: translateY(0); }
+            50%      { opacity: 0.14; transform: translateY(-3px); }
+        }
+
+        /* コンテナと主要要素は水面より前面に */
+        .container { position: relative; z-index: 1; }
+        .nav-tabs { position: relative; z-index: 1; }
 
         /* バナー広告表示時の余白調整 */
         body.has-banner-ad {
@@ -278,7 +307,9 @@
             padding: 6px 4px;
             border-top: 1px solid var(--accent-faint);
             border-bottom: 1px solid var(--accent-faint);
-            background: linear-gradient(180deg, rgba(10,13,24,0.4), rgba(10,13,24,0));
+            background: linear-gradient(180deg, rgba(3, 7, 13, 0.18), rgba(3, 7, 13, 0));
+            backdrop-filter: blur(2px);
+            -webkit-backdrop-filter: blur(2px);
         }
 
         .nav-tabs button {
