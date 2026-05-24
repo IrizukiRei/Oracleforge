@@ -1297,6 +1297,43 @@
             border-bottom: 1px solid var(--accent-faint);
         }
 
+        /* 課金プランの現在状態を一目で分かるように */
+        .plan-status-block {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+        .plan-status-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .plan-status-label {
+            font-size: 13px;
+            color: var(--text-soft);
+            letter-spacing: 0.06em;
+        }
+        .plan-status-badge {
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            padding: 4px 12px;
+            border-radius: 999px;
+            white-space: nowrap;
+        }
+        .plan-status-badge.active {
+            color: #061a0c;
+            background: linear-gradient(180deg, #6fe39a, #3fae6a);
+            box-shadow: 0 0 12px rgba(111, 227, 154, 0.35);
+        }
+        .plan-status-badge.inactive {
+            color: var(--text-faint);
+            background: rgba(159, 214, 230, 0.06);
+            border: 1px solid var(--accent-faint);
+        }
+
         .edit-settings-stack {
             display: flex;
             flex-direction: column;
@@ -2557,6 +2594,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
 
             <div class="deck-info">
                 <p><span data-ja="現在" data-en="Current">現在</span>: <strong id="current-set-name">デフォルト</strong></p>
+                <p style="margin-top:6px;font-size:13px;"><span data-ja="保存枠" data-en="Saved sets">保存枠</span>: <strong id="set-save-count">–</strong></p>
             </div>
 
             <div style="margin-bottom:15px;">
@@ -2838,16 +2876,22 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
             <div class="info-box" id="ads-removal-section">
                 <h3>🚫 <span data-ja="課金プラン" data-en="Billing Plans">課金プラン</span></h3>
                 <p style="font-size:12px;color:#aaa;margin-bottom:10px;" data-ja="広告を消すプランと、保存無制限＋広告削除プランを購入・復元できます。" data-en="You can purchase or restore two plans: Remove Ads, and Unlimited Saves + Remove Ads.">広告を消すプランと、保存無制限＋広告削除プランを購入・復元できます。</p>
-                <p id="ads-status" style="font-size:13px;color:var(--accent-1);margin-bottom:6px;"></p>
-                <p id="save-plus-status" style="font-size:13px;color:var(--accent-1);margin-bottom:10px;"></p>
+                <div class="plan-status-block">
+                    <div class="plan-status-row">
+                        <span class="plan-status-label" data-ja="広告削除" data-en="Remove Ads">広告削除</span>
+                        <span id="ads-status" class="plan-status-badge"></span>
+                    </div>
+                    <div class="plan-status-row">
+                        <span class="plan-status-label" data-ja="保存無制限" data-en="Unlimited Saves">保存無制限</span>
+                        <span id="save-plus-status" class="plan-status-badge"></span>
+                    </div>
+                </div>
                 <div style="display:flex;gap:10px;flex-wrap:wrap;">
                     <button class="btn" id="buy-remove-ads" onclick="purchaseRemoveAds()" style="padding:10px 15px;font-size:13px;" data-ja="広告を非表示にする" data-en="Hide Ads">広告を非表示にする</button>
                     <button class="btn" id="buy-save-plus" onclick="purchaseSavePlus()" style="padding:10px 15px;font-size:13px;" data-ja="保存無制限＋広告削除" data-en="Unlimited Saves + Remove Ads">保存無制限＋広告削除</button>
                     <button class="btn" id="restore-purchases" onclick="restorePurchases()" style="padding:10px 15px;font-size:13px;" data-ja="購入を復元" data-en="Restore Purchases">購入を復元</button>
                 </div>
-                <p id="ad-debug-status" style="font-size:11px;color:#9fd8ff;margin-top:8px;line-height:1.5;"></p>
-                <p id="iap-verify-status" style="font-size:11px;color:#9fd8ff;margin-top:4px;line-height:1.5;word-break:break-all;"></p>
-                <p style="font-size:10px;color:#888;margin-top:4px;line-height:1.5;" data-ja="※「課金復元」を押すと、Google Play Billing に再問い合わせし、所有していなければ広告は復帰します。" data-en="Tip: pressing Restore queries Google Play Billing again; if no purchase is owned, ads come back.">※「課金復元」を押すと、Google Play Billing に再問い合わせし、所有していなければ広告は復帰します。</p>
+                <p style="font-size:10px;color:#888;margin-top:8px;line-height:1.5;" data-ja="※「購入を復元」を押すと、Google Play Billing に再問い合わせし、所有していなければ広告は復帰します。" data-en="Tip: pressing Restore queries Google Play Billing again; if no purchase is owned, ads come back.">※「購入を復元」を押すと、Google Play Billing に再問い合わせし、所有していなければ広告は復帰します。</p>
             </div>
 
             <div class="info-box" id="guide-settings-box">
@@ -3233,10 +3277,16 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
 
                 const applyBtn = (btn, baseJa, baseEn, product, ownedFlag) => {
                     if (!btn) return;
-                    const price = product?.price ? ` (${product.price})` : '';
-                    btn.textContent = (currentLang === 'ja' ? baseJa : baseEn) + price;
-                    btn.disabled = false;
-                    btn.style.opacity = ownedFlag ? '0.75' : '1';
+                    if (ownedFlag) {
+                        btn.textContent = currentLang === 'ja' ? '✓ 購入済み' : '✓ Owned';
+                        btn.disabled = true;
+                        btn.style.opacity = '0.6';
+                    } else {
+                        const price = product?.price ? ` (${product.price})` : '';
+                        btn.textContent = (currentLang === 'ja' ? baseJa : baseEn) + price;
+                        btn.disabled = false;
+                        btn.style.opacity = '1';
+                    }
                 };
 
                 applyBtn(update('buy-remove-ads'), '広告を非表示にする', 'Hide Ads', removeAdsProduct, this.entitlements.ads_removed);
@@ -3245,47 +3295,28 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                 setAll('#buy-remove-ads-drawer', (el) => applyBtn(el, '広告を非表示にする', 'Hide Ads', removeAdsProduct, this.entitlements.ads_removed));
                 setAll('#buy-save-plus-drawer', (el) => applyBtn(el, '保存無制限＋広告削除', 'Unlimited Saves + Remove Ads', savePlusProduct, this.entitlements.save_plus));
 
-                const restoreBtn = update('restore-purchases');
-                if (restoreBtn) restoreBtn.style.display = this.isNative ? 'inline-block' : 'none';
+                ['restore-purchases', 'restore-purchases-drawer'].forEach((id) => {
+                    const restoreBtn = update(id);
+                    if (restoreBtn) restoreBtn.style.display = this.isNative ? 'inline-block' : 'none';
+                });
 
-                const renderStatus = (el, owned, ownedJa, ownedEn, notOwnedJa, notOwnedEn) => {
+                // 現在のプラン状態を「有効／未購入」バッジで明示
+                const renderBadge = (el, owned) => {
                     if (!el) return;
                     el.textContent = owned
-                        ? (currentLang === 'ja' ? ownedJa : ownedEn)
-                        : (currentLang === 'ja' ? notOwnedJa : notOwnedEn);
-                    el.style.color = owned ? '#4CAF50' : '#9fd6e6';
+                        ? (currentLang === 'ja' ? '有効' : 'Active')
+                        : (currentLang === 'ja' ? '未購入' : 'Not purchased');
+                    el.classList.toggle('active', owned);
+                    el.classList.toggle('inactive', !owned);
                 };
 
-                ['ads-status', 'ads-status-drawer'].forEach((id) => renderStatus(
-                    update(id), this.entitlements.ads_removed,
-                    '✓ 広告は非表示です', '✓ Ads are hidden',
-                    '・広告を表示中です', '• Ads are currently shown'
-                ));
-                ['save-plus-status', 'save-plus-status-drawer'].forEach((id) => renderStatus(
-                    update(id), this.entitlements.save_plus,
-                    '✓ 保存は無制限です（広告非表示）', '✓ Unlimited saves enabled (ads removed)',
-                    '・通常の保存モードです', '• Standard save mode'
-                ));
+                ['ads-status', 'ads-status-drawer'].forEach((id) =>
+                    renderBadge(update(id), this.entitlements.ads_removed));
+                ['save-plus-status', 'save-plus-status-drawer'].forEach((id) =>
+                    renderBadge(update(id), this.entitlements.save_plus));
 
-                // Billing 検証ステータスのデバッグ行（端末固有の問題切り分け用）
-                ['iap-verify-status', 'iap-verify-status-drawer'].forEach((id) => {
-                    const el = update(id);
-                    if (!el) return;
-                    const verified = this.verifiedFromBilling;
-                    const checkedAt = this.lastBillingCheckAt
-                        ? new Date(this.lastBillingCheckAt).toLocaleTimeString()
-                        : '-';
-                    const owned = this.lastBillingOwnedIds.length > 0
-                        ? this.lastBillingOwnedIds.join(', ')
-                        : 'none';
-                    const errPart = this.lastReconcileError ? ` / err:${this.lastReconcileError}` : '';
-                    el.textContent =
-                        `billing_verified:${verified} / owned:[${owned}] / ` +
-                        `local_ads_removed:${this.entitlements.ads_removed} / ` +
-                        `local_save_plus:${this.entitlements.save_plus} / ` +
-                        `checked:${checkedAt}${errPart}`;
-                    el.style.color = verified ? '#9fd8ff' : '#ffcc66';
-                });
+                // セット保存枠の表示も更新（保存無制限が有効かどうかが分かるように）
+                if (typeof updateSetSaveCount === 'function') updateSetSaveCount();
             }
 
             isAdsRemoved() {
@@ -4799,17 +4830,15 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                 // ドロワーでは不要な要素を削除（ヘッダーのみ）
                 const headerBox = content.querySelector('#settings-header-box');
                 if (headerBox) headerBox.remove();
-                // サウンド設定のUIをドロワー用に調整
-                const soundBox = content.querySelector('#sound-settings-box');
-                if (soundBox) {
-                    // ドロワー内でのIDを変更してオリジナルと競合しないようにする
-                    soundBox.id = 'sound-settings-box-drawer';
-                    soundBox.querySelectorAll('[id]').forEach(el => {
-                        el.id = el.id + '-drawer';
-                    });
-                }
-                // スライダーの値を現在の設定に同期
+                // 複製した全要素の id を "-drawer" 付きにリネームして元画面と衝突させない。
+                // これをしないと getElementById が隠れた元画面側を返し、
+                // ドロワー内のステータス（広告削除/保存無制限バッジ等）が更新されない。
+                content.querySelectorAll('[id]').forEach(el => {
+                    el.id = el.id + '-drawer';
+                });
+                // スライダーの値・課金状態・保存枠をドロワー側にも反映
                 updateSoundSettingsUI();
+                if (iapManager) iapManager.updateUI();
             }
 
             overlay.classList.add('open');
@@ -6292,6 +6321,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
             const list = document.getElementById('sets-list');
             list.innerHTML = '';
             document.getElementById('current-set-name').textContent = currentSetName;
+            updateSetSaveCount();
             
             const cardsText = currentLang === 'ja' ? '枚' : ' cards';
             const activeText = currentLang === 'ja' ? '✓ 使用中' : '✓ Active';
@@ -7529,6 +7559,21 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
         function getSetSaveLimit() {
             if (iapManager) return iapManager.getSaveLimit();
             return IAP_CONFIG.freeSaveLimit;
+        }
+
+        // セットの保存枠表示（保存無制限プランが効いているか一目で分かるように）
+        function updateSetSaveCount() {
+            const el = document.getElementById('set-save-count');
+            if (!el) return;
+            const count = (typeof cardSets === 'object' && cardSets) ? Object.keys(cardSets).length : 0;
+            const limit = getSetSaveLimit();
+            if (Number.isFinite(limit)) {
+                el.textContent = `${count} / ${limit}`;
+                el.style.color = 'var(--text)';
+            } else {
+                el.textContent = currentLang === 'ja' ? `${count} / 無制限` : `${count} / Unlimited`;
+                el.style.color = '#6fe39a';
+            }
         }
 
         function updateCrystalSaveLimitNote() {
