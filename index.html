@@ -5,24 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>OracleForge - Card Shuffler</title>
     <script>
+        // 起動時の「遅延表示→化け」対策:
+        // 旧実装は webfont を display=block で待つため、ネットワークが遅いと本文が
+        // 一定時間不可視になり、その後にフォントが入って大きくリフローしていた。
+        // ここでは可視化ゲートを「DOMContentLoaded」または短いタイムアウトで必ず外し、
+        // フォントは display=swap でフォールバック即表示にして、空白/化けを最小化する。
         document.documentElement.classList.add('font-pending');
         (function () {
-            const release = () => document.documentElement.classList.remove('font-pending');
-            if (document.fonts && document.fonts.ready) {
-                Promise.race([
-                    document.fonts.ready,
-                    new Promise(resolve => setTimeout(resolve, 1200))
-                ]).finally(release);
+            let released = false;
+            const release = () => {
+                if (released) return;
+                released = true;
+                document.documentElement.classList.remove('font-pending');
+            };
+            // DOM が組み上がったら（CSS適用済み）すぐ見せる
+            if (document.readyState !== 'loading') {
+                requestAnimationFrame(release);
             } else {
-                window.addEventListener('load', release, { once: true });
-                setTimeout(release, 600);
+                document.addEventListener('DOMContentLoaded', () => requestAnimationFrame(release), { once: true });
             }
+            // フォント読み込み完了でも外す（来たらスッと差し替わる）
+            if (document.fonts && document.fonts.ready) {
+                document.fonts.ready.finally(release);
+            }
+            // どんなに遅くても 700ms で必ず見せる（恒久ブランクを防ぐ安全弁）
+            setTimeout(release, 700);
         })();
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Noto+Serif+JP:wght@400;500;600&display=block">
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Noto+Serif+JP:wght@400;500;600&display=block" rel="stylesheet">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Noto+Serif+JP:wght@400;500;600&display=swap">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Noto+Serif+JP:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         html.font-pending body {
             opacity: 0;
@@ -414,7 +427,7 @@
         }
 
         @keyframes cardHighlight {
-            0% { border-color: rgba(100,200,255,0.9); box-shadow: 0 0 15px rgba(100,200,255,0.4); }
+            0% { border-color: rgba(159,214,230,0.9); box-shadow: 0 0 15px rgba(159,214,230,0.4); }
             100% { border-color: rgba(255,255,255,0.2); box-shadow: none; }
         }
 
@@ -501,8 +514,8 @@
         .upload-btn {
             width: 100%;
             padding: 10px;
-            background: rgba(100,200,255,0.2);
-            border: 1px solid rgba(100,200,255,0.5);
+            background: rgba(159,214,230,0.2);
+            border: 1px solid rgba(159,214,230,0.5);
             color: #fff;
             cursor: pointer;
             border-radius: 4px;
@@ -511,7 +524,7 @@
         }
         
         .upload-btn:active {
-            background: rgba(100,200,255,0.4);
+            background: rgba(159,214,230,0.4);
         }
         
         /* スプレッド選択 */
@@ -540,12 +553,12 @@
         
         .spread-card:active {
             background: rgba(255,255,255,0.2);
-            border-color: rgba(100,200,255,0.8);
+            border-color: rgba(159,214,230,0.8);
         }
         
         .spread-card h3 {
             margin-bottom: 8px;
-            color: #64c8ff;
+            color: #9fd6e6;
             font-size: 1em;
             line-height: 1.25;
             word-break: keep-all;
@@ -566,10 +579,10 @@
             justify-content: center;
             margin-top: 20px;
             background: rgba(0,0,0,0.3);
-            border: 3px solid rgba(100,200,255,0.5);
+            border: 3px solid rgba(159,214,230,0.5);
             border-radius: 16px;
             padding: clamp(12px, 3vw, 20px);
-            box-shadow: 0 0 20px rgba(100,200,255,0.3);
+            box-shadow: 0 0 20px rgba(159,214,230,0.3);
             overflow-x: auto;
         }
 
@@ -614,7 +627,7 @@
             padding: 10px 36px 10px 16px;
             margin-bottom: 8px;
             background: rgba(15, 32, 39, 0.85);
-            border: 1px solid rgba(100, 200, 255, 0.35);
+            border: 1px solid rgba(159, 214, 230, 0.35);
             border-radius: 10px;
             font-size: clamp(12px, 3.2vw, 15px);
             color: #c8e8ff;
@@ -635,12 +648,12 @@
         }
         .reading-phase-banner .phase-step {
             display: inline-block;
-            background: rgba(100, 200, 255, 0.2);
-            border: 1px solid rgba(100, 200, 255, 0.4);
+            background: rgba(159, 214, 230, 0.2);
+            border: 1px solid rgba(159, 214, 230, 0.4);
             border-radius: 999px;
             padding: 2px 10px;
             font-size: 11px;
-            color: #64c8ff;
+            color: #9fd6e6;
             margin-bottom: 4px;
             letter-spacing: 0.1em;
         }
@@ -651,8 +664,8 @@
             width: 24px;
             height: 24px;
             border-radius: 50%;
-            background: rgba(100, 200, 255, 0.15);
-            border: 1px solid rgba(100, 200, 255, 0.3);
+            background: rgba(159, 214, 230, 0.15);
+            border: 1px solid rgba(159, 214, 230, 0.3);
             color: #8ab8d0;
             font-size: 14px;
             line-height: 1;
@@ -664,7 +677,7 @@
             padding: 0;
         }
         .phase-dismiss-btn:active {
-            background: rgba(100, 200, 255, 0.3);
+            background: rgba(159, 214, 230, 0.3);
             color: #fff;
         }
         .reading-step-indicator.dismissed {
@@ -683,29 +696,29 @@
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background: rgba(100, 200, 255, 0.2);
-            border: 1px solid rgba(100, 200, 255, 0.3);
+            background: rgba(159, 214, 230, 0.2);
+            border: 1px solid rgba(159, 214, 230, 0.3);
             transition: all 0.3s;
         }
         .reading-step-indicator .step-dot.active {
-            background: #64c8ff;
-            border-color: #64c8ff;
-            box-shadow: 0 0 6px rgba(100, 200, 255, 0.6);
+            background: #9fd6e6;
+            border-color: #9fd6e6;
+            box-shadow: 0 0 6px rgba(159, 214, 230, 0.6);
             width: 10px;
             height: 10px;
         }
         .reading-step-indicator .step-dot.done {
-            background: rgba(100, 200, 255, 0.5);
-            border-color: rgba(100, 200, 255, 0.6);
+            background: rgba(159, 214, 230, 0.5);
+            border-color: rgba(159, 214, 230, 0.6);
         }
         .reading-step-indicator .step-line {
             width: 16px;
             height: 2px;
-            background: rgba(100, 200, 255, 0.2);
+            background: rgba(159, 214, 230, 0.2);
             border-radius: 1px;
         }
         .reading-step-indicator .step-line.done {
-            background: rgba(100, 200, 255, 0.5);
+            background: rgba(159, 214, 230, 0.5);
         }
 
         /* --- 操作ガイドボタン（全画面共通） --- */
@@ -1104,7 +1117,7 @@
         }
         
         .card-slot.filled {
-            border: 2px solid rgba(100,200,255,0.8);
+            border: 2px solid rgba(159,214,230,0.8);
             background: transparent;
         }
         
@@ -1149,8 +1162,8 @@
         /* OracleForge custom storage fix: セット編集フィルタ・ソートボタンのアクティブスタイル */
         .set-filter-btn.active,
         .set-sort-btn.active {
-            background: rgba(100,200,255,0.5);
-            border-color: rgba(100,200,255,0.8);
+            background: rgba(159,214,230,0.5);
+            border-color: rgba(159,214,230,0.8);
         }
 
         /* 情報ボックス */
@@ -1239,7 +1252,7 @@
         }
 
         .result-info h3 {
-            color: #64c8ff;
+            color: #9fd6e6;
             margin-bottom: 12px;
             font-size: 1em;
         }
@@ -1253,7 +1266,7 @@
         }
 
         .card-meaning strong {
-            color: #64c8ff;
+            color: #9fd6e6;
         }
 
         .info-box {
@@ -1313,14 +1326,14 @@
             font-size: 11px;
             color: #9ad6ff;
             background: transparent;
-            border: 1px solid rgba(100,200,255,0.4);
+            border: 1px solid rgba(159,214,230,0.4);
             padding: 4px 8px;
             border-radius: 999px;
             cursor: pointer;
         }
 
         .edit-shortcut-link:hover {
-            background: rgba(100,200,255,0.15);
+            background: rgba(159,214,230,0.15);
         }
 
         /* シャッフルアニメーション */
@@ -1445,11 +1458,11 @@
         }
 
         .question-display {
-            background: rgba(100,200,255,0.1);
+            background: rgba(159,214,230,0.1);
             padding: 12px;
             border-radius: 8px;
             margin-bottom: 15px;
-            border: 1px solid rgba(100,200,255,0.3);
+            border: 1px solid rgba(159,214,230,0.3);
         }
 
         .question-header {
@@ -1461,15 +1474,15 @@
 
         .question-title {
             font-size: 11px;
-            color: #64c8ff;
+            color: #9fd6e6;
         }
 
         .question-toggle {
             padding: 6px 12px;
             font-size: 11px;
             border-radius: 6px;
-            border: 1px solid rgba(100,200,255,0.5);
-            background: rgba(100,200,255,0.15);
+            border: 1px solid rgba(159,214,230,0.5);
+            background: rgba(159,214,230,0.15);
             color: #fff;
             cursor: pointer;
         }
@@ -1530,7 +1543,7 @@
             width: min(520px, 92vw);
             margin: 40px auto;
             background: rgba(15,32,39,0.96);
-            border: 2px solid rgba(100,200,255,0.4);
+            border: 2px solid rgba(159,214,230,0.4);
             border-radius: 14px;
             padding: 18px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.45);
@@ -1548,7 +1561,7 @@
 
         .modal-title {
             font-size: 1.05em;
-            color: #64c8ff;
+            color: #9fd6e6;
             font-weight: 600;
         }
 
@@ -1573,8 +1586,8 @@
         }
 
         .modal-btn.primary {
-            background: rgba(100,200,255,0.35);
-            border-color: rgba(100,200,255,0.8);
+            background: rgba(159,214,230,0.35);
+            border-color: rgba(159,214,230,0.8);
         }
 
         .modal-btn.danger {
@@ -1616,7 +1629,7 @@
 
         .credits-item h4 {
             font-size: 14px;
-            color: #64c8ff;
+            color: #9fd6e6;
             margin-bottom: 6px;
         }
 
@@ -1647,7 +1660,7 @@
         }
 
         .ritual-section h3 {
-            color: #64c8ff;
+            color: #9fd6e6;
             margin-bottom: 12px;
             font-size: 1em;
         }
@@ -1675,14 +1688,14 @@
         }
 
         .question-list li:active {
-            background: rgba(100,200,255,0.2);
+            background: rgba(159,214,230,0.2);
         }
 
         textarea {
             width: 100%;
             padding: 12px;
             border-radius: 8px;
-            border: 2px solid rgba(100,200,255,0.3);
+            border: 2px solid rgba(159,214,230,0.3);
             background: rgba(0,0,0,0.3);
             color: #fff;
             font-size: 14px;
@@ -1691,11 +1704,11 @@
         }
 
         .crystal-item {
-            background: rgba(100,200,255,0.05);
+            background: rgba(159,214,230,0.05);
             padding: 12px;
             border-radius: 8px;
             margin-bottom: 8px;
-            border-left: 3px solid #64c8ff;
+            border-left: 3px solid #9fd6e6;
         }
 
         .crystal-date {
@@ -1828,8 +1841,8 @@
             border-radius: 50% 50% 45% 45%;
             position: relative;
             box-shadow: 
-                0 0 30px rgba(100,200,255,0.3),
-                0 0 60px rgba(100,200,255,0.2),
+                0 0 30px rgba(159,214,230,0.3),
+                0 0 60px rgba(159,214,230,0.2),
                 inset 0 -20px 40px rgba(100,150,200,0.2);
         }
 
@@ -2141,8 +2154,8 @@
         }
 
         .density-btn.active {
-            background: rgba(100,200,255,0.4);
-            border-color: rgba(100,200,255,0.9);
+            background: rgba(159,214,230,0.4);
+            border-color: rgba(159,214,230,0.9);
         }
 
         .card-grid.compact {
@@ -2205,8 +2218,8 @@
             height: calc(var(--cardW) * 1.5);
             border-radius: var(--cardRadius);
             overflow: hidden;
-            border: 3px solid rgba(100,200,255,0.8);
-            box-shadow: 0 0 20px rgba(100,200,255,0.5);
+            border: 3px solid rgba(159,214,230,0.8);
+            box-shadow: 0 0 20px rgba(159,214,230,0.5);
             cursor: pointer;
         }
 
@@ -2564,7 +2577,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                 <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
                     <input type="checkbox" id="use-sig-toggle" onchange="toggleSignificator()" style="width:20px;height:20px;">
                     <span data-ja="シグニフィケーターを使用" data-en="Use Significator">シグニフィケーターを使用</span>
-                    <span id="sig-name-display" style="color:#64c8ff;font-size:12px;"></span>
+                    <span id="sig-name-display" style="color:#9fd6e6;font-size:12px;"></span>
                 </label>
                 <div style="font-size:11px;color:#888;margin-top:5px;" data-ja="グランタブローで使用: シグニフィケーターの出た位置をハイライト" data-en="For Grand Tableau: Highlights significator positions">
                     グランタブローで使用: シグニフィケーターの出た位置をハイライト
@@ -2717,16 +2730,16 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
         <!-- くじ引き画面 -->
         <div id="lottery-screen" class="screen">
             <div style="text-align:center;padding:20px;">
-                <h2 style="color:#64c8ff;margin-bottom:15px;" data-ja="🎲 くじ引き" data-en="🎲 Random Draw">🎲 くじ引き</h2>
+                <h2 style="color:#9fd6e6;margin-bottom:15px;" data-ja="🎲 くじ引き" data-en="🎲 Random Draw">🎲 くじ引き</h2>
                 <p style="color:#888;font-size:13px;margin-bottom:20px;" data-ja="カードをランダムに引きます。リセットするまで同じカードは出ません。" data-en="Draw cards randomly. Same card won't appear until reset.">カードをランダムに引きます。リセットするまで同じカードは出ません。</p>
                 
-                <div style="background:rgba(100,200,255,0.1);padding:15px;border-radius:10px;margin-bottom:20px;">
+                <div style="background:rgba(159,214,230,0.1);padding:15px;border-radius:10px;margin-bottom:20px;">
                     <div style="margin-bottom:10px;">
                         <span data-ja="引く枚数: " data-en="Draw count: ">引く枚数: </span>
-                        <select id="lottery-count" style="padding:8px 15px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.3);color:#fff;border-radius:6px;font-size:16px;">
+                        <select id="lottery-count" style="padding:8px 15px;background:rgba(10,13,24,0.7);border:1px solid var(--accent-line);color:var(--accent-2);border-radius:4px;font-size:16px;font-family:inherit;">
                         </select>
                     </div>
-                    <div style="font-size:14px;color:#64c8ff;">
+                    <div style="font-size:14px;color:#9fd6e6;">
                         <span data-ja="残り: " data-en="Remaining: ">残り: </span><span id="lottery-remaining">0</span><span data-ja="枚" data-en=" cards">枚</span>
                     </div>
                 </div>
@@ -2748,7 +2761,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                     <h3 data-ja="1. 準備" data-en="1. Prepare">1. 準備</h3>
                     <p data-ja="深呼吸を3回。心を落ち着けて質問に集中します。" data-en="Take 3 deep breaths. Focus your mind on your question.">深呼吸を3回。心を落ち着けて質問に集中します。</p>
                     <button class="btn" onclick="startBreathing()" id="breathBtn" data-ja="深呼吸を始める" data-en="Start Breathing">深呼吸を始める</button>
-                    <div id="breathTimer" style="margin-top:12px;font-size:1.2em;color:#64c8ff;"></div>
+                    <div id="breathTimer" style="margin-top:12px;font-size:1.2em;color:#9fd6e6;"></div>
                 </div>
 
                 <div class="ritual-section">
@@ -2777,7 +2790,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                     <button class="btn" onclick="saveCrystal()" style="margin-top:10px;" data-ja="保存" data-en="Save">保存</button>
                     
                     <div style="margin-top:20px;">
-                        <h4 style="color:#64c8ff;margin-bottom:10px;font-size:0.9em;" data-ja="過去の記録" data-en="Past Insights">過去の記録</h4>
+                        <h4 style="color:#9fd6e6;margin-bottom:10px;font-size:0.9em;" data-ja="過去の記録" data-en="Past Insights">過去の記録</h4>
                         <div id="crystalList"></div>
                     </div>
                 </div>
@@ -3240,7 +3253,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                     el.textContent = owned
                         ? (currentLang === 'ja' ? ownedJa : ownedEn)
                         : (currentLang === 'ja' ? notOwnedJa : notOwnedEn);
-                    el.style.color = owned ? '#4CAF50' : '#64c8ff';
+                    el.style.color = owned ? '#4CAF50' : '#9fd6e6';
                 };
 
                 ['ads-status', 'ads-status-drawer'].forEach((id) => renderStatus(
@@ -6175,7 +6188,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                 if (card.imageData) {
                     cardInner.innerHTML = `<img src="${card.imageData}" style="width:100%;height:100%;object-fit:cover;">`;
                 } else {
-                    cardInner.innerHTML = `<div style="width:100%;height:100%;background:linear-gradient(135deg,#2a2a4a,#1a1a2e);display:flex;align-items:center;justify-content:center;font-size:14px;color:#64c8ff;padding:10px;text-align:center;">${lotteryDisplayName}</div>`;
+                    cardInner.innerHTML = `<div style="width:100%;height:100%;background:linear-gradient(135deg,#2a2a4a,#1a1a2e);display:flex;align-items:center;justify-content:center;font-size:14px;color:#9fd6e6;padding:10px;text-align:center;">${lotteryDisplayName}</div>`;
                 }
 
                 cardInner.onclick = () => { if (audioManager) audioManager.playTap(); showCardModal(card); };
@@ -6300,7 +6313,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
             presetHtml += `<p style="color:#ffcc66;font-size:11px;">${presetText}</p>`;
             presetHtml += getLenormandThumbGridHtml();
             if (isUsingPreset) {
-                presetHtml += `<p style="color:#64c8ff;font-size:12px;">${activeText}</p>`;
+                presetHtml += `<p style="color:#9fd6e6;font-size:12px;">${activeText}</p>`;
             } else {
                 presetHtml += `<button class="btn" style="padding:8px 12px;font-size:12px;margin-top:8px;background:rgba(255,200,100,0.3);border-color:rgba(255,200,100,0.6);" onclick="switchToLenormandPreset()">${switchText}</button>`;
             }
@@ -6312,8 +6325,8 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                 const setCard = document.createElement('div');
                 setCard.className = 'spread-card';
                 if (!isUsingPreset && setName === currentSetName) {
-                    setCard.style.borderColor = 'rgba(100,200,255,0.8)';
-                    setCard.style.background = 'rgba(100,200,255,0.2)';
+                    setCard.style.borderColor = 'rgba(159,214,230,0.8)';
+                    setCard.style.background = 'rgba(159,214,230,0.2)';
                 }
                 
                 const cardCount = cardSets[setName].filter(id => {
@@ -6328,7 +6341,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                 
                 let html = `<h3>${displayName}</h3><p>${cardCount}${cardsText}</p>`;
                 if (!isUsingPreset && setName === currentSetName) {
-                    html += `<p style="color:#64c8ff;font-size:12px;">${activeText}</p>`;
+                    html += `<p style="color:#9fd6e6;font-size:12px;">${activeText}</p>`;
                     html += `<button class="btn" style="padding:8px 12px;font-size:12px;margin-top:8px;" onclick="editSetCards()">${editText}</button>`;
                 } else {
                     html += `<button class="btn" style="padding:8px 12px;font-size:12px;margin-top:8px;" onclick="switchSet('${setName}')">${switchText}</button>`;
@@ -6425,13 +6438,13 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
             };
 
             modal.innerHTML = `
-                <div style="max-width:600px;margin:0 auto;background:rgba(15,32,39,0.98);padding:20px;border-radius:12px;border:2px solid rgba(100,200,255,0.5);">
-                    <h2 style="color:#64c8ff;margin-bottom:15px;font-size:1.1em;">${texts.title}</h2>
+                <div style="max-width:600px;margin:0 auto;background:rgba(15,32,39,0.98);padding:20px;border-radius:12px;border:2px solid rgba(159,214,230,0.5);">
+                    <h2 style="color:#9fd6e6;margin-bottom:15px;font-size:1.1em;">${texts.title}</h2>
 
                     <!-- OracleForge custom storage fix: 検索バー -->
                     <div style="margin-bottom:10px;">
                         <input type="text" id="set-edit-search" placeholder="${texts.searchPlaceholder}"
-                               style="width:100%;padding:10px;border-radius:6px;border:1px solid rgba(100,200,255,0.3);background:rgba(0,0,0,0.3);color:#fff;font-size:14px;"
+                               style="width:100%;padding:10px;border-radius:6px;border:1px solid rgba(159,214,230,0.3);background:rgba(0,0,0,0.3);color:#fff;font-size:14px;"
                                oninput="updateSetEditFilter()">
                     </div>
 
@@ -6450,7 +6463,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                     </div>
 
                     <!-- OracleForge custom storage fix: 選択数/表示総数表示 -->
-                    <div id="set-edit-count" style="margin-bottom:10px;color:#64c8ff;font-size:13px;text-align:center;"></div>
+                    <div id="set-edit-count" style="margin-bottom:10px;color:#9fd6e6;font-size:13px;text-align:center;"></div>
 
                     <div style="margin-bottom:10px;">
                         <button onclick="selectAllCards(true)" class="btn" style="padding:8px 15px;font-size:12px;margin:3px;">${texts.selectAll}</button>
@@ -7198,7 +7211,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                 // 説明テキスト（上部に配置してカードに隠れないようにする）
                 const hint = document.createElement('div');
                 hint.id = 'collect-hint';
-                hint.style.cssText = 'text-align:center;color:#64c8ff;font-size:14px;position:absolute;top:8px;width:100%;z-index:200;text-shadow:0 0 8px rgba(0,0,0,0.8);';
+                hint.style.cssText = 'text-align:center;color:#9fd6e6;font-size:14px;position:absolute;top:8px;width:100%;z-index:200;text-shadow:0 0 8px rgba(0,0,0,0.8);';
                 hint.innerHTML = currentLang === 'ja' ? '↓ カードをタップして集めてください ↓' : '↓ Tap cards to collect ↓';
                 shuffleArea.appendChild(hint);
                 
@@ -7893,7 +7906,7 @@ sigBadge + '</strong><br>' + (descText || noDescText) + '</div>';
                         left: 50%;
                         width: 50px;
                         height: 50px;
-                        border: 2px solid rgba(100, 200, 255, 0.5);
+                        border: 2px solid rgba(159, 214, 230, 0.5);
                         border-radius: 50%;
                         transform: translate(-50%, -50%) scale(0);
                         animation: rippleExpand 2.5s ease-out forwards;
