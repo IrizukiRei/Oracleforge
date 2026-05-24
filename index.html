@@ -3771,16 +3771,40 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                 return;
             }
 
-            const success = await iapManager.restorePurchases();
-            if (success) {
+            const ja = currentLang === 'ja';
+            const ok = await iapManager.restorePurchases();
+            const ent = iapManager.entitlements;
+
+            // 照会自体が失敗（通信不可・ストア未接続など）→ 「購入履歴なし」と区別する
+            if (!ok || !iapManager.verifiedFromBilling) {
                 showGenericModal(
-                    currentLang === 'ja' ? '復元完了' : 'Restore Complete',
-                    currentLang === 'ja' ? '購入履歴を確認しました' : 'Purchase history has been verified'
+                    ja ? '確認できませんでした' : 'Could Not Verify',
+                    ja
+                        ? 'Google Play に接続できませんでした。通信環境を確認して、もう一度「購入を復元」をお試しください。'
+                        : 'Could not reach Google Play. Check your connection and tap Restore again.'
+                );
+                return;
+            }
+
+            // 照会成功 → 実際に所有しているプランを明示
+            let ownedLabel = '';
+            if (ent.save_plus) {
+                ownedLabel = ja ? '保存無制限＋広告削除' : 'Unlimited Saves + Remove Ads';
+            } else if (ent.ads_removed) {
+                ownedLabel = ja ? '広告削除' : 'Remove Ads';
+            }
+
+            if (ownedLabel) {
+                showGenericModal(
+                    ja ? '復元しました' : 'Restored',
+                    (ja ? '有効なプラン: ' : 'Active plan: ') + ownedLabel
                 );
             } else {
                 showGenericModal(
-                    currentLang === 'ja' ? 'お知らせ' : 'Notice',
-                    currentLang === 'ja' ? '復元する購入履歴がありません' : 'No purchases to restore'
+                    ja ? '購入履歴がありません' : 'No Purchases Found',
+                    ja
+                        ? 'このGoogleアカウントでは購入が見つかりませんでした。購入時と同じアカウントで Google Play にログインしているかご確認ください。'
+                        : 'No purchases were found for this Google account. Make sure you are signed in to Google Play with the same account used to buy.'
                 );
             }
         }
@@ -5379,7 +5403,15 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                     masterCards = JSON.parse(savedOldCards);
                     localStorage.setItem('oracleAllCards', savedOldCards);
                 } else {
-                    // 初回起動：デフォルト10枚作成
+                    // 初回起動（保存データが一切ない真の新規インストール）:
+                    // 既定デッキをプリセットのルノルマンにする。
+                    isUsingPreset = true;
+                    currentSetName = currentLang === 'ja' ? 'ルノルマン' : 'Lenormand';
+                    localStorage.setItem('oracleIsPreset', 'true');
+                    if (oracleDB && oracleDB.ready) {
+                        saveSettingToIndexedDB('isUsingPreset', true).catch(e => console.warn('IndexedDB save error:', e));
+                    }
+                    // 「デフォルト」カスタムデッキ用に従来どおり10枚を用意（切替先として残す）
                     for (let i = 0; i < 10; i++) {
                         masterCards.push({
                             id: i,
