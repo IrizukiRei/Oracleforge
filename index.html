@@ -2311,6 +2311,105 @@
             color: var(--text-faint);
         }
 
+        /* 並び替えモード */
+        .box-thumb-mode-reorder {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .box-thumb-reorder-row {
+            display: grid;
+            grid-template-columns: 36px 40px 1fr 36px;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 6px;
+            background: rgba(15,40,50,0.4);
+            border: 1px solid var(--accent-faint);
+            border-radius: 3px;
+        }
+        .box-thumb-row-preview {
+            width: 40px;
+            aspect-ratio: 2/3;
+            background: #2a2a4a;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .box-thumb-row-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .box-thumb-row-name {
+            font-size: 12px;
+            color: var(--text);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .box-thumb-icon-btn {
+            background: transparent;
+            border: 1px solid var(--accent-line);
+            color: var(--accent-2);
+            border-radius: 3px;
+            width: 36px;
+            height: 36px;
+            font-size: 16px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .box-thumb-icon-btn:hover:not(:disabled) { background: rgba(159,214,230,0.10); }
+        .box-thumb-icon-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        /* 外すモード */
+        .box-thumb-removable {
+            position: relative;
+            cursor: pointer;
+            outline: 1px solid rgba(220,53,69,0.4);
+        }
+        .box-thumb-removable:hover { outline-color: #dc3545; }
+        .box-thumb-remove-x {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: rgba(220,53,69,0.9);
+            color: #fff;
+            font-size: 14px;
+            line-height: 18px;
+            text-align: center;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.5);
+        }
+
+        /* 追加カード選択モーダルの本体 */
+        .box-pick-hint {
+            font-size: 12px;
+            color: var(--text-soft);
+            margin: 0 0 10px;
+            line-height: 1.5;
+        }
+        .box-pick-list {
+            max-height: 50vh;
+            overflow-y: auto;
+            background: rgba(3,7,13,0.4);
+            border: 1px solid var(--accent-faint);
+            border-radius: 3px;
+            padding: 4px;
+        }
+        .box-pick-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            color: var(--text);
+            font-size: 13px;
+        }
+        .box-pick-row:hover { background: rgba(159,214,230,0.06); }
+        .box-pick-row input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--accent-1);
+        }
+
         .set-input {
             padding: 10px;
             border-radius: 4px;
@@ -6674,15 +6773,24 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
             renderSetsList();
         }
 
-        // カード箱UIの状態（null=一覧表示、{kind, name?}=箱の詳細表示）
+        // カード箱UIの状態
+        //  boxDetailOpen: null=一覧表示 / {kind:'preset'} / {kind:'custom', name}
+        //  boxDetailMode: 詳細表示中のモード ('view' | 'reorder' | 'remove')
         let boxDetailOpen = null;
+        let boxDetailMode = 'view';
 
         function openBoxDetail(kind, name) {
             boxDetailOpen = (kind === 'preset') ? { kind: 'preset' } : { kind: 'custom', name };
+            boxDetailMode = 'view';
             renderSetsList();
         }
         function closeBoxDetail() {
             boxDetailOpen = null;
+            boxDetailMode = 'view';
+            renderSetsList();
+        }
+        function setBoxDetailMode(mode) {
+            boxDetailMode = mode;
             renderSetsList();
         }
 
@@ -6701,6 +6809,222 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
             const index = byId || buildMasterCardIndex();
             const ids = cardSets[state.name] || [];
             return ids.map(id => index.get(id)).filter(c => c && !c.archived);
+        }
+
+        // 箱詳細の「中身」描画。モード（view / reorder / remove）で見た目を切り替える。
+        function renderBoxThumbsSection(panel, cards, isPresetBox) {
+            const ja = currentLang === 'ja';
+            const thumbs = document.createElement('div');
+            thumbs.className = 'box-detail-thumbs';
+
+            if (cards.length === 0) {
+                thumbs.classList.add('box-detail-thumbs-empty');
+                thumbs.textContent = ja ? '（カードがありません）' : '(empty)';
+                panel.appendChild(thumbs);
+                return;
+            }
+
+            // プリセット箱は常に view（read-only）
+            if (isPresetBox || boxDetailMode === 'view') {
+                thumbs.innerHTML = renderCardThumbsHtml(cards);
+                panel.appendChild(thumbs);
+                return;
+            }
+
+            const setName = boxDetailOpen.name;
+
+            if (boxDetailMode === 'reorder') {
+                thumbs.classList.add('box-thumb-mode-reorder');
+                cards.forEach((card, idx) => {
+                    const row = document.createElement('div');
+                    row.className = 'box-thumb-reorder-row';
+                    const up = document.createElement('button');
+                    up.type = 'button'; up.className = 'box-thumb-icon-btn';
+                    up.textContent = '↑';
+                    up.disabled = idx === 0;
+                    up.onclick = () => moveBoxCard(setName, idx, -1);
+                    const down = document.createElement('button');
+                    down.type = 'button'; down.className = 'box-thumb-icon-btn';
+                    down.textContent = '↓';
+                    down.disabled = idx === cards.length - 1;
+                    down.onclick = () => moveBoxCard(setName, idx, +1);
+
+                    const preview = document.createElement('div');
+                    preview.className = 'box-thumb-row-preview';
+                    preview.innerHTML = card.imageData
+                        ? `<img src="${card.imageData}" alt="">`
+                        : '';
+                    const name = document.createElement('div');
+                    name.className = 'box-thumb-row-name';
+                    name.textContent = localizeDefaultCardName(card.name || '');
+
+                    row.appendChild(up);
+                    row.appendChild(preview);
+                    row.appendChild(name);
+                    row.appendChild(down);
+                    thumbs.appendChild(row);
+                });
+                panel.appendChild(thumbs);
+                return;
+            }
+
+            if (boxDetailMode === 'remove') {
+                thumbs.classList.add('box-thumb-mode-remove');
+                const grid = document.createElement('div');
+                grid.className = 'preset-thumb-grid';
+                cards.forEach((card) => {
+                    const cell = document.createElement('div');
+                    cell.className = 'preset-thumb box-thumb-removable';
+                    cell.title = ja ? 'この箱から外す' : 'Remove from this box';
+                    cell.setAttribute('aria-label', ja ? 'この箱から外す' : 'Remove from this box');
+                    const label = escapeHtml(localizeDefaultCardName(card.name || ''));
+                    cell.innerHTML = card.imageData
+                        ? `<img src="${card.imageData}" alt="${label}">`
+                        : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:9px;color:#888;padding:2px;text-align:center;">${label}</div>`;
+                    const x = document.createElement('span');
+                    x.className = 'box-thumb-remove-x';
+                    x.textContent = '×';
+                    x.setAttribute('aria-hidden', 'true');
+                    cell.appendChild(x);
+                    cell.onclick = () => removeFromBox(setName, card.id);
+                    grid.appendChild(cell);
+                });
+                thumbs.appendChild(grid);
+                panel.appendChild(thumbs);
+                return;
+            }
+
+            // フォールバック
+            thumbs.innerHTML = renderCardThumbsHtml(cards);
+            panel.appendChild(thumbs);
+        }
+
+        function moveBoxCard(setName, idx, dir) {
+            const ids = cardSets[setName];
+            if (!ids) return;
+            const target = idx + dir;
+            if (target < 0 || target >= ids.length) return;
+            [ids[idx], ids[target]] = [ids[target], ids[idx]];
+            saveSets();
+            renderSetsList();
+        }
+
+        function removeFromBox(setName, cardId) {
+            const ids = cardSets[setName];
+            if (!ids) return;
+            const i = ids.indexOf(cardId);
+            if (i === -1) return;
+            ids.splice(i, 1);
+            saveSets();
+            // 使用中の箱を編集している場合は active count や占い側にも反映
+            if (currentSetName === setName) {
+                updateActiveCount();
+                resetLottery();
+            }
+            renderSetsList();
+        }
+
+        // 「カードを追加」: この箱に未追加のカードを一覧してチェック追加。
+        async function openAddExistingCardsModal(setName) {
+            const ja = currentLang === 'ja';
+            const ids = cardSets[setName] || [];
+            const inBox = new Set(ids);
+            const candidates = masterCards.filter(c => !c.archived && !inBox.has(c.id));
+
+            if (candidates.length === 0) {
+                await showAlertModal(
+                    ja
+                        ? 'この箱に追加できるカードがありません。新しく作るか、すべてのカードを編集してください。'
+                        : 'No cards available to add. Create a new one or edit your cards.'
+                );
+                return;
+            }
+
+            const rowsHtml = candidates.map(c => {
+                const label = escapeHtml(localizeDefaultCardName(c.name || ''));
+                const num = getCardNumberLabel(c, String(c.id + 1));
+                return `<label class="box-pick-row">
+                    <input type="checkbox" value="${c.id}" />
+                    <span>No.${num}: ${label}</span>
+                </label>`;
+            }).join('');
+
+            const bodyHtml = `
+                <p class="box-pick-hint">${ja ? '追加したいカードにチェックを入れて「追加」を押してください。' : 'Check the cards you want to add, then press Add.'}</p>
+                <div class="box-pick-list" id="box-pick-list">${rowsHtml}</div>
+            `;
+
+            const result = await showModal({
+                title: ja ? `「${setName}」にカードを追加` : `Add cards to "${setName}"`,
+                bodyHtml,
+                closeOnBackdrop: false,
+                buttons: [
+                    { label: ja ? 'キャンセル' : 'Cancel', variant: 'ghost', value: 'cancel' },
+                    { label: ja ? '追加' : 'Add', variant: 'primary', value: 'add', closeOnClick: false,
+                      onClick: () => {
+                          const picks = Array.from(document.querySelectorAll('#box-pick-list input:checked'))
+                              .map(el => parseInt(el.value, 10))
+                              .filter(n => Number.isFinite(n));
+                          if (picks.length === 0) {
+                              showAlertModal(ja ? '1枚以上選んでください' : 'Please select at least one card');
+                              return;
+                          }
+                          cardSets[setName] = [...(cardSets[setName] || []), ...picks];
+                          saveSets();
+                          if (currentSetName === setName) {
+                              updateActiveCount();
+                              resetLottery();
+                          }
+                          closeGenericModal('add');
+                      } }
+                ]
+            });
+            if (result === 'add') renderSetsList();
+        }
+
+        // 「新しく作る」: マスターに新規カードを作り、その id をこの箱にも追加。
+        async function openCreateCardInBoxModal(setName) {
+            const ja = currentLang === 'ja';
+            const bodyHtml = `
+                <p class="box-pick-hint">${ja ? 'カード名を入れてください。画像はあとから「すべてのカード」で追加できます。' : 'Enter a card name. You can add the image later from All Cards.'}</p>
+                <input type="text" id="box-create-name" class="set-input" placeholder="${ja ? 'カード名' : 'Card name'}" maxlength="80" />
+            `;
+            const result = await showModal({
+                title: ja ? `「${setName}」に新しいカードを作る` : `Create a new card in "${setName}"`,
+                bodyHtml,
+                closeOnBackdrop: false,
+                buttons: [
+                    { label: ja ? 'キャンセル' : 'Cancel', variant: 'ghost', value: 'cancel' },
+                    { label: ja ? '作成して追加' : 'Create & add', variant: 'primary', value: 'create', closeOnClick: false,
+                      onClick: () => {
+                          const input = document.getElementById('box-create-name');
+                          const name = (input?.value || '').trim();
+                          if (!name) {
+                              showAlertModal(ja ? 'カード名を入れてください' : 'Please enter a card name');
+                              return;
+                          }
+                          const nextId = masterCards.length > 0
+                              ? Math.max(...masterCards.map(c => c.id)) + 1
+                              : 0;
+                          masterCards.push({
+                              id: nextId,
+                              name,
+                              description: { ja: '', en: '' },
+                              imageData: '',
+                              archived: false
+                          });
+                          saveMasterCards();
+                          cardSets[setName] = [...(cardSets[setName] || []), nextId];
+                          saveSets();
+                          if (currentSetName === setName) {
+                              updateActiveCount();
+                              resetLottery();
+                          }
+                          closeGenericModal('create');
+                      } }
+                ]
+            });
+            if (result === 'create') renderSetsList();
         }
 
         function renderSetsList() {
@@ -6768,52 +7092,69 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                 // アクション
                 const actions = document.createElement('div');
                 actions.className = 'box-detail-actions';
-                if (!isActive) {
-                    const useBtn = document.createElement('button');
-                    useBtn.className = 'btn';
-                    useBtn.textContent = ja ? 'この箱を使う' : 'Use this box';
-                    useBtn.onclick = () => {
-                        if (isPresetBox) switchToLenormandPreset();
-                        else switchSet(boxDetailOpen.name);
-                    };
-                    actions.appendChild(useBtn);
-                }
-                if (!isPresetBox) {
-                    const editBtn = document.createElement('button');
-                    editBtn.className = 'btn';
-                    editBtn.textContent = ja ? '箱を編集' : 'Edit box';
-                    editBtn.onclick = () => {
-                        // 既存の編集フローは「現在使用中のセット」を編集するので、
-                        // 一度この箱に切り替えてから編集モーダルを開く。
-                        if (!isActive) switchSet(boxDetailOpen.name);
-                        editSetCards();
-                    };
-                    actions.appendChild(editBtn);
+                const mkBtn = (label, onClick, extraStyle) => {
+                    const b = document.createElement('button');
+                    b.className = 'btn';
+                    b.textContent = label;
+                    b.onclick = onClick;
+                    if (extraStyle) Object.assign(b.style, extraStyle);
+                    return b;
+                };
 
-                    const isProtected = boxDetailOpen.name === 'デフォルト' || boxDetailOpen.name === 'Default';
-                    if (!isProtected) {
-                        const delBtn = document.createElement('button');
-                        delBtn.className = 'btn';
-                        delBtn.style.background = 'rgba(220,53,69,0.3)';
-                        delBtn.style.borderColor = '#dc3545';
-                        delBtn.style.color = '#ffd0d0';
-                        delBtn.textContent = ja ? '箱を削除' : 'Delete box';
-                        delBtn.onclick = () => deleteSet(boxDetailOpen.name);
-                        actions.appendChild(delBtn);
+                if (boxDetailMode === 'view') {
+                    if (!isActive) {
+                        actions.appendChild(mkBtn(
+                            ja ? 'この箱を使う' : 'Use this box',
+                            () => {
+                                if (isPresetBox) switchToLenormandPreset();
+                                else switchSet(boxDetailOpen.name);
+                            }
+                        ));
                     }
+                    if (!isPresetBox) {
+                        const setName = boxDetailOpen.name;
+                        actions.appendChild(mkBtn(
+                            ja ? '＋ カードを追加' : '＋ Add cards',
+                            () => openAddExistingCardsModal(setName)
+                        ));
+                        actions.appendChild(mkBtn(
+                            ja ? '＋ 新しく作る' : '＋ Create new',
+                            () => openCreateCardInBoxModal(setName)
+                        ));
+                        if (cards.length > 0) {
+                            actions.appendChild(mkBtn(
+                                ja ? '並び替え' : 'Reorder',
+                                () => setBoxDetailMode('reorder')
+                            ));
+                            actions.appendChild(mkBtn(
+                                ja ? '外す' : 'Remove',
+                                () => setBoxDetailMode('remove')
+                            ));
+                        }
+                        const isProtected = setName === 'デフォルト' || setName === 'Default';
+                        if (!isProtected) {
+                            actions.appendChild(mkBtn(
+                                ja ? '箱を削除' : 'Delete box',
+                                () => deleteSet(setName),
+                                {
+                                    background: 'rgba(220,53,69,0.3)',
+                                    borderColor: '#dc3545',
+                                    color: '#ffd0d0'
+                                }
+                            ));
+                        }
+                    }
+                } else {
+                    // reorder / remove 編集モード中は「完了」だけ出して集中させる
+                    const label = (boxDetailMode === 'reorder')
+                        ? (ja ? '✓ 並び替え完了' : '✓ Done reordering')
+                        : (ja ? '✓ 外す完了' : '✓ Done removing');
+                    actions.appendChild(mkBtn(label, () => setBoxDetailMode('view')));
                 }
                 panel.appendChild(actions);
 
-                // 中身（サムネ一覧）— 共通 .preset-thumb-grid / .preset-thumb を再利用
-                const thumbs = document.createElement('div');
-                thumbs.className = 'box-detail-thumbs';
-                if (cards.length === 0) {
-                    thumbs.classList.add('box-detail-thumbs-empty');
-                    thumbs.textContent = ja ? '（カードがありません）' : '(empty)';
-                } else {
-                    thumbs.innerHTML = renderCardThumbsHtml(cards);
-                }
-                panel.appendChild(thumbs);
+                // 中身：モードによって描画を切り替え
+                renderBoxThumbsSection(panel, cards, isPresetBox);
 
                 list.appendChild(panel);
                 renderCardFilterSetOptions();
