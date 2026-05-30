@@ -351,7 +351,7 @@
         }
 
         .nav-tabs button {
-            padding: 10px 14px 8px;
+            padding: 10px 10px 8px;
             background: transparent;
             border: none;
             border-bottom: 2px solid transparent;
@@ -360,12 +360,16 @@
             border-radius: 0;
             font-size: 13px;
             font-family: inherit;
-            letter-spacing: 0.08em;
+            letter-spacing: 0.04em;
             transition: color 0.25s, border-color 0.25s, text-shadow 0.25s;
-            flex: 0 1 110px;
-            min-width: 60px;
-            max-width: 130px;
+            flex: 1 1 90px;
+            min-width: 70px;
+            max-width: 160px;
             position: relative;
+            /* 「すべてのカード」のような長めのラベルが文字途中で折り返さないようにする */
+            white-space: nowrap;
+            word-break: keep-all;
+            overflow-wrap: normal;
         }
 
         @media (min-width: 768px) {
@@ -1844,7 +1848,6 @@
         @media (max-height: 720px) {
             .title-screen { justify-content: flex-start; }
             .title-screen > div:first-of-type img { width: 110px !important; height: 110px !important; }
-            .title-text { font-size: 3em; margin-bottom: 6px; }
             .title-tagline { margin-bottom: 18px; font-size: 0.88em; }
             .title-steps { margin-top: 22px; }
         }
@@ -1959,10 +1962,10 @@
             50% { transform: translateY(-10px); }
         }
 
-        /* タイトルテキスト */
+        /* タイトルテキスト: clamp で 320px 端末から大画面までスムーズにスケール */
         .title-text {
-            font-size: 3.4em;
-            letter-spacing: 0.28em;
+            font-size: clamp(22px, 6.5vw, 56px);
+            letter-spacing: clamp(0.01em, 0.6vw, 0.35em);
             font-weight: 500;
             background: linear-gradient(180deg, #cfecf5 0%, var(--accent-1) 55%, var(--accent-3) 100%);
             -webkit-background-clip: text;
@@ -1974,13 +1977,10 @@
             font-family: 'Cormorant Garamond', 'Noto Serif JP', serif;
             filter: drop-shadow(0 0 22px rgba(174,230,245,0.30));
             text-align: center;
-        }
-
-        @media (min-width: 500px) {
-            .title-text {
-                font-size: 4.2em;
-                letter-spacing: 0.4em;
-            }
+            max-width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: clip;
         }
 
         .title-sub {
