@@ -2753,11 +2753,11 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
 
         <div class="nav-tabs">
             <button class="active" onclick="showScreen('sets')" data-screen="sets" data-ja="カード箱" data-en="Card Boxes">カード箱</button>
+            <button onclick="showScreen('edit')" data-screen="edit" data-ja="すべてのカード" data-en="All Cards">すべてのカード</button>
             <button onclick="showScreen('spread')" data-screen="spread" data-ja="展開" data-en="Spread">展開</button>
             <button onclick="showScreen('reading')" data-screen="reading" data-ja="占う" data-en="Read">占う</button>
             <button onclick="showScreen('lottery')" data-screen="lottery" data-ja="くじ" data-en="Draw">くじ</button>
             <button onclick="showScreen('ritual')" data-screen="ritual" data-ja="記録" data-en="Notes">記録</button>
-            <button onclick="showScreen('edit')" data-screen="edit" data-ja="すべてのカード" data-en="All Cards">すべてのカード</button>
         </div>
 
         <!-- カード編集画面（すべてのカード／カード庫） -->
@@ -4716,56 +4716,101 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
             }
             return streak;
         }
+        // ルノルマン説明文の組み込みデフォルト。
+        // lenormand-desc-{ja,en}.json と同じ内容を JS に埋め込んでおくことで、
+        // fetch() できない環境（web の file:// プレビュー等）でも説明が出る。
+        // 起動後に JSON ロードが成功すれば、その内容がこれを上書きする。
         const LENORMAND_DESC_EN = {
-            0: '',
-            1: '',
-            2: '',
-            3: '',
-            4: '',
-            5: '',
-            6: '',
-            7: '',
-            8: '',
-            9: '',
-            10: '',
-            11: '',
-            12: '',
-            13: '',
-            14: '',
-            15: '',
-            16: '',
-            17: '',
-            18: '',
-            19: '',
-            20: '',
-            21: '',
-            22: '',
-            23: '',
-            24: '',
-            25: '',
-            26: '',
-            27: '',
-            28: '',
-            29: '',
-            30: '',
-            31: '',
-            32: '',
-            33: '',
-            34: '',
-            35: '',
-            36: '',
-            37: '',
-            38: ''
+            0:  'Rider/News/Arrival/Movement/Messenger',
+            1:  'Clover/Luck/Chance/Small Joy/Lightness',
+            2:  'Ship/Travel/Distance/Trade/Longing',
+            3:  'House/Home/Family/Roots/Stability',
+            4:  'Tree/Health/Growth/Time/Recovery',
+            5:  'Clouds/Confusion/Uncertainty/Doubt/Mixed',
+            6:  'Snake/Complication/Temptation/Jealousy/Deception',
+            7:  'Coffin/Ending/Loss/Closure/Transformation',
+            8:  'Bouquet/Gift/Joy/Charm/Invitation',
+            9:  'Scythe/Sudden Cut/Decision/Risk/Harvest',
+            10: 'Whip/Conflict/Pressure/Repetition/Argument',
+            11: 'Birds/Talk/Anxiety/Chatter/Worry',
+            12: 'Child/New Start/Innocence/Small/Curiosity',
+            13: 'Fox/Cunning/Work/Self-Interest/Strategy',
+            14: 'Bear/Power/Protection/Influence/Finance',
+            15: 'Stars/Hope/Guidance/Inspiration/Dream',
+            16: 'Stork/Change/Improvement/Transition/Move',
+            17: 'Dog/Friend/Loyalty/Support/Trust',
+            18: 'Tower/Institution/Authority/Solitude/Distance',
+            19: 'Garden/Public/Community/Social/Network',
+            20: 'Mountain/Obstacle/Block/Delay/Barrier',
+            21: 'Crossroads/Choice/Options/Direction/Decision',
+            22: 'Mouse/Loss/Stress/Erosion/Drain',
+            23: 'Heart/Love/Affection/Desire/Connection',
+            24: 'Ring/Commitment/Contract/Cycle/Promise',
+            25: 'Book/Secret/Study/Unknown/Hidden',
+            26: 'Letter/Message/Document/Notice/Info',
+            27: 'Gentleman/Male Figure/Partner/Man/Significator',
+            28: 'Lady/Female Figure/Partner/Woman/Significator',
+            29: 'Lilies/Peace/Maturity/Intimacy/Grace',
+            30: 'Sun/Success/Vitality/Clarity/Joy',
+            31: 'Moon/Intuition/Creativity/Recognition/Fantasy',
+            32: 'Key/Solution/Certainty/Unlock/Answer',
+            33: 'Fish/Money/Abundance/Flow/Business',
+            34: 'Anchor/Stability/Work/Security/Long-Term',
+            35: 'Cross/Burden/Fate/Trial/Devotion',
+            36: 'Extra Gentleman/Additional Male/Second Significator/Another Man/Focus',
+            37: 'Extra Lady/Additional Female/Second Significator/Another Woman/Focus',
+            38: 'Person/Neutral Significator/Querent/Identity/Presence'
+        };
+        const LENORMAND_DESC_JA = {
+            0:  '到来/出発/訪問/速報/スピード',
+            1:  '幸運/偶然/小さな幸福/チャンス/ポジティブ',
+            2:  '移動/旅行/冒険/海外/転換期',
+            3:  '基盤/安心/快適/家庭/地元',
+            4:  '健康/成長/積み重ね/根本/生命力',
+            5:  '迷い/不安/不透明/停滞/中途半端',
+            6:  '欲望/嫉妬/悪意/誘惑/複雑さ',
+            7:  '終了/清算/喪失/休息/変容',
+            8:  '祝福/魅力/喜び/贈り物/美しさ',
+            9:  '切断/別離/警告/決断/収穫',
+            10: 'いさかい/反復/攻撃/衝突/追い詰める',
+            11: 'おしゃべり/噂/交流/自由/対人関係',
+            12: '新しさ/素直/無邪気/未熟/初心',
+            13: '慎重/利害/策略/詐欺/狡猾',
+            14: '力強さ/保護/支配/独占/財力',
+            15: '希望/理想/夢/導き/輝き',
+            16: '変化/転居/出産/更新/運搬',
+            17: '友情/信頼/忠誠/サポ－ト/味方',
+            18: '権威/孤高/保守的/制度/野心',
+            19: '社交/人脈/公開/コミュニティ/イベント',
+            20: '障害/試練/壁/遅延/忍耐',
+            21: 'ターニングポイント/取捨選択/分岐/方向転換/優柔不断',
+            22: 'ストレス/消耗/損失/疲労/窃盗',
+            23: '愛情/情熱/ロマンス/優しさ/ときめき',
+            24: '契約/約束/確約/絆/循環',
+            25: '秘密/知識/学習/知的好奇心/記録',
+            26: '連絡/通知/文章/メッセージ/伝達',
+            27: '男性/行動力/父性/意志/能動性',
+            28: '女性/感受性/母性/包容/内面性',
+            29: '成熟/老成/貞操/品位/平和',
+            30: '大成功/活力/勝利/カリスマ/栄光',
+            31: '創作性/直感/人気/幻想/センス',
+            32: '解決/革新/開示/打開策/キーパーソン',
+            33: '金銭/ビジネス/流動性/取引/繁栄',
+            34: '安定/固定/継続/定着/拠点',
+            35: '宿命/祈り/責任/重荷/苦難',
+            36: '男性/行動力/父性/意志/能動性',
+            37: '女性/感受性/母性/包容/内面性',
+            38: '人物/主体/視点/関与/存在'
         };
         let lenormandDescEn = {...LENORMAND_DESC_EN};
-        let lenormandDescJa = {};
+        let lenormandDescJa = {...LENORMAND_DESC_JA};
         let useSignificator = false; // シグニフィケーター使用フラグ
         let useReversal = true; // 正逆を取るかどうか
         let currentLang = 'ja'; // 言語設定
         const LENORMAND_OPTIONAL_DEFAULT = {
             extraGentleman: true,
             extraLady: true,
-            person: false
+            person: true
         };
         let lenormandOptional = {...LENORMAND_OPTIONAL_DEFAULT};
         const cardFilterState = {
@@ -4963,12 +5008,13 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                     throw new Error('Failed to load lenormand-desc-ja.json');
                 }
                 const data = await response.json();
-                lenormandDescJa = {...data};
+                // JSON が取れたらデフォルトに上書きマージ（取れなくても組み込み済み）
+                lenormandDescJa = {...LENORMAND_DESC_JA, ...data};
                 renderLenormandGrid();
                 renderSetsList();
                 updateSignificatorDisplay();
             } catch (error) {
-                lenormandDescJa = {};
+                // 起動時に既に LENORMAND_DESC_JA で初期化済みなのでここでは触らない
             }
         }
 
