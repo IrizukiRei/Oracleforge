@@ -5,7 +5,8 @@
   "main": "index.html",
   "scripts": {
     "build": "node scripts/build.js",
-    "cap:sync": "npm run build && npx cap sync",
+    "icons": "node scripts/generate-launcher-icons.js",
+    "cap:sync": "npm run icons && npm run build && npx cap sync",
     "cap:open": "npx cap open android"
   },
   "devDependencies": {
