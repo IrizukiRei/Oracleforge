@@ -1243,6 +1243,68 @@
             object-fit: cover;
         }
 
+        /* デフォルト裏面の選択（連続ログインで解放） */
+        .default-back-row {
+            margin-bottom: 15px;
+            padding: 12px 14px;
+            background: linear-gradient(180deg, rgba(15,40,50,0.5), rgba(7,19,28,0.4));
+            border: 1px solid var(--accent-faint);
+            border-radius: 4px;
+        }
+        .default-back-options {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .default-back-option {
+            position: relative;
+            width: 78px;
+            background: rgba(3,7,13,0.55);
+            border: 1px solid var(--accent-faint);
+            border-radius: 4px;
+            padding: 6px 6px 8px;
+            color: var(--text-soft);
+            font-size: 11px;
+            font-family: inherit;
+            cursor: pointer;
+            text-align: center;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .default-back-option img {
+            display: block;
+            width: 100%;
+            aspect-ratio: 2/3;
+            object-fit: cover;
+            border-radius: 2px;
+            margin-bottom: 4px;
+        }
+        .default-back-option:hover { border-color: var(--accent-line); }
+        .default-back-option.selected {
+            border-color: var(--accent-1);
+            box-shadow: 0 0 0 1px var(--accent-1), 0 0 14px var(--accent-glow);
+            color: var(--accent-2);
+        }
+        .default-back-option.locked {
+            cursor: not-allowed;
+            opacity: 0.85;
+        }
+        .default-back-option.locked img { filter: grayscale(0.6) brightness(0.5) blur(1px); }
+        .default-back-lock-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(3,7,13,0.55);
+            border-radius: 4px;
+            color: var(--accent-2);
+            pointer-events: none;
+        }
+        .default-back-option:not(.locked) .default-back-lock-overlay { display: none; }
+        .default-back-lock-icon { font-size: 18px; line-height: 1; }
+        .default-back-lock-text { font-size: 10px; margin-top: 2px; letter-spacing: 0.06em; text-align: center; padding: 0 4px; }
+
         .result-info {
             background: rgba(255,255,255,0.1);
             padding: 15px;
@@ -1782,7 +1844,7 @@
         @media (max-height: 720px) {
             .title-screen { justify-content: flex-start; }
             .title-screen > div:first-of-type img { width: 110px !important; height: 110px !important; }
-            .title-text { font-size: 2.2em; margin-bottom: 4px; }
+            .title-text { font-size: 3em; margin-bottom: 6px; }
             .title-tagline { margin-bottom: 18px; font-size: 0.88em; }
             .title-steps { margin-top: 22px; }
         }
@@ -1899,7 +1961,7 @@
 
         /* タイトルテキスト */
         .title-text {
-            font-size: 2.6em;
+            font-size: 3.4em;
             letter-spacing: 0.28em;
             font-weight: 500;
             background: linear-gradient(180deg, #cfecf5 0%, var(--accent-1) 55%, var(--accent-3) 100%);
@@ -1907,16 +1969,16 @@
             background-clip: text;
             -webkit-text-fill-color: transparent;
             color: var(--accent-1);
-            margin-bottom: 6px;
+            margin-bottom: 8px;
             animation: titleGlow 4s ease-in-out infinite;
             font-family: 'Cormorant Garamond', 'Noto Serif JP', serif;
-            filter: drop-shadow(0 0 18px rgba(174,230,245,0.25));
+            filter: drop-shadow(0 0 22px rgba(174,230,245,0.30));
             text-align: center;
         }
 
         @media (min-width: 500px) {
             .title-text {
-                font-size: 3.1em;
+                font-size: 4.2em;
                 letter-spacing: 0.4em;
             }
         }
@@ -2090,11 +2152,163 @@
             100% { transform: translate(0, 0) rotate(0deg); }
         }
 
-        /* セット管理 */
+        /* セット管理（カード箱UI） */
         .sets-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 10px;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 16px;
+            padding: 4px;
+        }
+
+        /* カード箱タイル */
+        .card-box {
+            position: relative;
+            aspect-ratio: 3 / 4;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            background: linear-gradient(180deg, rgba(15,40,50,0.55), rgba(7,19,28,0.55));
+            border: 1px solid var(--accent-faint);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.45);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+        .card-box::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: url('box.png');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.92;
+            pointer-events: none;
+        }
+        .card-box::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, transparent 40%, rgba(3,7,13,0.85) 100%);
+            pointer-events: none;
+        }
+        .card-box:hover, .card-box:focus-visible {
+            transform: translateY(-2px);
+            border-color: var(--accent-line);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.55), 0 0 18px var(--accent-glow);
+        }
+        .card-box.active {
+            border-color: var(--accent-1);
+            box-shadow: 0 0 0 1px var(--accent-1), 0 12px 24px rgba(0,0,0,0.5), 0 0 22px var(--accent-glow);
+        }
+        .card-box-body {
+            position: relative;
+            z-index: 1;
+            padding: 12px 12px 14px;
+            color: var(--text);
+        }
+        .card-box-name {
+            font-family: 'Cormorant Garamond', 'Noto Serif JP', serif;
+            font-size: 1.05em;
+            letter-spacing: 0.1em;
+            color: var(--accent-2);
+            margin: 0 0 4px;
+            text-shadow: 0 2px 6px rgba(0,0,0,0.7);
+            line-height: 1.2;
+        }
+        .card-box-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            color: var(--text-soft);
+            letter-spacing: 0.06em;
+        }
+        .card-box-badge-preset {
+            font-size: 9px;
+            padding: 1px 6px;
+            border-radius: 999px;
+            border: 1px solid var(--accent-line);
+            color: var(--accent-2);
+            background: rgba(159,214,230,0.10);
+            letter-spacing: 0.12em;
+        }
+        .card-box-active-pill {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            z-index: 2;
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            color: #061a0c;
+            background: linear-gradient(180deg, #6fe39a, #3fae6a);
+            box-shadow: 0 0 10px rgba(111,227,154,0.35);
+            letter-spacing: 0.06em;
+            font-weight: 600;
+        }
+
+        /* 箱の詳細パネル（同一画面内で開閉） */
+        .box-detail {
+            background:
+                linear-gradient(180deg, rgba(15,40,50,0.55) 0%, rgba(7,19,28,0.5) 100%);
+            border: 1px solid var(--accent-faint);
+            border-top: 1px solid var(--accent-line);
+            border-radius: 4px;
+            padding: 16px;
+            margin-top: 8px;
+        }
+        .box-detail-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--accent-faint);
+        }
+        .box-detail-back {
+            background: none;
+            border: 1px solid var(--accent-line);
+            color: var(--accent-2);
+            padding: 6px 12px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-family: inherit;
+            letter-spacing: 0.08em;
+            cursor: pointer;
+        }
+        .box-detail-back:hover { border-color: var(--accent-2); }
+        .box-detail-title {
+            font-family: 'Cormorant Garamond', 'Noto Serif JP', serif;
+            font-size: 1.2em;
+            letter-spacing: 0.14em;
+            color: var(--accent-2);
+            margin: 0;
+        }
+        .box-detail-meta {
+            font-size: 12px;
+            color: var(--text-soft);
+            margin: 0 0 12px;
+            letter-spacing: 0.06em;
+        }
+        .box-detail-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+        .box-detail-thumbs {
+            max-height: 280px;
+            overflow-y: auto;
+            padding: 4px;
+            background: rgba(3,7,13,0.4);
+            border-radius: 3px;
+        }
+        .box-detail-thumbs-empty {
+            display: flex;
+            justify-content: center;
+            padding: 24px;
+            color: var(--text-faint);
         }
 
         .set-input {
@@ -2288,11 +2502,6 @@
             </select>
         </div>
         
-        <!-- アイコン -->
-        <div style="margin-bottom:18px;pointer-events:none;filter:drop-shadow(0 0 18px rgba(174,230,245,0.20));">
-            <img src="icon.png" style="width:140px;height:140px;object-fit:contain;">
-        </div>
-
         <div class="title-text" style="pointer-events:none;">OracleForge</div>
         <div class="title-sub" style="pointer-events:none;" data-ja="Card Oracle" data-en="Card Oracle">Card Oracle</div>
 
@@ -2473,7 +2682,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                     <div class="back-preview" id="back-preview">🔮</div>
                 </div>
                 <div style="flex:1;">
-                    <input type="file" accept="image/*" style="display:none" 
+                    <input type="file" accept="image/*" style="display:none"
                            id="back-file" onchange="selectBackImage(this)">
                     <button class="btn" onclick="document.getElementById('back-file').click()" data-ja="裏面画像" data-en="Back Image">
                         裏面画像
@@ -2482,6 +2691,26 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                         裏面画像を削除
                     </button>
                 </div>
+            </div>
+
+            <!-- デフォルト裏面の選択（連続ログインで2枚目を解放） -->
+            <div class="default-back-row" id="default-back-row">
+                <div style="font-size:12px;color:var(--text-soft);margin-bottom:6px;letter-spacing:0.06em;" data-ja="既定の裏面" data-en="Default back">既定の裏面</div>
+                <div class="default-back-options">
+                    <button type="button" class="default-back-option" data-choice="default" onclick="setDefaultBackChoice('default')">
+                        <img src="card-back-default.jpg" alt="">
+                        <span data-ja="デフォルト" data-en="Default">デフォルト</span>
+                    </button>
+                    <button type="button" class="default-back-option locked" data-choice="secret" onclick="setDefaultBackChoice('secret')">
+                        <img src="secretcard.png" alt="">
+                        <span data-ja="シークレット" data-en="Secret">シークレット</span>
+                        <span class="default-back-lock-overlay" aria-hidden="true">
+                            <span class="default-back-lock-icon">🔒</span>
+                            <span class="default-back-lock-text" id="default-back-lock-text"></span>
+                        </span>
+                    </button>
+                </div>
+                <p style="margin:8px 0 0;font-size:11px;color:var(--text-faint);line-height:1.5;" data-ja="※ ご自身の裏面画像をアップロードしている時はそちらが優先されます。" data-en="※ Your uploaded back image takes priority when set.">※ ご自身の裏面画像をアップロードしている時はそちらが優先されます。</p>
             </div>
 
             <div class="back-card-section">
@@ -2588,18 +2817,18 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
         <!-- セット管理画面 -->
         <div id="sets-screen" class="screen">
             <div class="info-box">
-                <h3>📦 <span data-ja="セット管理" data-en="Set Management">セット管理</span></h3>
-                <p data-ja="複数のカードセットを切り替えて使用できます" data-en="Switch between multiple card sets">複数のカードセットを切り替えて使用できます</p>
+                <h3>📦 <span data-ja="カード箱" data-en="Card Boxes">カード箱</span></h3>
+                <p data-ja="箱をタップして中のカードを見たり、編集したりできます。" data-en="Tap a box to view or edit the cards inside.">箱をタップして中のカードを見たり、編集したりできます。</p>
             </div>
 
             <div class="deck-info">
-                <p><span data-ja="現在" data-en="Current">現在</span>: <strong id="current-set-name">デフォルト</strong></p>
-                <p style="margin-top:6px;font-size:13px;"><span data-ja="保存枠" data-en="Saved sets">保存枠</span>: <strong id="set-save-count">–</strong></p>
+                <p><span data-ja="使用中の箱" data-en="Active box">使用中の箱</span>: <strong id="current-set-name">デフォルト</strong></p>
+                <p style="margin-top:6px;font-size:13px;"><span data-ja="保存枠" data-en="Saved boxes">保存枠</span>: <strong id="set-save-count">–</strong></p>
             </div>
 
-            <div style="margin-bottom:15px;">
-                <input type="text" id="new-set-name" class="set-input" data-ja-placeholder="新しいセット名" data-en-placeholder="New set name">
-                <button class="btn" onclick="createNewSet()" data-ja="作成" data-en="Create">作成</button>
+            <div id="new-set-form" style="margin-bottom:15px;">
+                <input type="text" id="new-set-name" class="set-input" data-ja-placeholder="新しい箱の名前" data-en-placeholder="New box name">
+                <button class="btn" onclick="createNewSet()" data-ja="箱を作る" data-en="Create box">箱を作る</button>
             </div>
 
             <div id="sets-list" class="sets-grid"></div>
@@ -4345,6 +4574,49 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
         let backCardImage = null;
         const DEFAULT_BACK_IMAGE = 'card-back-default.jpg';
         const LENORMAND_BACK_IMAGE = 'assetsback-lenormand.webp';
+        const SECRET_BACK_IMAGE = 'secretcard.png';
+        const SECRET_BACK_UNLOCK_DAYS = 3;
+
+        // 3日連続ログインで2枚目のデフォルト裏面（SECRET_BACK_IMAGE）を解放する。
+        // 解放後は永続的に解放扱い。
+        function getLoginStreak() {
+            return parseInt(localStorage.getItem('oracleLoginStreak') || '0', 10) || 0;
+        }
+        function isSecretBackUnlocked() {
+            return localStorage.getItem('oracleSecretBackUnlocked') === 'true';
+        }
+        function getDefaultBackChoice() {
+            const v = localStorage.getItem('oracleBackChoice');
+            return v === 'secret' ? 'secret' : 'default';
+        }
+        function setDefaultBackChoice(choice) {
+            const v = choice === 'secret' ? 'secret' : 'default';
+            localStorage.setItem('oracleBackChoice', v);
+            // updateBackPreview() は updateBackChooserUI() も呼ぶので一回で足りる
+            updateBackPreview();
+        }
+        function formatDateYMD(d) {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${y}-${m}-${day}`;
+        }
+        function updateLoginStreak() {
+            const today = formatDateYMD(new Date());
+            const last = localStorage.getItem('oracleLoginLast');
+            let streak = getLoginStreak();
+            if (last === today) {
+                return streak;
+            }
+            const yest = formatDateYMD(new Date(Date.now() - 24 * 60 * 60 * 1000));
+            streak = (last === yest) ? streak + 1 : 1;
+            localStorage.setItem('oracleLoginLast', today);
+            localStorage.setItem('oracleLoginStreak', String(streak));
+            if (streak >= SECRET_BACK_UNLOCK_DAYS) {
+                localStorage.setItem('oracleSecretBackUnlocked', 'true');
+            }
+            return streak;
+        }
         const LENORMAND_DESC_EN = {
             0: '',
             1: '',
@@ -4487,6 +4759,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
             updateStorageInfo();
             updateSignificatorDisplay();
             updateQuestionToggleLabel();
+            updateBackChooserUI();
 
             // フェーズバナーのテキストも言語に合わせて更新
             try {
@@ -4601,11 +4874,16 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
         }
 
         function resolveBackImage() {
+            // ユーザーがアップロードした画像が最優先
             if (backCardImage) {
                 return backCardImage;
             }
             if (isUsingPreset) {
                 return LENORMAND_BACK_IMAGE;
+            }
+            // 非プリセット時のデフォルト裏面：連続ログインで解放した2枚目を選んでいれば優先
+            if (isSecretBackUnlocked() && getDefaultBackChoice() === 'secret') {
+                return SECRET_BACK_IMAGE;
             }
             return DEFAULT_BACK_IMAGE;
         }
@@ -5333,7 +5611,8 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
             audioManager.loadSettings();
             updateSoundSettingsUI();
 
-
+            // 連続ログインカウント更新（3日連続でシークレット裏面解放）
+            try { updateLoginStreak(); } catch (e) { console.warn('login streak failed', e); }
 
             // IAP初期化（課金状態の復元）
             iapManager = new IAPManager();
@@ -5868,9 +6147,40 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
         
         function updateBackPreview() {
             const preview = document.getElementById('back-preview');
-            if (!preview) return;
-            const backImg = resolveBackImage();
-            preview.innerHTML = `<img src="${backImg}">`;
+            if (preview) {
+                const backImg = resolveBackImage();
+                preview.innerHTML = `<img src="${backImg}">`;
+            }
+            updateBackChooserUI();
+        }
+
+        // デフォルト裏面チューザーの選択状態とロック表示を更新
+        function updateBackChooserUI() {
+            const row = document.getElementById('default-back-row');
+            if (!row) return;
+            const ja = currentLang === 'ja';
+            const unlocked = isSecretBackUnlocked();
+            const choice = getDefaultBackChoice();
+
+            row.querySelectorAll('.default-back-option').forEach(btn => {
+                const target = btn.dataset.choice;
+                const isLocked = target === 'secret' && !unlocked;
+                btn.classList.toggle('locked', isLocked);
+                btn.classList.toggle('selected', !isLocked && target === choice);
+                btn.disabled = isLocked;
+            });
+
+            const lockText = row.querySelector('#default-back-lock-text');
+            if (lockText) {
+                if (unlocked) {
+                    lockText.textContent = '';
+                } else {
+                    const remaining = Math.max(0, SECRET_BACK_UNLOCK_DAYS - getLoginStreak());
+                    lockText.textContent = ja
+                        ? `あと${remaining}日`
+                        : `${remaining} day${remaining === 1 ? '' : 's'} left`;
+                }
+            }
         }
         
         function setCardCount() {
@@ -5974,15 +6284,20 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
             });
         }
 
-        function getLenormandThumbGridHtml() {
-            const cards = getLenormandActiveCards();
+        // 共通: カードのサムネグリッド HTML を生成（プリセット・カスタム両方で利用）
+        function renderCardThumbsHtml(cards) {
             const thumbs = cards.map(card => {
+                const label = escapeHtml(localizeDefaultCardName(card.name || ''));
                 const img = card.imageData
-                    ? `<img src="${card.imageData}" alt="${card.name}">`
-                    : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:9px;color:#888;">${card.name}</div>`;
+                    ? `<img src="${card.imageData}" alt="${label}">`
+                    : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:9px;color:#888;padding:2px;text-align:center;">${label}</div>`;
                 return `<div class="preset-thumb">${img}</div>`;
             }).join('');
             return `<div class="preset-thumb-grid">${thumbs}</div>`;
+        }
+
+        function getLenormandThumbGridHtml() {
+            return renderCardThumbsHtml(getLenormandActiveCards());
         }
         
         function renderCards() {
@@ -6334,89 +6649,250 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
             resetLottery();
         }
 
-        function deleteSet(setName) {
-            if (setName === 'デフォルト') {
-                alert('デフォルトは削除不可');
+        async function deleteSet(setName) {
+            const ja = currentLang === 'ja';
+            if (setName === 'デフォルト' || setName === 'Default') {
+                await showAlertModal(
+                    ja ? 'デフォルトの箱は削除できません' : 'The Default box cannot be deleted'
+                );
                 return;
             }
-            if (!confirm(`「${setName}」を削除?`)) return;
-            
+            const confirmed = await showConfirmModal(
+                ja ? `「${setName}」を削除しますか？` : `Delete "${setName}"?`
+            );
+            if (!confirmed) return;
+
             delete cardSets[setName];
             if (currentSetName === setName) {
                 switchSet('デフォルト');
             }
             saveSets();
+            // 削除した箱の詳細を開いていたら一覧へ戻す
+            if (boxDetailOpen && boxDetailOpen.kind === 'custom' && boxDetailOpen.name === setName) {
+                boxDetailOpen = null;
+            }
             renderSetsList();
+        }
+
+        // カード箱UIの状態（null=一覧表示、{kind, name?}=箱の詳細表示）
+        let boxDetailOpen = null;
+
+        function openBoxDetail(kind, name) {
+            boxDetailOpen = (kind === 'preset') ? { kind: 'preset' } : { kind: 'custom', name };
+            renderSetsList();
+        }
+        function closeBoxDetail() {
+            boxDetailOpen = null;
+            renderSetsList();
+        }
+
+        // 箱のサムネ用カード配列を取得（プリセット or カスタム）
+        // masterCards を id 引きできる Map に変換（O(n) で1回）
+        function buildMasterCardIndex() {
+            const m = new Map();
+            for (const c of masterCards) m.set(c.id, c);
+            return m;
+        }
+
+        function getBoxCardsForDisplay(state, byId) {
+            if (state.kind === 'preset') {
+                return getLenormandActiveCards();
+            }
+            const index = byId || buildMasterCardIndex();
+            const ids = cardSets[state.name] || [];
+            return ids.map(id => index.get(id)).filter(c => c && !c.archived);
         }
 
         function renderSetsList() {
             const list = document.getElementById('sets-list');
+            if (!list) return;
             list.innerHTML = '';
-            document.getElementById('current-set-name').textContent = currentSetName;
+            const currentSetNameEl = document.getElementById('current-set-name');
+            if (currentSetNameEl) currentSetNameEl.textContent = currentSetName;
             updateSetSaveCount();
-            
-            const cardsText = currentLang === 'ja' ? '枚' : ' cards';
-            const activeText = currentLang === 'ja' ? '✓ 使用中' : '✓ Active';
-            const editText = currentLang === 'ja' ? '編集' : 'Edit';
-            const switchText = currentLang === 'ja' ? '切替' : 'Switch';
-            const deleteText = currentLang === 'ja' ? '削除' : 'Delete';
-            const presetText = currentLang === 'ja' ? 'プリセット' : 'Preset';
-            
-            // ルノルマンプリセットを最初に表示
-            const presetCard = document.createElement('div');
-            presetCard.className = 'spread-card';
-            if (isUsingPreset && currentSetName === (currentLang === 'ja' ? 'ルノルマン' : 'Lenormand')) {
-                presetCard.style.borderColor = 'rgba(255,200,100,0.8)';
-                presetCard.style.background = 'rgba(255,200,100,0.2)';
+
+            const ja = currentLang === 'ja';
+            const cardsSuffix = ja ? '枚' : ' cards';
+            // この描画呼び出しで使い回す masterCards の id インデックス
+            const masterById = buildMasterCardIndex();
+
+            // 詳細表示中は「新しい箱を作る」フォームを隠して文脈を分離
+            const newSetForm = document.getElementById('new-set-form');
+            if (newSetForm) newSetForm.style.display = boxDetailOpen ? 'none' : '';
+
+            // ---- 箱の詳細ビュー ----
+            if (boxDetailOpen) {
+                list.className = '';
+                const cards = getBoxCardsForDisplay(boxDetailOpen, masterById);
+                const isPresetBox = boxDetailOpen.kind === 'preset';
+                const boxName = isPresetBox
+                    ? (ja ? LENORMAND_PRESET.nameJa : LENORMAND_PRESET.nameEn)
+                    : (boxDetailOpen.name === 'デフォルト' ? (ja ? 'デフォルト' : 'Default') : boxDetailOpen.name);
+                const isActive = isPresetBox
+                    ? isUsingPreset
+                    : (!isUsingPreset && currentSetName === boxDetailOpen.name);
+
+                const panel = document.createElement('div');
+                panel.className = 'box-detail';
+
+                // ヘッダー
+                const header = document.createElement('div');
+                header.className = 'box-detail-header';
+                const back = document.createElement('button');
+                back.type = 'button';
+                back.className = 'box-detail-back';
+                back.textContent = ja ? '← 箱一覧へ' : '← Back to boxes';
+                back.onclick = closeBoxDetail;
+                header.appendChild(back);
+                const title = document.createElement('h3');
+                title.className = 'box-detail-title';
+                title.textContent = boxName;
+                header.appendChild(title);
+                if (isActive) {
+                    const pill = document.createElement('span');
+                    pill.className = 'card-box-active-pill';
+                    pill.style.position = 'static';
+                    pill.style.marginLeft = 'auto';
+                    pill.textContent = ja ? '使用中' : 'Active';
+                    header.appendChild(pill);
+                }
+                panel.appendChild(header);
+
+                // メタ
+                const meta = document.createElement('p');
+                meta.className = 'box-detail-meta';
+                const presetTag = isPresetBox ? ` ・ ${ja ? 'プリセット（編集不可）' : 'Preset (read-only)'}` : '';
+                meta.textContent = `${cards.length}${cardsSuffix}${presetTag}`;
+                panel.appendChild(meta);
+
+                // アクション
+                const actions = document.createElement('div');
+                actions.className = 'box-detail-actions';
+                if (!isActive) {
+                    const useBtn = document.createElement('button');
+                    useBtn.className = 'btn';
+                    useBtn.textContent = ja ? 'この箱を使う' : 'Use this box';
+                    useBtn.onclick = () => {
+                        if (isPresetBox) switchToLenormandPreset();
+                        else switchSet(boxDetailOpen.name);
+                    };
+                    actions.appendChild(useBtn);
+                }
+                if (!isPresetBox) {
+                    const editBtn = document.createElement('button');
+                    editBtn.className = 'btn';
+                    editBtn.textContent = ja ? '箱を編集' : 'Edit box';
+                    editBtn.onclick = () => {
+                        // 既存の編集フローは「現在使用中のセット」を編集するので、
+                        // 一度この箱に切り替えてから編集モーダルを開く。
+                        if (!isActive) switchSet(boxDetailOpen.name);
+                        editSetCards();
+                    };
+                    actions.appendChild(editBtn);
+
+                    const isProtected = boxDetailOpen.name === 'デフォルト' || boxDetailOpen.name === 'Default';
+                    if (!isProtected) {
+                        const delBtn = document.createElement('button');
+                        delBtn.className = 'btn';
+                        delBtn.style.background = 'rgba(220,53,69,0.3)';
+                        delBtn.style.borderColor = '#dc3545';
+                        delBtn.style.color = '#ffd0d0';
+                        delBtn.textContent = ja ? '箱を削除' : 'Delete box';
+                        delBtn.onclick = () => deleteSet(boxDetailOpen.name);
+                        actions.appendChild(delBtn);
+                    }
+                }
+                panel.appendChild(actions);
+
+                // 中身（サムネ一覧）— 共通 .preset-thumb-grid / .preset-thumb を再利用
+                const thumbs = document.createElement('div');
+                thumbs.className = 'box-detail-thumbs';
+                if (cards.length === 0) {
+                    thumbs.classList.add('box-detail-thumbs-empty');
+                    thumbs.textContent = ja ? '（カードがありません）' : '(empty)';
+                } else {
+                    thumbs.innerHTML = renderCardThumbsHtml(cards);
+                }
+                panel.appendChild(thumbs);
+
+                list.appendChild(panel);
+                renderCardFilterSetOptions();
+                return;
             }
-            const presetName = currentLang === 'ja' ? LENORMAND_PRESET.nameJa : LENORMAND_PRESET.nameEn;
-            const lenormandCount = getLenormandActiveCards().length;
-            let presetHtml = `<h3>${presetName}</h3><p>${lenormandCount}${cardsText}</p>`;
-            presetHtml += `<p style="color:#ffcc66;font-size:11px;">${presetText}</p>`;
-            presetHtml += getLenormandThumbGridHtml();
-            if (isUsingPreset) {
-                presetHtml += `<p style="color:#9fd6e6;font-size:12px;">${activeText}</p>`;
-            } else {
-                presetHtml += `<button class="btn" style="padding:8px 12px;font-size:12px;margin-top:8px;background:rgba(255,200,100,0.3);border-color:rgba(255,200,100,0.6);" onclick="switchToLenormandPreset()">${switchText}</button>`;
-            }
-            presetCard.innerHTML = presetHtml;
-            list.appendChild(presetCard);
-            
+
+            // ---- 箱一覧ビュー ----
+            list.className = 'sets-grid';
+
+            // プリセット（ルノルマン）
+            const presetCount = getLenormandActiveCards().length;
+            const presetName = ja ? LENORMAND_PRESET.nameJa : LENORMAND_PRESET.nameEn;
+            list.appendChild(makeBoxTile({
+                name: presetName,
+                count: presetCount,
+                active: isUsingPreset,
+                isPreset: true,
+                onOpen: () => openBoxDetail('preset')
+            }));
+
             // ユーザーのカスタムセット
             Object.keys(cardSets).forEach(setName => {
-                const setCard = document.createElement('div');
-                setCard.className = 'spread-card';
-                if (!isUsingPreset && setName === currentSetName) {
-                    setCard.style.borderColor = 'rgba(159,214,230,0.8)';
-                    setCard.style.background = 'rgba(159,214,230,0.2)';
-                }
-                
-                const cardCount = cardSets[setName].filter(id => {
-                    const card = masterCards.find(c => c.id === id);
-                    return card && !card.archived;
+                const count = cardSets[setName].filter(id => {
+                    const c = masterById.get(id);
+                    return c && !c.archived;
                 }).length;
-                
-                // デフォルトセットの表示名を言語に合わせる
-                const displayName = (setName === 'デフォルト') 
-                    ? (currentLang === 'ja' ? 'デフォルト' : 'Default')
+                const displayName = (setName === 'デフォルト')
+                    ? (ja ? 'デフォルト' : 'Default')
                     : setName;
-                
-                let html = `<h3>${displayName}</h3><p>${cardCount}${cardsText}</p>`;
-                if (!isUsingPreset && setName === currentSetName) {
-                    html += `<p style="color:#9fd6e6;font-size:12px;">${activeText}</p>`;
-                    html += `<button class="btn" style="padding:8px 12px;font-size:12px;margin-top:8px;" onclick="editSetCards()">${editText}</button>`;
-                } else {
-                    html += `<button class="btn" style="padding:8px 12px;font-size:12px;margin-top:8px;" onclick="switchSet('${setName}')">${switchText}</button>`;
-                }
-                
-                if (setName !== 'デフォルト' && setName !== 'Default') {
-                    html += `<button class="btn" style="padding:8px 12px;font-size:12px;margin-top:8px;background:rgba(220,53,69,0.5);border-color:#dc3545;" onclick="deleteSet('${setName}')">${deleteText}</button>`;
-                }
-                
-                setCard.innerHTML = html;
-                list.appendChild(setCard);
+                list.appendChild(makeBoxTile({
+                    name: displayName,
+                    count,
+                    active: !isUsingPreset && setName === currentSetName,
+                    isPreset: false,
+                    onOpen: () => openBoxDetail('custom', setName)
+                }));
             });
+
             renderCardFilterSetOptions();
+        }
+
+        // カード箱タイル要素を作成
+        function makeBoxTile({ name, count, active, isPreset, onOpen }) {
+            const ja = currentLang === 'ja';
+            const tile = document.createElement('div');
+            tile.className = 'card-box' + (active ? ' active' : '');
+            tile.tabIndex = 0;
+            tile.setAttribute('role', 'button');
+            tile.setAttribute('aria-label', name);
+            tile.onclick = onOpen;
+            tile.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onOpen(); } };
+
+            if (active) {
+                const pill = document.createElement('span');
+                pill.className = 'card-box-active-pill';
+                pill.textContent = ja ? '使用中' : 'Active';
+                tile.appendChild(pill);
+            }
+
+            const body = document.createElement('div');
+            body.className = 'card-box-body';
+            const h = document.createElement('h3');
+            h.className = 'card-box-name';
+            h.textContent = name;
+            body.appendChild(h);
+            const meta = document.createElement('div');
+            meta.className = 'card-box-meta';
+            const countSpan = document.createElement('span');
+            countSpan.textContent = ja ? `${count}枚` : `${count} cards`;
+            meta.appendChild(countSpan);
+            if (isPreset) {
+                const tag = document.createElement('span');
+                tag.className = 'card-box-badge-preset';
+                tag.textContent = ja ? 'プリセット' : 'PRESET';
+                meta.appendChild(tag);
+            }
+            body.appendChild(meta);
+            tile.appendChild(body);
+            return tile;
         }
         
         // タロットプリセットに切り替え

@@ -19,6 +19,8 @@ const files = [
     'assetsback-lenormand.webp',
     'card-back-default.jpg',
     'icon.png',
+    'box.png',
+    'secretcard.png',
     'lenormand-desc-en.json',
     'lenormand-desc-ja.json',
     'audio-manifest.json',
