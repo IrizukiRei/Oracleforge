@@ -1838,15 +1838,16 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            overflow-y: auto;
-            overflow-x: hidden;
+            overflow: hidden;
             padding: 28px 20px 40px;
             -webkit-overflow-scrolling: touch;
+            overscroll-behavior: none;
+            touch-action: none;
         }
         .title-screen::-webkit-scrollbar { display: none; }
         .title-screen { scrollbar-width: none; }
         @media (max-height: 720px) {
-            .title-screen { justify-content: flex-start; }
+            .title-screen { justify-content: flex-start; overflow-y: auto; touch-action: pan-y; }
             .title-screen > div:first-of-type img { width: 110px !important; height: 110px !important; }
             .title-tagline { margin-bottom: 18px; font-size: 0.88em; }
             .title-steps { margin-top: 22px; }
