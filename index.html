@@ -85,6 +85,8 @@
             height: 100%;
             height: 100dvh;
             -webkit-overflow-scrolling: touch;
+            /* WebView ルートでのラバーバンド（ぷよっと動く）も抑止 */
+            overscroll-behavior: none;
         }
 
         /* スクロールバー非表示 */
@@ -1842,6 +1844,10 @@
             overflow-x: hidden;
             padding: 28px 20px 40px;
             -webkit-overflow-scrolling: touch;
+            /* スワイプ時のラバーバンド（ぷよっと動く）を抑止。
+               内容が画面に収まっている時はピクリとも動かなくなる。
+               収まらない縦長端末では通常スクロールは引き続き機能する。 */
+            overscroll-behavior: none;
         }
         .title-screen::-webkit-scrollbar { display: none; }
         .title-screen { scrollbar-width: none; }
