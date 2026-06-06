@@ -1844,14 +1844,15 @@
             overflow-x: hidden;
             padding: 28px 20px 40px;
             -webkit-overflow-scrolling: touch;
-            /* スワイプ時のラバーバンド（ぷよっと動く）を抑止。
+                        overflow: hidden;
                内容が画面に収まっている時はピクリとも動かなくなる。
                収まらない縦長端末では通常スクロールは引き続き機能する。 */
             overscroll-behavior: none;
+                        touch-action: none;
         }
         .title-screen::-webkit-scrollbar { display: none; }
         .title-screen { scrollbar-width: none; }
-        @media (max-height: 720px) {
+                    .title-screen { justify-content: flex-start; overflow-y: auto; touch-action: pan-y; }
             .title-screen { justify-content: flex-start; }
             .title-screen > div:first-of-type img { width: 110px !important; height: 110px !important; }
             .title-tagline { margin-bottom: 18px; font-size: 0.88em; }
