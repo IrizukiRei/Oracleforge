@@ -3701,7 +3701,10 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
             // Google official test ad unit IDs (Android)
             testBannerId: 'ca-app-pub-3940256099942544/9214589741',
             testInterstitialId: 'ca-app-pub-3940256099942544/1033173712',
-            forceTestAds: true,
+            // 本番では必ず false。true のままだと常に Google のテスト広告が配信され、
+            // 収益が一切発生しない。開発時の確認は設定の「広告テストモード」(admobTestMode)
+            // トグルで端末ごとに切り替える。
+            forceTestAds: false,
             // Screens where banner should be hidden
             hideBannerScreens: ['reading', 'ritual'],
             // Frequency cap settings
@@ -4182,7 +4185,10 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                     : 'In-app purchases are not available on web. Please test in the native app.\nUse "Test Purchase (local)" to verify the UI only.');
 
             const buttons = [];
-            if (pendingProductId) {
+            // 「テスト購入（ローカル）」は実決済なしでエンタイトルメントを付与するため、
+            // 収益化対象であるネイティブ製品ビルドでは絶対に出さない（課金バイパス防止）。
+            // 課金プラグインが無い Web プレビューでの UI 確認用途に限定する。
+            if (pendingProductId && !isNativeApp) {
                 buttons.push({
                     text: currentLang === 'ja' ? 'テスト購入（ローカル）' : 'Test Purchase (local)',
                     variant: 'primary',
@@ -6109,7 +6115,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                 const card = activeCards.find(c => c.id === significatorIds[0]);
                 if (card) {
                     preview1.innerHTML = card.imageData
-                        ? `<img src="${card.imageData}" style="width:100%;height:100%;object-fit:cover;">`
+                        ? `<img src="${escapeHtml(card.imageData)}" style="width:100%;height:100%;object-fit:cover;">`
                         : localizeDefaultCardName(card.name);
                 } else {
                     preview1.innerHTML = notSetText;
@@ -6123,7 +6129,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                 const card = activeCards.find(c => c.id === significatorIds[1]);
                 if (card) {
                     preview2.innerHTML = card.imageData
-                        ? `<img src="${card.imageData}" style="width:100%;height:100%;object-fit:cover;">`
+                        ? `<img src="${escapeHtml(card.imageData)}" style="width:100%;height:100%;object-fit:cover;">`
                         : localizeDefaultCardName(card.name);
                 } else {
                     preview2.innerHTML = notSetText;
@@ -6162,7 +6168,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                 const checkMark = isSelected ? '<div style="position:absolute;top:5px;right:5px;color:#ffcc66;font-size:18px;">✓</div>' : '';
                 const sigDisplayName = localizeDefaultCardName(card.name);
                 const preview = card.imageData
-                    ? `<img src="${card.imageData}" style="width:100%;height:100%;object-fit:cover;">`
+                    ? `<img src="${escapeHtml(card.imageData)}" style="width:100%;height:100%;object-fit:cover;">`
                     : sigDisplayName;
                 cardList += `
                     <div onclick="toggleSignificatorCard(${card.id})" style="cursor:pointer;padding:10px;background:rgba(255,255,255,0.05);border:2px solid rgba(255,255,255,0.2);border-radius:8px;text-align:center;position:relative;${selected}">
@@ -6301,7 +6307,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
             const preview = document.getElementById('back-preview');
             if (preview) {
                 const backImg = resolveBackImage();
-                preview.innerHTML = `<img src="${backImg}">`;
+                preview.innerHTML = `<img src="${escapeHtml(backImg)}">`;
             }
             updateBackChooserUI();
         }
@@ -6423,7 +6429,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                 const item = document.createElement('div');
                 item.className = 'card-item preset-card';
                 const previewContent = card.imageData
-                    ? `<img src="${card.imageData}">`
+                    ? `<img src="${escapeHtml(card.imageData)}">`
                     : card.name;
                 const numberLabel = getCardNumberLabel(card, String(card.id + 1));
                 item.innerHTML = `
@@ -6441,7 +6447,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
             const thumbs = cards.map(card => {
                 const label = escapeHtml(localizeDefaultCardName(card.name || ''));
                 const img = card.imageData
-                    ? `<img src="${card.imageData}" alt="${label}">`
+                    ? `<img src="${escapeHtml(card.imageData)}" alt="${label}">`
                     : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:9px;color:#888;padding:2px;text-align:center;">${label}</div>`;
                 return `<div class="preset-thumb">${img}</div>`;
             }).join('');
@@ -6481,7 +6487,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                 
                 const noImageText = currentLang === 'ja' ? '画像なし' : 'No image';
                 const previewContent = card.imageData 
-                    ? `<img src="${card.imageData}">`
+                    ? `<img src="${escapeHtml(card.imageData)}">`
                     : noImageText;
                 
                 const namePlaceholder = currentLang === 'ja' ? '名前' : 'Name';
@@ -6541,7 +6547,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                     saveMasterCards();
 
                     const preview = document.getElementById(`preview-${index}`);
-                    preview.innerHTML = `<img src="${data}">`;
+                    preview.innerHTML = `<img src="${escapeHtml(data)}">`;
                     updateStorageInfo();
                 });
             }
@@ -6714,9 +6720,9 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                 
                 const lotteryDisplayName = localizeDefaultCardName(card.name);
                 if (card.imageData) {
-                    cardInner.innerHTML = `<img src="${card.imageData}" style="width:100%;height:100%;object-fit:cover;">`;
+                    cardInner.innerHTML = `<img src="${escapeHtml(card.imageData)}" style="width:100%;height:100%;object-fit:cover;">`;
                 } else {
-                    cardInner.innerHTML = `<div style="width:100%;height:100%;background:linear-gradient(135deg,#2a2a4a,#1a1a2e);display:flex;align-items:center;justify-content:center;font-size:14px;color:#9fd6e6;padding:10px;text-align:center;">${lotteryDisplayName}</div>`;
+                    cardInner.innerHTML = `<div style="width:100%;height:100%;background:linear-gradient(135deg,#2a2a4a,#1a1a2e);display:flex;align-items:center;justify-content:center;font-size:14px;color:#9fd6e6;padding:10px;text-align:center;">${escapeHtml(lotteryDisplayName)}</div>`;
                 }
 
                 cardInner.onclick = () => { if (audioManager) audioManager.playTap(); showCardModal(card); };
@@ -6905,7 +6911,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                     const preview = document.createElement('div');
                     preview.className = 'box-thumb-row-preview';
                     preview.innerHTML = card.imageData
-                        ? `<img src="${card.imageData}" alt="">`
+                        ? `<img src="${escapeHtml(card.imageData)}" alt="">`
                         : '';
                     const name = document.createElement('div');
                     name.className = 'box-thumb-row-name';
@@ -6932,7 +6938,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                     cell.setAttribute('aria-label', ja ? 'この箱から外す' : 'Remove from this box');
                     const label = escapeHtml(localizeDefaultCardName(card.name || ''));
                     cell.innerHTML = card.imageData
-                        ? `<img src="${card.imageData}" alt="${label}">`
+                        ? `<img src="${escapeHtml(card.imageData)}" alt="${label}">`
                         : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:9px;color:#888;padding:2px;text-align:center;">${label}</div>`;
                     const x = document.createElement('span');
                     x.className = 'box-thumb-remove-x';
@@ -8099,7 +8105,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                     display:flex;align-items:center;justify-content:center;
                 `;
                 const backImg = resolveBackImage();
-                card.innerHTML = `<img src="${backImg}" style="width:100%;height:100%;object-fit:cover;border-radius:6px;">`;
+                card.innerHTML = `<img src="${escapeHtml(backImg)}" style="width:100%;height:100%;object-fit:cover;border-radius:6px;">`;
                 card.dataset.collected = 'false';
                 shuffleCards.push(card);
                 shuffleArea.appendChild(card);
@@ -8302,7 +8308,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
             const cardBack = document.createElement('div');
             cardBack.className = 'card-face card-back';
             const backImg = resolveBackImage();
-            cardBack.innerHTML = `<img src="${backImg}">`;
+            cardBack.innerHTML = `<img src="${escapeHtml(backImg)}">`;
             
             const cardFront = document.createElement('div');
             cardFront.className = 'card-face card-front';
@@ -8313,7 +8319,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                 img.src = card.imageData;
                 cardFront.appendChild(img);
             } else {
-                cardFront.innerHTML = `<div class="card-text">${localizeDefaultCardName(card.name)}</div>`;
+                cardFront.innerHTML = `<div class="card-text">${escapeHtml(localizeDefaultCardName(card.name))}</div>`;
             }
             
             cardFront.onclick = function(e) {
@@ -8740,9 +8746,9 @@ sigBadge + '</strong><br>' + (descText || noDescText) + '</div>';
             `;
             
             if (newCard.imageData) {
-                cardInner.innerHTML = `<img src="${newCard.imageData}" style="width:100%;height:100%;object-fit:cover;">`;
+                cardInner.innerHTML = `<img src="${escapeHtml(newCard.imageData)}" style="width:100%;height:100%;object-fit:cover;">`;
             } else {
-                cardInner.innerHTML = `<div style="width:100%;height:100%;background:#2a2a4a;display:flex;align-items:center;justify-content:center;font-size:10px;color:#888;">${newCard.name}</div>`;
+                cardInner.innerHTML = `<div style="width:100%;height:100%;background:#2a2a4a;display:flex;align-items:center;justify-content:center;font-size:10px;color:#888;">${escapeHtml(newCard.name)}</div>`;
             }
             
             cardInner.onclick = () => { if (audioManager) audioManager.playTap(); showCardModal(newCard); };
@@ -8904,8 +8910,8 @@ sigBadge + '</strong><br>' + (descText || noDescText) + '</div>';
             
             list.innerHTML = crystals.map(c => `
                 <div class="crystal-item">
-                    <div class="crystal-date">${c.date}</div>
-                    <div style="font-size:14px;line-height:1.5;">${c.text}</div>
+                    <div class="crystal-date">${escapeHtml(c.date)}</div>
+                    <div style="font-size:14px;line-height:1.5;">${escapeHtml(c.text)}</div>
                 </div>
             `).join('');
         }

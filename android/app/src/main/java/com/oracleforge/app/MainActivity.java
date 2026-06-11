@@ -41,6 +41,13 @@ public class MainActivity extends BridgeActivity {
                     String safeFileName = (fileName == null || fileName.trim().isEmpty())
                             ? "oracleforge-backup.json"
                             : fileName.trim();
+                    // パストラバーサル対策: ディレクトリ区切りを含むファイル名は基底名のみ採用し、
+                    // 危険な文字を除去してキャッシュ外への書き込みを防ぐ。
+                    safeFileName = new File(safeFileName).getName();
+                    safeFileName = safeFileName.replaceAll("[^A-Za-z0-9._-]", "_");
+                    if (safeFileName.isEmpty() || safeFileName.equals(".") || safeFileName.equals("..")) {
+                        safeFileName = "oracleforge-backup.json";
+                    }
                     if (!safeFileName.endsWith(".json")) safeFileName = safeFileName + ".json";
 
                     File outFile = new File(getCacheDir(), safeFileName);
