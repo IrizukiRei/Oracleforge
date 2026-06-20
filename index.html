@@ -1863,6 +1863,154 @@
             display: none !important;
         }
 
+        /* 初回起動ウェルカムモーダル */
+        .welcome-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(3, 7, 13, 0.78);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            z-index: 11000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.35s ease, visibility 0.35s ease;
+        }
+        .welcome-overlay.show { opacity: 1; visibility: visible; }
+        .welcome-modal {
+            position: relative;
+            width: min(92vw, 420px);
+            max-height: 88vh;
+            overflow-y: auto;
+            box-sizing: border-box;
+            padding: 28px 22px 24px;
+            background:
+                radial-gradient(ellipse 80% 30% at 50% -8%, rgba(174, 230, 245, 0.12) 0%, transparent 60%),
+                linear-gradient(180deg, var(--ink-3) 0%, var(--ink-2) 60%, var(--ink-1) 100%);
+            border: 1px solid var(--accent-line);
+            border-radius: 4px;
+            box-shadow: 0 0 24px rgba(159,214,230,0.25), 0 8px 28px rgba(0,0,0,0.55);
+            color: var(--text);
+            text-align: center;
+        }
+        .welcome-modal::-webkit-scrollbar { display: none; }
+        .welcome-modal { scrollbar-width: none; }
+        .welcome-title {
+            font-family: 'Cormorant Garamond', 'Noto Serif JP', serif;
+            font-size: 1.4em;
+            letter-spacing: 0.18em;
+            color: var(--accent-1);
+            margin-bottom: 6px;
+        }
+        .welcome-sub {
+            font-size: 0.85em;
+            color: var(--ink-soft, #c8d4dc);
+            opacity: 0.85;
+            letter-spacing: 0.08em;
+            margin-bottom: 18px;
+        }
+        .welcome-divider {
+            width: 60px; height: 1px;
+            margin: 0 auto 18px;
+            background: linear-gradient(90deg, transparent, var(--accent-line), transparent);
+        }
+        .welcome-lead {
+            font-size: 0.95em;
+            line-height: 1.6;
+            margin-bottom: 18px;
+            color: #e8eef2;
+        }
+        .welcome-btn-primary {
+            display: block;
+            width: 100%;
+            padding: 14px 18px;
+            background: linear-gradient(180deg, rgba(159,214,230,0.22) 0%, rgba(159,214,230,0.10) 100%);
+            border: 1px solid var(--accent-1);
+            color: var(--accent-1);
+            font-family: inherit;
+            font-size: 1em;
+            letter-spacing: 0.14em;
+            border-radius: 2px;
+            cursor: pointer;
+            touch-action: manipulation;
+            box-shadow: 0 0 12px rgba(159,214,230,0.18);
+            margin-bottom: 10px;
+        }
+        .welcome-btn-primary:active { background: rgba(159,214,230,0.28); }
+        .welcome-btn-secondary {
+            display: block;
+            width: 100%;
+            padding: 11px 14px;
+            background: transparent;
+            border: 1px solid var(--accent-line);
+            color: var(--accent-2);
+            font-family: inherit;
+            font-size: 0.9em;
+            letter-spacing: 0.10em;
+            border-radius: 2px;
+            cursor: pointer;
+            touch-action: manipulation;
+            margin-bottom: 6px;
+        }
+        .welcome-guide-link {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 6px 10px;
+            background: transparent;
+            border: none;
+            color: var(--accent-2);
+            font-family: inherit;
+            font-size: 0.82em;
+            letter-spacing: 0.08em;
+            cursor: pointer;
+            opacity: 0.8;
+        }
+        .welcome-guide-link:active { opacity: 1; }
+
+        /* 占う／くじ など 画面トップのサブテキスト（初心者向けヒント） */
+        .screen-subtext {
+            text-align: center;
+            font-size: 12px;
+            color: var(--accent-2);
+            opacity: 0.75;
+            letter-spacing: 0.04em;
+            margin: -6px 0 12px;
+            padding: 0 12px;
+            line-height: 1.45;
+        }
+
+        /* 折りたたみセクション（すべてのカード画面の上級者向けエリア用） */
+        details.advanced-section {
+            margin: 14px 0;
+            border: 1px solid rgba(159,214,230,0.18);
+            border-radius: 4px;
+            background: rgba(10,13,24,0.4);
+        }
+        details.advanced-section > summary {
+            list-style: none;
+            cursor: pointer;
+            padding: 12px 14px;
+            font-size: 13px;
+            letter-spacing: 0.06em;
+            color: var(--accent-2);
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        details.advanced-section > summary::-webkit-details-marker { display: none; }
+        details.advanced-section > summary::before {
+            content: '▸ ';
+            display: inline-block;
+            transition: transform 0.2s;
+            color: var(--accent-line);
+        }
+        details.advanced-section[open] > summary::before { transform: rotate(90deg); }
+        details.advanced-section > .advanced-body {
+            padding: 4px 14px 14px;
+        }
+
         /* 水面オーバーレイ（占い時の overlay.webp と同じ画像を低不透明で重ね、世界観を連結） */
         .web-bg {
             position: absolute;
@@ -2637,6 +2785,21 @@
         <button class="title-guide-link" type="button" onclick="openAppGuide()" data-ja="✦ 使い方をくわしく見る" data-en="✦ View full guide" style="position:relative;z-index:10001;pointer-events:auto;">✦ 使い方をくわしく見る</button>
     </div>
 
+    <!-- 初回起動ウェルカムモーダル -->
+    <div class="welcome-overlay" id="welcome-overlay" aria-hidden="true">
+        <div class="welcome-modal" role="dialog" aria-labelledby="welcome-title-text">
+            <div class="welcome-title" id="welcome-title-text" data-ja="ようこそ" data-en="Welcome">ようこそ</div>
+            <div class="welcome-sub" data-ja="OracleForge へ" data-en="to OracleForge">OracleForge へ</div>
+            <div class="welcome-divider"></div>
+
+            <div class="welcome-lead" data-ja="ルノルマン39枚のカードはもう準備できています。難しい設定は要りません。" data-en="All 39 Lenormand cards are ready. No setup needed.">ルノルマン39枚のカードはもう準備できています。難しい設定は要りません。</div>
+
+            <button class="welcome-btn-primary" type="button" onclick="welcomeStartOneCard()" data-ja="まず1枚引いてみる" data-en="Pull a single card">まず1枚引いてみる</button>
+            <button class="welcome-btn-secondary" type="button" onclick="welcomeGoToSpread()" data-ja="自分で展開を選ぶ" data-en="Pick a spread myself">自分で展開を選ぶ</button>
+            <button class="welcome-guide-link" type="button" onclick="dismissWelcomeAndShowGuide()" data-ja="✦ 詳しい使い方を見る" data-en="✦ View full guide">✦ 詳しい使い方を見る</button>
+        </div>
+    </div>
+
     <!-- 左サイドバー（ホーム・設定ボタン） -->
     <div class="side-buttons">
         <button onclick="goHome()" title="Home" aria-label="Home" style="font-family:'Cormorant Garamond',serif;font-size:22px;">⌂</button>
@@ -2770,7 +2933,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
         <!-- カード編集画面（すべてのカード／カード庫） -->
         <div id="edit-screen" class="screen">
             <div class="info-box">
-                <p style="margin:0;" data-ja="🗂 ここは共有のカード庫です。すべてのカードを直接編集できます。普段は「カード箱」から箱ごとに整理した方が分かりやすいです。" data-en="🗂 This is your shared card pool. Edit every card directly here. For everyday use, organizing from Card Boxes is usually easier.">🗂 ここは共有のカード庫です。すべてのカードを直接編集できます。普段は「カード箱」から箱ごとに整理した方が分かりやすいです。</p>
+                <p style="margin:0;" data-ja="🗂 ここはカード自体を編集するページです。普段の占いはこの画面を開かなくてもできます。自分の写真や絵でカードを作りたい時に使ってください。" data-en="🗂 This page lets you edit the cards themselves. You don't need to open it for everyday readings. Come here when you want to build cards from your own photos or art.">🗂 ここはカード自体を編集するページです。普段の占いはこの画面を開かなくてもできます。自分の写真や絵でカードを作りたい時に使ってください。</p>
             </div>
 
             <div id="storage-warning" class="storage-warning compact" style="display:none;">
@@ -2782,74 +2945,108 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                 <div class="storage-info" id="storage-info"></div>
             </div>
 
-            <div class="back-card-section">
-                <div>
-                    <div style="font-size:12px;margin-bottom:5px;" data-ja="裏面" data-en="Back">裏面</div>
-                    <div class="back-preview" id="back-preview">🔮</div>
-                </div>
-                <div style="flex:1;">
-                    <input type="file" accept="image/*" style="display:none"
-                           id="back-file" onchange="selectBackImage(this)">
-                    <button class="btn" onclick="document.getElementById('back-file').click()" data-ja="裏面画像" data-en="Back Image">
-                        裏面画像
-                    </button>
-                    <button class="btn" onclick="clearBackImage()" style="margin-top:6px;background:rgba(220,53,69,0.3);border-color:#dc3545;" data-ja="裏面画像を削除" data-en="Clear Back Image">
-                        裏面画像を削除
-                    </button>
+            <!-- 自分のカードを作る -->
+            <div class="info-box" style="background:rgba(159,214,230,0.10);border-color:rgba(159,214,230,0.35);">
+                <h3 style="margin-bottom:6px;">✏ <span data-ja="自分のカードを作る" data-en="Make your own cards">自分のカードを作る</span></h3>
+                <p style="margin:0 0 10px;font-size:12px;color:var(--text-soft);" data-ja="枚数を決めて「設定」を押すと、その数の空カードが下に追加されます。各カードに自分の画像と説明を入れられます。" data-en="Choose a number and tap Set. Empty card slots will appear below — give each one your own image and description.">枚数を決めて「設定」を押すと、その数の空カードが下に追加されます。各カードに自分の画像と説明を入れられます。</p>
+                <div class="add-cards-section" style="margin:0;">
+                    <label style="font-size:14px;" data-ja="枚数:" data-en="Cards:">枚数:</label>
+                    <input type="number" id="card-count-input" min="1" max="150" value="10">
+                    <button class="btn" onclick="setCardCount()" data-ja="設定" data-en="Set">設定</button>
                 </div>
             </div>
 
-            <!-- デフォルト裏面の選択（連続ログインで2枚目を解放） -->
-            <div class="default-back-row" id="default-back-row">
-                <div style="font-size:12px;color:var(--text-soft);margin-bottom:6px;letter-spacing:0.06em;" data-ja="既定の裏面" data-en="Default back">既定の裏面</div>
-                <div class="default-back-options">
-                    <button type="button" class="default-back-option" data-choice="default" onclick="setDefaultBackChoice('default')">
-                        <img src="card-back-default.jpg" alt="">
-                        <span data-ja="デフォルト" data-en="Default">デフォルト</span>
-                    </button>
-                    <button type="button" class="default-back-option locked" data-choice="secret" onclick="setDefaultBackChoice('secret')">
-                        <img src="secretcard.png" alt="">
-                        <span data-ja="シークレット" data-en="Secret">シークレット</span>
-                        <span class="default-back-lock-overlay" aria-hidden="true">
-                            <span class="default-back-lock-icon">🔒</span>
-                            <span class="default-back-lock-text" id="default-back-lock-text"></span>
-                        </span>
-                    </button>
-                </div>
-                <p style="margin:8px 0 0;font-size:11px;color:var(--text-faint);line-height:1.5;" data-ja="※ ご自身の裏面画像をアップロードしている時はそちらが優先されます。" data-en="※ Your uploaded back image takes priority when set.">※ ご自身の裏面画像をアップロードしている時はそちらが優先されます。</p>
-            </div>
+            <!-- ユーザーが作ったカード -->
+            <div id="card-grid" class="card-grid"></div>
 
-            <div class="back-card-section">
-                <div>
-                    <div style="font-size:12px;margin-bottom:5px;" data-ja="シグニフィケーター（最大2枚）" data-en="Significators (up to 2)">シグニフィケーター（最大2枚）</div>
-                    <div style="display:flex;gap:10px;">
-                        <div class="back-preview" id="sig-preview-1" style="background:rgba(255,200,100,0.3);font-size:10px;" data-ja="未設定" data-en="Not set">未設定</div>
-                        <div class="back-preview" id="sig-preview-2" style="background:rgba(255,200,100,0.3);font-size:10px;" data-ja="未設定" data-en="Not set">未設定</div>
+            <!-- ルノルマン39枚プリセット（折りたたみ） -->
+            <details class="advanced-section">
+                <summary><span data-ja="🃏 ルノルマン39枚（プリセット・編集不可）" data-en="🃏 Lenormand preset (39 cards, read-only)">🃏 ルノルマン39枚（プリセット・編集不可）</span></summary>
+                <div class="advanced-body">
+                    <p style="margin:0 0 12px;font-size:12px;color:var(--text-soft);" data-ja="既に用意されている39枚のルノルマンです。下のチェックで一部のカードを使う／使わないを切り替えられます。" data-en="The 39 ready-made Lenormand cards. Use the checkboxes below to include or exclude specific cards.">既に用意されている39枚のルノルマンです。下のチェックで一部のカードを使う／使わないを切り替えられます。</p>
+                    <div class="lenormand-options">
+                        <label>
+                            <input type="checkbox" id="lenormand-extra-gentleman">
+                            <span data-ja="追加・紳士を使う" data-en="Use Extra Gentleman">追加・紳士を使う</span>
+                        </label>
+                        <label>
+                            <input type="checkbox" id="lenormand-extra-lady">
+                            <span data-ja="追加・淑女を使う" data-en="Use Extra Lady">追加・淑女を使う</span>
+                        </label>
+                        <label>
+                            <input type="checkbox" id="lenormand-person">
+                            <span data-ja="00.Personを使う" data-en="Use 00.Person">00.Personを使う</span>
+                        </label>
                     </div>
+                    <div id="lenormand-grid" class="card-grid" style="margin-top:10px;"></div>
                 </div>
-                <div style="flex:1;">
-                    <button class="btn" onclick="openSignificatorSelect()" style="font-size:13px;" data-ja="カード選択" data-en="Select Card">
-                        カード選択
-                    </button>
-                    <button class="btn" onclick="clearSignificator()" style="font-size:13px;background:rgba(220,53,69,0.3);border-color:#dc3545;" data-ja="解除" data-en="Clear">
-                        解除
-                    </button>
-                    <div style="font-size:11px;color:#888;margin-top:5px;" data-ja="グランタブローで「私」を示す基準札" data-en="Cards representing 'yourself' in Grand Tableau">グランタブローで「私」を示す基準札</div>
-                </div>
-            </div>
-            
-            <div class="add-cards-section">
-                <label style="font-size:14px;" data-ja="枚数:" data-en="Cards:">枚数:</label>
-                <input type="number" id="card-count-input" min="1" max="150" value="10">
-                <button class="btn" onclick="setCardCount()" data-ja="設定" data-en="Set">設定</button>
-            </div>
+            </details>
 
-            <div class="edit-settings-stack">
-                <div class="info-box">
-                    <div style="display:flex;align-items:center;gap:10px;">
-                        <h3 style="margin-bottom:0;">🗂 <span data-ja="カード整理" data-en="Card Organizer">カード整理</span></h3>
+            <!-- 詳細設定（折りたたみ） -->
+            <details class="advanced-section">
+                <summary><span data-ja="⚙ 詳細設定（裏面・シグニフィケーターなど）" data-en="⚙ Advanced settings (card back, significator, etc.)">⚙ 詳細設定（裏面・シグニフィケーターなど）</span></summary>
+                <div class="advanced-body">
+                    <!-- 裏面 -->
+                    <div class="back-card-section">
+                        <div>
+                            <div style="font-size:12px;margin-bottom:5px;" data-ja="カードの裏面（裏側の絵）" data-en="Card back image">カードの裏面（裏側の絵）</div>
+                            <div class="back-preview" id="back-preview">🔮</div>
+                        </div>
+                        <div style="flex:1;">
+                            <input type="file" accept="image/*" style="display:none"
+                                   id="back-file" onchange="selectBackImage(this)">
+                            <button class="btn" onclick="document.getElementById('back-file').click()" data-ja="裏面画像を選ぶ" data-en="Choose back image">
+                                裏面画像を選ぶ
+                            </button>
+                            <button class="btn" onclick="clearBackImage()" style="margin-top:6px;background:rgba(220,53,69,0.3);border-color:#dc3545;" data-ja="裏面画像を削除" data-en="Clear back image">
+                                裏面画像を削除
+                            </button>
+                        </div>
                     </div>
-                    <div style="margin-top:10px;">
+
+                    <!-- 既定の裏面（連続ログイン報酬） -->
+                    <div class="default-back-row" id="default-back-row">
+                        <div style="font-size:12px;color:var(--text-soft);margin-bottom:6px;letter-spacing:0.06em;" data-ja="既定の裏面（連続ログインで特別な裏面が解放されます）" data-en="Default back (a special back unlocks after a streak of daily logins)">既定の裏面（連続ログインで特別な裏面が解放されます）</div>
+                        <div class="default-back-options">
+                            <button type="button" class="default-back-option" data-choice="default" onclick="setDefaultBackChoice('default')">
+                                <img src="card-back-default.jpg" alt="">
+                                <span data-ja="ふつう" data-en="Default">ふつう</span>
+                            </button>
+                            <button type="button" class="default-back-option locked" data-choice="secret" onclick="setDefaultBackChoice('secret')">
+                                <img src="secretcard.png" alt="">
+                                <span data-ja="特別" data-en="Special">特別</span>
+                                <span class="default-back-lock-overlay" aria-hidden="true">
+                                    <span class="default-back-lock-icon">🔒</span>
+                                    <span class="default-back-lock-text" id="default-back-lock-text"></span>
+                                </span>
+                            </button>
+                        </div>
+                        <p style="margin:8px 0 0;font-size:11px;color:var(--text-faint);line-height:1.5;" data-ja="※ 上で自分の裏面画像をアップロードした時はそちらが優先されます。" data-en="※ Your uploaded back image takes priority when set.">※ 上で自分の裏面画像をアップロードした時はそちらが優先されます。</p>
+                    </div>
+
+                    <!-- シグニフィケーター -->
+                    <div class="back-card-section">
+                        <div>
+                            <div style="font-size:12px;margin-bottom:5px;" data-ja="自分・相手を表すカード（上級者向け）" data-en="Cards that represent you / the other (advanced)">自分・相手を表すカード（上級者向け）</div>
+                            <div style="display:flex;gap:10px;">
+                                <div class="back-preview" id="sig-preview-1" style="background:rgba(255,200,100,0.3);font-size:10px;" data-ja="未設定" data-en="Not set">未設定</div>
+                                <div class="back-preview" id="sig-preview-2" style="background:rgba(255,200,100,0.3);font-size:10px;" data-ja="未設定" data-en="Not set">未設定</div>
+                            </div>
+                        </div>
+                        <div style="flex:1;">
+                            <button class="btn" onclick="openSignificatorSelect()" style="font-size:13px;" data-ja="カードを選ぶ" data-en="Select cards">
+                                カードを選ぶ
+                            </button>
+                            <button class="btn" onclick="clearSignificator()" style="font-size:13px;background:rgba(220,53,69,0.3);border-color:#dc3545;" data-ja="解除" data-en="Clear">
+                                解除
+                            </button>
+                            <div style="font-size:11px;color:#888;margin-top:5px;" data-ja="グランタブロー（36枚の展開）で「自分」「相手」の位置を強調する設定。普段は使わなくてOK。" data-en="Used in Grand Tableau (36-card spread) to highlight the 'self' and 'other' positions. You can leave it off.">グランタブロー（36枚の展開）で「自分」「相手」の位置を強調する設定。普段は使わなくてOK。</div>
+                        </div>
+                    </div>
+
+                    <!-- カードの並び替え・検索 -->
+                    <div class="info-box" style="margin-top:14px;">
+                        <h3 style="margin-bottom:8px;">🔍 <span data-ja="カードの並び替え・検索" data-en="Sort & search cards">カードの並び替え・検索</span></h3>
                         <div class="edit-settings-label" data-ja="検索 / フィルタ" data-en="Search / Filter">検索 / フィルタ</div>
                         <input type="text" id="card-search" class="set-input" data-ja-placeholder="カード名・説明を検索" data-en-placeholder="Search name or description">
                         <div class="card-tools">
@@ -2874,57 +3071,31 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                                 </select>
                             </div>
                         </div>
-                    </div>
-                    <div style="display:flex;align-items:center;gap:8px;margin-top:8px;">
-                        <label style="font-size:13px;" data-ja="No.へ移動:" data-en="Go to No.:">No.へ移動:</label>
-                        <input type="number" id="card-jump-input" min="1" max="150" style="width:60px;padding:4px 6px;border-radius:4px;border:1px solid rgba(255,255,255,0.3);background:rgba(0,0,0,0.3);color:#fff;font-size:13px;">
-                        <button class="btn" onclick="jumpToCard()" style="font-size:12px;padding:4px 10px;" data-ja="移動" data-en="Go">移動</button>
-                    </div>
-                    <label style="display:inline-flex;align-items:center;gap:4px;margin-top:6px;font-size:13px;cursor:pointer;">
-                        <input type="checkbox" id="card-show-archived">
-                        <span data-ja="アーカイブ済みを表示" data-en="Show archived">アーカイブ済みを表示</span>
-                    </label>
-                    <div class="card-density">
-                        <span class="density-label" data-ja="表示密度" data-en="Density">表示密度</span>
-                        <button type="button" class="btn density-btn" id="density-large" data-ja="大きい" data-en="Large">大きい</button>
-                        <button type="button" class="btn density-btn" id="density-compact" data-ja="小さい" data-en="Compact">小さい</button>
+                        <div style="display:flex;align-items:center;gap:8px;margin-top:8px;">
+                            <label style="font-size:13px;" data-ja="No.へ移動:" data-en="Go to No.:">No.へ移動:</label>
+                            <input type="number" id="card-jump-input" min="1" max="150" style="width:60px;padding:4px 6px;border-radius:4px;border:1px solid rgba(255,255,255,0.3);background:rgba(0,0,0,0.3);color:#fff;font-size:13px;">
+                            <button class="btn" onclick="jumpToCard()" style="font-size:12px;padding:4px 10px;" data-ja="移動" data-en="Go">移動</button>
+                        </div>
+                        <label style="display:inline-flex;align-items:center;gap:4px;margin-top:6px;font-size:13px;cursor:pointer;">
+                            <input type="checkbox" id="card-show-archived">
+                            <span data-ja="アーカイブ済みを表示" data-en="Show archived">アーカイブ済みを表示</span>
+                        </label>
+                        <div class="card-density">
+                            <span class="density-label" data-ja="表示密度" data-en="Density">表示密度</span>
+                            <button type="button" class="btn density-btn" id="density-large" data-ja="大きい" data-en="Large">大きい</button>
+                            <button type="button" class="btn density-btn" id="density-compact" data-ja="小さい" data-en="Compact">小さい</button>
+                        </div>
                     </div>
                 </div>
-
-                <div class="info-box">
-                    <h3>🂡 <span data-ja="ルノルマン設定" data-en="Lenormand Options">ルノルマン設定</span></h3>
-                    <div class="lenormand-options">
-                        <label>
-                            <input type="checkbox" id="lenormand-extra-gentleman">
-                            <span data-ja="追加・紳士を使う" data-en="Use Extra Gentleman">追加・紳士を使う</span>
-                        </label>
-                        <label>
-                            <input type="checkbox" id="lenormand-extra-lady">
-                            <span data-ja="追加・淑女を使う" data-en="Use Extra Lady">追加・淑女を使う</span>
-                        </label>
-                        <label>
-                            <input type="checkbox" id="lenormand-person">
-                            <span data-ja="00.Personを使う" data-en="Use 00.Person">00.Personを使う</span>
-                        </label>
-                    </div>
-                </div>
-            </div>
-
-            <div class="info-box" style="background:rgba(255,200,100,0.12);border-color:rgba(255,200,100,0.35);">
-                <h3 data-ja="🃏 ルノルマンプリセット（編集不可）" data-en="🃏 Lenormand Preset (Read-only)">🃏 ルノルマンプリセット（編集不可）</h3>
-                <p style="margin-bottom:0;" data-ja="カード画像一覧（説明は現在の言語で表示）" data-en="Image list (descriptions shown in the current language)">カード画像一覧（説明は現在の言語で表示）</p>
-            </div>
-
-            <div id="lenormand-grid" class="card-grid"></div>
-            
-            <div id="card-grid" class="card-grid"></div>
+            </details>
         </div>
 
         <!-- カード箱画面（旧: セット管理） -->
         <div id="sets-screen" class="screen active">
             <div class="info-box">
                 <h3>📦 <span data-ja="カード箱" data-en="Card Boxes">カード箱</span></h3>
-                <p data-ja="箱をタップして中のカードを見たり、編集したりできます。" data-en="Tap a box to view or edit the cards inside.">箱をタップして中のカードを見たり、編集したりできます。</p>
+                <p style="margin-bottom:6px;" data-ja="自分だけのカードセットを何種類か作って切り替えたい人向けの場所です。" data-en="Lets you build a few different card sets and switch between them.">自分だけのカードセットを何種類か作って切り替えたい人向けの場所です。</p>
+                <p style="margin:0;font-size:12px;color:var(--text-soft);" data-ja="ルノルマンだけ使うなら、ここは触らずに「占う」タブで占い始めて大丈夫です。" data-en="If you only use the Lenormand deck, you can ignore this tab and go straight to Read.">ルノルマンだけ使うなら、ここは触らずに「占う」タブで占い始めて大丈夫です。</p>
             </div>
 
             <div class="deck-info">
@@ -2942,6 +3113,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
 
         <!-- スプレッド選択画面 -->
         <div id="spread-screen" class="screen">
+            <div class="screen-subtext" data-ja="カードの並べ方を選びます。迷ったら一番上の「ワンオラクル（1枚）」が簡単です。" data-en="Pick how the cards will be laid out. If you're not sure, try One Card at the top.">カードの並べ方を選びます。迷ったら一番上の「ワンオラクル（1枚）」が簡単です。</div>
             <div class="deck-info">
                 <p><span data-ja="有効カード" data-en="Active Cards">有効カード</span>: <span id="spread-active-count">0</span><span data-ja="枚" data-en=""></span></p>
             </div>
@@ -2959,7 +3131,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
 
             <div class="info-box">
                 <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
-                    <input type="checkbox" id="use-reversal-toggle" onchange="toggleReversal()" checked style="width:20px;height:20px;">
+                    <input type="checkbox" id="use-reversal-toggle" onchange="toggleReversal()" style="width:20px;height:20px;">
                     <span data-ja="正逆を取る" data-en="Use Reversals">正逆を取る</span>
                 </label>
                 <div style="font-size:11px;color:#888;margin-top:5px;" data-ja="OFFにするとカードは常に正位置で出ます（オラクルカード向け）" data-en="Turn OFF to always draw cards upright (for oracle cards)">
@@ -3049,6 +3221,8 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
         <!-- リーディング画面 -->
         <div id="reading-screen" class="screen">
 
+            <div class="screen-subtext" data-ja="① 下の「シャッフル」を押す → ② カードを引く → ③ 出たカードを読む" data-en="① Tap Shuffle below  →  ② Draw the cards  →  ③ Read what comes up">① 下の「シャッフル」を押す → ② カードを引く → ③ 出たカードを読む</div>
+
             <!-- Layer 0: 問い表示（折りたたみ） -->
             <div id="question-display" class="question-display collapsed" style="display:none;">
                 <div class="question-header">
@@ -3102,9 +3276,10 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
 
         <!-- くじ引き画面 -->
         <div id="lottery-screen" class="screen">
+            <div class="screen-subtext" data-ja="準備なしで1枚〜数枚を引きたい時用の、軽い占い。「占う」とは別の遊び。" data-en="Casual: pull a few cards on a whim, separate from the formal Read tab.">準備なしで1枚〜数枚を引きたい時用の、軽い占い。「占う」とは別の遊び。</div>
             <div style="text-align:center;padding:20px;">
                 <h2 style="color:#9fd6e6;margin-bottom:15px;" data-ja="🎲 くじ引き" data-en="🎲 Random Draw">🎲 くじ引き</h2>
-                <p style="color:#888;font-size:13px;margin-bottom:20px;" data-ja="カードをランダムに引きます。リセットするまで同じカードは出ません。" data-en="Draw cards randomly. Same card won't appear until reset.">カードをランダムに引きます。リセットするまで同じカードは出ません。</p>
+                <p style="color:#888;font-size:13px;margin-bottom:20px;" data-ja="ランダムに何枚か引きます。「占う」みたいに展開を選ばなくてOK。リセットするまで同じカードは出ません。" data-en="Draws random cards without picking a spread. Same card won't repeat until you reset.">ランダムに何枚か引きます。「占う」みたいに展開を選ばなくてOK。リセットするまで同じカードは出ません。</p>
                 
                 <div style="background:rgba(159,214,230,0.1);padding:15px;border-radius:10px;margin-bottom:20px;">
                     <div style="margin-bottom:10px;">
@@ -4818,7 +4993,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
         let lenormandDescEn = {...LENORMAND_DESC_EN};
         let lenormandDescJa = {...LENORMAND_DESC_JA};
         let useSignificator = false; // シグニフィケーター使用フラグ
-        let useReversal = true; // 正逆を取るかどうか
+        let useReversal = false; // 正逆を取るかどうか（ルノルマン伝統的にOFF、初心者にも分かりやすい）
         let currentLang = 'ja'; // 言語設定
         const LENORMAND_OPTIONAL_DEFAULT = {
             extraGentleman: true,
@@ -5947,6 +6122,9 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
             if (savedReversal !== null) {
                 useReversal = savedReversal === 'true';
             }
+            // 変数とチェックボックスのUI状態を同期
+            const reversalToggleEl = document.getElementById('use-reversal-toggle');
+            if (reversalToggleEl) reversalToggleEl.checked = useReversal;
 
             const extraGentleman = document.getElementById('lenormand-extra-gentleman');
             const extraLady = document.getElementById('lenormand-extra-lady');
@@ -8918,6 +9096,66 @@ sigBadge + '</strong><br>' + (descText || noDescText) + '</div>';
         
         // タイトル画面から開始
         var startAppCalled = false;
+        // 初回起動ウェルカム関連 ---------------------------------------
+        const ONBOARDED_KEY = 'oracleforge_onboarded_v1';
+
+        function hasOnboarded() {
+            try { return localStorage.getItem(ONBOARDED_KEY) === '1'; }
+            catch(e) { return false; }
+        }
+
+        function markOnboarded() {
+            try { localStorage.setItem(ONBOARDED_KEY, '1'); } catch(e) {}
+        }
+
+        function showFirstRunWelcome() {
+            const overlay = document.getElementById('welcome-overlay');
+            if (!overlay) return;
+            try {
+                if (typeof changeLang === 'function' && typeof currentLang !== 'undefined') {
+                    changeLang(currentLang);
+                }
+            } catch(e) {}
+            overlay.classList.add('show');
+            overlay.setAttribute('aria-hidden', 'false');
+        }
+
+        function closeWelcomeOverlay() {
+            const overlay = document.getElementById('welcome-overlay');
+            if (overlay) {
+                overlay.classList.remove('show');
+                overlay.setAttribute('aria-hidden', 'true');
+            }
+            markOnboarded();
+        }
+
+        // ウェルカムの「まず1枚引いてみる」: 1枚展開で占う画面へ直行
+        function welcomeStartOneCard() {
+            closeWelcomeOverlay();
+            try {
+                if (typeof selectSpread === 'function') {
+                    selectSpread('one', 1);
+                } else {
+                    showScreen('reading');
+                }
+            } catch(e) {
+                console.error('welcomeStartOneCard failed', e);
+                try { showScreen('reading'); } catch(_) {}
+            }
+        }
+
+        // ウェルカムの「自分で展開を選ぶ」: 展開タブへ
+        function welcomeGoToSpread() {
+            closeWelcomeOverlay();
+            try { showScreen('spread'); } catch(e) {}
+        }
+
+        function dismissWelcomeAndShowGuide() {
+            closeWelcomeOverlay();
+            try { openAppGuide(); } catch(e) {}
+        }
+        // ---------------------------------------------------------------
+
         function startApp() {
             // 二重実行防止
             if (startAppCalled) return;
@@ -8929,6 +9167,7 @@ sigBadge + '</strong><br>' + (descText || noDescText) + '</div>';
                 audioManager.onUserInteraction();
                 audioManager.playConfirm();
             }
+            const isFirstRun = !hasOnboarded();
             const title = document.getElementById('titleScreen');
             if (title) {
                 title.style.transition = 'opacity 0.5s';
@@ -8937,6 +9176,10 @@ sigBadge + '</strong><br>' + (descText || noDescText) + '</div>';
                     title.classList.add('hidden');
                     // スクロールを有効化
                     document.body.classList.remove('title-visible');
+                    // 初回起動ならウェルカムモーダル → 1枚引いてみる導線
+                    if (isFirstRun) {
+                        showFirstRunWelcome();
+                    }
                     // フラグをリセット（goHomeで戻った時のため）
                     startAppCalled = false;
                 }, 500);
