@@ -1863,6 +1863,140 @@
             display: none !important;
         }
 
+        /* 初回起動ウェルカムモーダル：はじめるを押した直後に1回だけ表示 */
+        .welcome-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(3, 7, 13, 0.78);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            z-index: 11000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.35s ease, visibility 0.35s ease;
+        }
+        .welcome-overlay.show { opacity: 1; visibility: visible; }
+        .welcome-modal {
+            position: relative;
+            width: min(92vw, 420px);
+            max-height: 88vh;
+            overflow-y: auto;
+            box-sizing: border-box;
+            padding: 28px 22px 24px;
+            background:
+                radial-gradient(ellipse 80% 30% at 50% -8%, rgba(174, 230, 245, 0.12) 0%, transparent 60%),
+                linear-gradient(180deg, var(--ink-3) 0%, var(--ink-2) 60%, var(--ink-1) 100%);
+            border: 1px solid var(--accent-line);
+            border-radius: 4px;
+            box-shadow: 0 0 24px rgba(159,214,230,0.25), 0 8px 28px rgba(0,0,0,0.55);
+            color: var(--text);
+            text-align: center;
+        }
+        .welcome-modal::-webkit-scrollbar { display: none; }
+        .welcome-modal { scrollbar-width: none; }
+        .welcome-title {
+            font-family: 'Cormorant Garamond', 'Noto Serif JP', serif;
+            font-size: 1.4em;
+            letter-spacing: 0.18em;
+            color: var(--accent-1);
+            margin-bottom: 6px;
+        }
+        .welcome-sub {
+            font-size: 0.85em;
+            color: var(--ink-soft, #c8d4dc);
+            opacity: 0.85;
+            letter-spacing: 0.08em;
+            margin-bottom: 18px;
+        }
+        .welcome-divider {
+            width: 60px; height: 1px;
+            margin: 0 auto 18px;
+            background: linear-gradient(90deg, transparent, var(--accent-line), transparent);
+        }
+        .welcome-lead {
+            font-size: 0.95em;
+            line-height: 1.6;
+            margin-bottom: 18px;
+            color: #e8eef2;
+        }
+        .welcome-lead strong { color: var(--accent-2); font-weight: 500; }
+        .welcome-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 0 auto 22px;
+            text-align: left;
+            max-width: 320px;
+        }
+        .welcome-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 10px 12px;
+            background: rgba(159,214,230,0.05);
+            border: 1px solid rgba(159,214,230,0.18);
+            border-radius: 4px;
+        }
+        .welcome-step-num {
+            flex: 0 0 26px;
+            height: 26px;
+            border-radius: 50%;
+            border: 1px solid var(--accent-line);
+            color: var(--accent-1);
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.95em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .welcome-step-body { font-size: 0.9em; line-height: 1.45; }
+        .welcome-step-body b { color: var(--accent-2); font-weight: 500; }
+        .welcome-btn-primary {
+            display: block;
+            width: 100%;
+            padding: 13px 18px;
+            background: linear-gradient(180deg, rgba(159,214,230,0.22) 0%, rgba(159,214,230,0.10) 100%);
+            border: 1px solid var(--accent-1);
+            color: var(--accent-1);
+            font-family: inherit;
+            font-size: 1em;
+            letter-spacing: 0.14em;
+            border-radius: 2px;
+            cursor: pointer;
+            touch-action: manipulation;
+            box-shadow: 0 0 12px rgba(159,214,230,0.18);
+        }
+        .welcome-btn-primary:active { background: rgba(159,214,230,0.28); }
+        .welcome-guide-link {
+            display: inline-block;
+            margin-top: 14px;
+            padding: 6px 10px;
+            background: transparent;
+            border: none;
+            color: var(--accent-2);
+            font-family: inherit;
+            font-size: 0.85em;
+            letter-spacing: 0.08em;
+            cursor: pointer;
+            opacity: 0.85;
+        }
+        .welcome-guide-link:active { opacity: 1; }
+
+        /* 占う／くじ 画面のサブテキスト（初心者向け） */
+        .screen-subtext {
+            text-align: center;
+            font-size: 12px;
+            color: var(--accent-2);
+            opacity: 0.7;
+            letter-spacing: 0.06em;
+            margin: -6px 0 12px;
+            padding: 0 14px;
+        }
+
         /* 水面オーバーレイ（占い時の overlay.webp と同じ画像を低不透明で重ね、世界観を連結） */
         .web-bg {
             position: absolute;
@@ -2619,22 +2753,51 @@
         <div class="title-steps" style="pointer-events:none;">
             <div class="title-step">
                 <div class="title-step-num">I</div>
-                <div class="title-step-label" data-ja="問いを記す" data-en="Ask">問いを記す</div>
-                <div class="title-step-desc" data-ja="記録タブ" data-en="Notes tab">記録タブ</div>
+                <div class="title-step-label" data-ja="心に問いを浮かべる" data-en="Hold a question">心に問いを浮かべる</div>
+                <div class="title-step-desc" data-ja="知りたいこと" data-en="What to ask">知りたいこと</div>
             </div>
             <div class="title-step">
                 <div class="title-step-num">II</div>
-                <div class="title-step-label" data-ja="展開を選ぶ" data-en="Choose spread">展開を選ぶ</div>
+                <div class="title-step-label" data-ja="展開を選ぶ" data-en="Choose a spread">展開を選ぶ</div>
                 <div class="title-step-desc" data-ja="15種から" data-en="15 layouts">15種から</div>
             </div>
             <div class="title-step">
                 <div class="title-step-num">III</div>
-                <div class="title-step-label" data-ja="カードを引く" data-en="Draw">カードを引く</div>
-                <div class="title-step-desc" data-ja="占うタブ" data-en="Read tab">占うタブ</div>
+                <div class="title-step-label" data-ja="カードを引く" data-en="Draw cards">カードを引く</div>
+                <div class="title-step-desc" data-ja="そのまま読み解く" data-en="And read">そのまま読み解く</div>
             </div>
         </div>
 
         <button class="title-guide-link" type="button" onclick="openAppGuide()" data-ja="✦ 使い方をくわしく見る" data-en="✦ View full guide" style="position:relative;z-index:10001;pointer-events:auto;">✦ 使い方をくわしく見る</button>
+    </div>
+
+    <!-- 初回起動ウェルカムモーダル -->
+    <div class="welcome-overlay" id="welcome-overlay" aria-hidden="true">
+        <div class="welcome-modal" role="dialog" aria-labelledby="welcome-title-text">
+            <div class="welcome-title" id="welcome-title-text" data-ja="ようこそ" data-en="Welcome">ようこそ</div>
+            <div class="welcome-sub" data-ja="OracleForge へ" data-en="to OracleForge">OracleForge へ</div>
+            <div class="welcome-divider"></div>
+
+            <div class="welcome-lead" data-ja="ルノルマン39枚はもう用意できています。そのまま占えます。" data-en="All 39 Lenormand cards are ready. You can start a reading right away.">ルノルマン39枚はもう用意できています。そのまま占えます。</div>
+
+            <div class="welcome-steps">
+                <div class="welcome-step">
+                    <div class="welcome-step-num">1</div>
+                    <div class="welcome-step-body" data-ja="心に問いを思い浮かべる" data-en="Hold a question in mind">心に問いを思い浮かべる</div>
+                </div>
+                <div class="welcome-step">
+                    <div class="welcome-step-num">2</div>
+                    <div class="welcome-step-body" data-ja="「展開」タブで形を選ぶ" data-en="Pick a spread in the Spread tab">「展開」タブで形を選ぶ</div>
+                </div>
+                <div class="welcome-step">
+                    <div class="welcome-step-num">3</div>
+                    <div class="welcome-step-body" data-ja="「占う」タブでカードを引く" data-en="Draw the cards in the Read tab">「占う」タブでカードを引く</div>
+                </div>
+            </div>
+
+            <button class="welcome-btn-primary" type="button" onclick="dismissWelcome(true)" data-ja="占いをはじめる" data-en="Start a reading">占いをはじめる</button>
+            <button class="welcome-guide-link" type="button" onclick="dismissWelcomeAndShowGuide()" data-ja="✦ 使い方をくわしく見る" data-en="✦ View full guide">✦ 使い方をくわしく見る</button>
+        </div>
     </div>
 
     <!-- 左サイドバー（ホーム・設定ボタン） -->
@@ -3049,6 +3212,8 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
         <!-- リーディング画面 -->
         <div id="reading-screen" class="screen">
 
+            <div class="screen-subtext" data-ja="問いを立ててから展開で占う、本式のリーディング" data-en="Formal reading: ask a question, choose a spread, draw">問いを立ててから展開で占う、本式のリーディング</div>
+
             <!-- Layer 0: 問い表示（折りたたみ） -->
             <div id="question-display" class="question-display collapsed" style="display:none;">
                 <div class="question-header">
@@ -3102,6 +3267,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
 
         <!-- くじ引き画面 -->
         <div id="lottery-screen" class="screen">
+            <div class="screen-subtext" data-ja="思いついた時に1枚〜数枚を気軽に引く、カジュアル占い" data-en="Casual: just pull 1 or a few cards on a whim">思いついた時に1枚〜数枚を気軽に引く、カジュアル占い</div>
             <div style="text-align:center;padding:20px;">
                 <h2 style="color:#9fd6e6;margin-bottom:15px;" data-ja="🎲 くじ引き" data-en="🎲 Random Draw">🎲 くじ引き</h2>
                 <p style="color:#888;font-size:13px;margin-bottom:20px;" data-ja="カードをランダムに引きます。リセットするまで同じカードは出ません。" data-en="Draw cards randomly. Same card won't appear until reset.">カードをランダムに引きます。リセットするまで同じカードは出ません。</p>
@@ -8918,6 +9084,51 @@ sigBadge + '</strong><br>' + (descText || noDescText) + '</div>';
         
         // タイトル画面から開始
         var startAppCalled = false;
+        // 初回起動ウェルカム関連 ---------------------------------------
+        const ONBOARDED_KEY = 'oracleforge_onboarded_v1';
+
+        function hasOnboarded() {
+            try { return localStorage.getItem(ONBOARDED_KEY) === '1'; }
+            catch(e) { return false; }
+        }
+
+        function markOnboarded() {
+            try { localStorage.setItem(ONBOARDED_KEY, '1'); } catch(e) {}
+        }
+
+        function showFirstRunWelcome() {
+            const overlay = document.getElementById('welcome-overlay');
+            if (!overlay) return;
+            // 言語切替で data-ja/data-en 反映
+            try {
+                if (typeof changeLang === 'function' && typeof currentLang !== 'undefined') {
+                    changeLang(currentLang);
+                }
+            } catch(e) {}
+            overlay.classList.add('show');
+            overlay.setAttribute('aria-hidden', 'false');
+        }
+
+        function dismissWelcome(goToReading) {
+            const overlay = document.getElementById('welcome-overlay');
+            if (overlay) {
+                overlay.classList.remove('show');
+                overlay.setAttribute('aria-hidden', 'true');
+            }
+            markOnboarded();
+            if (goToReading) {
+                // 「占う」タブへ遷移
+                try { showScreen('reading'); }
+                catch(e) { console.error('showScreen reading failed', e); }
+            }
+        }
+
+        function dismissWelcomeAndShowGuide() {
+            dismissWelcome(false);
+            try { openAppGuide(); } catch(e) {}
+        }
+        // ---------------------------------------------------------------
+
         function startApp() {
             // 二重実行防止
             if (startAppCalled) return;
@@ -8929,6 +9140,7 @@ sigBadge + '</strong><br>' + (descText || noDescText) + '</div>';
                 audioManager.onUserInteraction();
                 audioManager.playConfirm();
             }
+            const isFirstRun = !hasOnboarded();
             const title = document.getElementById('titleScreen');
             if (title) {
                 title.style.transition = 'opacity 0.5s';
@@ -8937,6 +9149,10 @@ sigBadge + '</strong><br>' + (descText || noDescText) + '</div>';
                     title.classList.add('hidden');
                     // スクロールを有効化
                     document.body.classList.remove('title-visible');
+                    // 初回起動ならウェルカムモーダルを表示
+                    if (isFirstRun) {
+                        showFirstRunWelcome();
+                    }
                     // フラグをリセット（goHomeで戻った時のため）
                     startAppCalled = false;
                 }, 500);
