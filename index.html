@@ -221,9 +221,9 @@
             z-index: 50;
         }
         .side-buttons button {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
+            width: 48px;
+            min-height: 48px;
+            border-radius: 12px;
             background: rgba(10, 13, 24, 0.85);
             border: 1px solid var(--accent-line);
             color: var(--accent-1);
@@ -233,8 +233,17 @@
             transition: all 0.3s;
             box-shadow: 0 2px 10px rgba(0,0,0,0.45), inset 0 0 12px rgba(159,214,230,0.05);
             display: inline-flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
+            gap: 2px;
+            padding: 5px 2px;
+        }
+        .side-buttons button .side-btn-label {
+            font-size: 9px;
+            line-height: 1;
+            letter-spacing: 0.02em;
+            font-family: 'Noto Serif JP', serif;
         }
         .side-buttons button:hover {
             background: rgba(159, 214, 230, 0.12);
@@ -248,9 +257,12 @@
                 right: 12px;
             }
             .side-buttons button {
-                width: 52px;
-                height: 52px;
+                width: 56px;
+                min-height: 56px;
                 font-size: 22px;
+            }
+            .side-buttons button .side-btn-label {
+                font-size: 10px;
             }
         }
 
@@ -579,11 +591,11 @@
         /* スプレッド表示エリア */
         .spread-display {
             position: relative;
-            min-height: clamp(380px, 55vh, 520px);
+            min-height: clamp(320px, 46vh, 460px);
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-top: 20px;
+            margin-top: 14px;
             background: rgba(0,0,0,0.3);
             border: 3px solid rgba(159,214,230,0.5);
             border-radius: 16px;
@@ -608,9 +620,26 @@
             pointer-events: none;
             border-radius: 0;
             transition: opacity 3s ease-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .spread-reveal-overlay.fade-out {
             opacity: 0;
+        }
+        /* 演出中であることを伝える案内文（薄さ＝故障ではなく演出だと示す） */
+        .spread-reveal-message {
+            color: #eaf6fa;
+            font-size: clamp(15px, 4.4vw, 20px);
+            letter-spacing: 0.06em;
+            text-align: center;
+            padding: 0 24px;
+            text-shadow: 0 0 12px rgba(0,0,0,0.85), 0 0 24px rgba(60,120,140,0.6);
+            animation: revealMsgPulse 2.4s ease-in-out infinite;
+        }
+        @keyframes revealMsgPulse {
+            0%, 100% { opacity: 0.65; transform: translateY(0); }
+            50%      { opacity: 1;    transform: translateY(-4px); }
         }
 
         /* ============================================
@@ -732,9 +761,9 @@
             position: fixed;
             right: 8px;
             bottom: 70px;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
+            width: 48px;
+            min-height: 48px;
+            border-radius: 12px;
             background: rgba(10, 13, 24, 0.9);
             border: 1px solid var(--accent-line);
             color: var(--accent-1);
@@ -746,8 +775,17 @@
             box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5), inset 0 0 12px rgba(159,214,230,0.06);
             transition: all 0.3s;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
+            gap: 2px;
+            padding: 5px 2px;
+        }
+        .app-guide-btn .app-guide-label {
+            font-size: 9px;
+            line-height: 1;
+            letter-spacing: 0.02em;
+            font-family: 'Noto Serif JP', serif;
         }
         .app-guide-btn:active {
             background: rgba(159, 214, 230, 0.18);
@@ -2802,12 +2840,21 @@
 
     <!-- 左サイドバー（ホーム・設定ボタン） -->
     <div class="side-buttons">
-        <button onclick="goHome()" title="Home" aria-label="Home" style="font-family:'Cormorant Garamond',serif;font-size:22px;">⌂</button>
-        <button onclick="openSettingsDrawer()" title="Settings" aria-label="Settings" style="font-size:18px;">⚙</button>
+        <button onclick="goHome()" title="Home" aria-label="Home">
+            <span aria-hidden="true" style="font-family:'Cormorant Garamond',serif;">⌂</span>
+            <span class="side-btn-label" data-ja="ホーム" data-en="Home">ホーム</span>
+        </button>
+        <button onclick="openSettingsDrawer()" title="Settings" aria-label="Settings">
+            <span aria-hidden="true">⚙</span>
+            <span class="side-btn-label" data-ja="設定" data-en="Settings">設定</span>
+        </button>
     </div>
 
     <!-- 操作ガイドボタン（?）- 全画面共通 / body直下でposition:fixed -->
-    <button id="app-guide-btn" class="app-guide-btn" onclick="openAppGuide()" title="Guide">?</button>
+    <button id="app-guide-btn" class="app-guide-btn" onclick="openAppGuide()" title="Guide" aria-label="Guide">
+        <span aria-hidden="true">?</span>
+        <span class="app-guide-label" data-ja="使い方" data-en="Help">使い方</span>
+    </button>
 
 
     <!-- 操作ガイドオーバーレイ（全画面共通） -->
@@ -3221,7 +3268,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
         <!-- リーディング画面 -->
         <div id="reading-screen" class="screen">
 
-            <div class="screen-subtext" data-ja="① 下の「シャッフル」を押す → ② カードを引く → ③ 出たカードを読む" data-en="① Tap Shuffle below  →  ② Draw the cards  →  ③ Read what comes up">① 下の「シャッフル」を押す → ② カードを引く → ③ 出たカードを読む</div>
+            <div class="screen-subtext" data-ja="① 下の「シャッフル」を押す → ② 散らばったカードをタップ（または指でなでて）集める → ③ 出たカードを読む" data-en="① Tap Shuffle below  →  ② Tap (or sweep) the scattered cards to gather them  →  ③ Read what comes up">① 下の「シャッフル」を押す → ② 散らばったカードをタップ（または指でなでて）集める → ③ 出たカードを読む</div>
 
             <!-- Layer 0: 問い表示（折りたたみ） -->
             <div id="question-display" class="question-display collapsed" style="display:none;">
@@ -7789,8 +7836,8 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                 collecting: {
                     step: 1,
                     icon: '👆',
-                    ja: 'カードをタップして集めてください',
-                    en: 'Tap cards to collect them',
+                    ja: 'カードをタップ（または指でなでて）集めてください',
+                    en: 'Tap (or sweep) the cards to collect them',
                     stepLabel: { ja: 'STEP 2 / 4', en: 'STEP 2 / 4' }
                 },
                 revealing: {
@@ -8247,17 +8294,23 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
             
             const inner = document.getElementById('spread-inner');
             inner.innerHTML = '';
-            inner.style.minHeight = '380px';
-            
-            // シャッフル用のコンテナ
+            inner.style.minHeight = '300px';
+
+            // シャッフル全体のラッパー（カード領域 + 下の操作行）
+            const shuffleWrap = document.createElement('div');
+            shuffleWrap.id = 'shuffle-wrap';
+            shuffleWrap.style.cssText = 'position:relative;width:100%;display:flex;flex-direction:column;align-items:center;';
+            inner.appendChild(shuffleWrap);
+
+            // シャッフル用のコンテナ（カードが散らばる領域）。画面に収まる高さに。
             const shuffleArea = document.createElement('div');
             shuffleArea.id = 'shuffle-area';
-            shuffleArea.style.cssText = 'position:relative;width:100%;height:380px;touch-action:none;padding-bottom:70px;';
-            inner.appendChild(shuffleArea);
-            
+            shuffleArea.style.cssText = 'position:relative;width:100%;height:clamp(240px,38vh,340px);touch-action:none;';
+            shuffleWrap.appendChild(shuffleArea);
+
             // カードの山（リフルシャッフル）
             const deckX = shuffleArea.offsetWidth / 2 || 150;
-            const deckY = shuffleArea.offsetHeight / 2 || 170;
+            const deckY = shuffleArea.offsetHeight / 2 || 150;
             const baseCardW = getCardBaseWidth();
             const shuffleCardW = Math.max(54, baseCardW * 0.75);
             const shuffleCardH = shuffleCardW * 1.5;
@@ -8308,13 +8361,22 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
             
             // 散らばるアニメーション
             setTimeout(() => {
+                // 散らばり半径はエリアの実サイズに合わせ、はみ出さないようにする
+                const areaW = shuffleArea.offsetWidth || 300;
+                const areaH = shuffleArea.offsetHeight || 280;
+                const maxDist = Math.max(60, Math.min(areaW, areaH) / 2 - shuffleCardW / 2 - 10);
+                // 上部のヒント文ぶん、少し下に余白を取る
+                const topPad = 34;
                 shuffleCards.forEach((card, i) => {
                     const angle = (i / cardCount) * Math.PI * 2 + Math.random() * 0.5;
-                    const dist = 80 + Math.random() * 60;
-                    const x = deckX - 30 + Math.cos(angle) * dist;
-                    const y = deckY - 45 + Math.sin(angle) * dist;
+                    const dist = maxDist * (0.55 + Math.random() * 0.45);
+                    let x = deckX - shuffleCardW / 2 + Math.cos(angle) * dist;
+                    let y = deckY - shuffleCardH / 2 + Math.sin(angle) * dist;
+                    // エリア内にクランプ
+                    x = Math.max(4, Math.min(areaW - shuffleCardW - 4, x));
+                    y = Math.max(topPad, Math.min(areaH - shuffleCardH - 4, y));
                     const rot = (Math.random() - 0.5) * 40;
-                    
+
                     card.style.left = x + 'px';
                     card.style.top = y + 'px';
                     card.style.transform = `rotate(${rot}deg)`;
@@ -8327,59 +8389,82 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                 // 説明テキスト（上部に配置してカードに隠れないようにする）
                 const hint = document.createElement('div');
                 hint.id = 'collect-hint';
-                hint.style.cssText = 'text-align:center;color:#9fd6e6;font-size:14px;position:absolute;top:8px;width:100%;z-index:200;text-shadow:0 0 8px rgba(0,0,0,0.8);';
-                hint.innerHTML = currentLang === 'ja' ? '↓ カードをタップして集めてください ↓' : '↓ Tap cards to collect ↓';
+                hint.style.cssText = 'text-align:center;color:#cdeaf2;font-size:15px;font-weight:500;position:absolute;top:6px;left:0;width:100%;z-index:200;text-shadow:0 0 8px rgba(0,0,0,0.9);pointer-events:none;line-height:1.5;';
+                hint.innerHTML = currentLang === 'ja'
+                    ? '👆 カードを <b>1枚ずつタップ</b> して集めましょう<br><span style="font-size:12px;opacity:0.85;">指でなでて混ぜてもOK</span>'
+                    : '👆 <b>Tap each card</b> to gather them<br><span style="font-size:12px;opacity:0.85;">Or sweep across them with your finger</span>';
                 shuffleArea.appendChild(hint);
-                
-                // タップ/クリックでカードを集める
-                let collectedCount = 0;
-                shuffleCards.forEach((card, i) => {
-                    card.onclick = () => {
-                        if (card.dataset.collected === 'true') return;
-                        card.dataset.collected = 'true';
-                        collectedCount++;
-                        if (audioManager) {
-                            audioManager.playShuffleTap();
-                        }
 
-                        // 中央に戻す
-                        card.style.left = (deckX - 30) + 'px';
-                        card.style.top = (deckY - 45 - collectedCount * 2) + 'px';
-                        card.style.transform = 'rotate(0deg)';
-                        card.style.zIndex = 30 + collectedCount;
-                        
-                        // 全部集まったらカードを引く
-                        if (collectedCount >= cardCount) {
-                            setTimeout(() => finishShuffle(), 500);
-                        }
-                    };
+                let collectedCount = 0;
+                // 1枚を回収する共通処理
+                const collectOne = (card) => {
+                    if (!card || card.dataset.collected === 'true') return;
+                    card.dataset.collected = 'true';
+                    collectedCount++;
+                    if (audioManager) {
+                        audioManager.playShuffleTap();
+                    }
+                    // 中央に戻す
+                    card.style.left = (deckX - shuffleCardW / 2) + 'px';
+                    card.style.top = (deckY - shuffleCardH / 2 - collectedCount * 2) + 'px';
+                    card.style.transform = 'rotate(0deg)';
+                    card.style.zIndex = 30 + collectedCount;
+                    // 全部集まったらカードを引く
+                    if (collectedCount >= cardCount) {
+                        setTimeout(() => finishShuffle(), 500);
+                    }
+                };
+
+                // タップ/クリックでカードを集める
+                shuffleCards.forEach((card) => {
+                    card.onclick = () => collectOne(card);
                 });
-                
-                // まとめて集めるボタン
+
+                // 指でなでて（スワイプ／ドラッグ）混ぜながら集める。
+                // 触れた位置の下にある shuffle-card を回収する。
+                const collectAtPoint = (clientX, clientY) => {
+                    const el = document.elementFromPoint(clientX, clientY);
+                    if (!el) return;
+                    const cardEl = el.closest ? el.closest('.shuffle-card') : null;
+                    if (cardEl && cardEl.dataset.collected === 'false') {
+                        collectOne(cardEl);
+                    }
+                };
+                let isSweeping = false;
+                shuffleArea.addEventListener('touchstart', (e) => {
+                    isSweeping = true;
+                    const t = e.touches[0];
+                    if (t) collectAtPoint(t.clientX, t.clientY);
+                }, { passive: true });
+                shuffleArea.addEventListener('touchmove', (e) => {
+                    if (!isSweeping) return;
+                    const t = e.touches[0];
+                    if (t) collectAtPoint(t.clientX, t.clientY);
+                }, { passive: true });
+                shuffleArea.addEventListener('touchend', () => { isSweeping = false; }, { passive: true });
+                // マウス（デスクトップ）でのなで操作
+                shuffleArea.addEventListener('mousedown', (e) => { isSweeping = true; collectAtPoint(e.clientX, e.clientY); });
+                shuffleArea.addEventListener('mousemove', (e) => { if (isSweeping) collectAtPoint(e.clientX, e.clientY); });
+                window.addEventListener('mouseup', () => { isSweeping = false; });
+
+                // まとめて集めるボタン（カードに被らないよう、カード領域の「下」に置く）
+                const collectRow = document.createElement('div');
+                collectRow.style.cssText = 'width:100%;display:flex;justify-content:center;margin-top:10px;';
                 const collectAllBtn = document.createElement('button');
                 collectAllBtn.className = 'btn';
-                collectAllBtn.style.cssText = 'position:absolute;bottom:54px;left:50%;transform:translateX(-50%);padding:8px 20px;font-size:13px;z-index:120;';
-                collectAllBtn.textContent = currentLang === 'ja' ? 'まとめて集める' : 'Collect All';
+                collectAllBtn.style.cssText = 'padding:10px 24px;font-size:14px;';
+                collectAllBtn.textContent = currentLang === 'ja' ? '全部まとめて集める' : 'Collect all at once';
                 collectAllBtn.onclick = () => {
+                    collectAllBtn.disabled = true;
                     shuffleCards.forEach((card, i) => {
                         if (card.dataset.collected === 'false') {
-                            setTimeout(() => {
-                                card.dataset.collected = 'true';
-                                collectedCount++;
-                                card.style.left = (deckX - 30) + 'px';
-                                card.style.top = (deckY - 45 - collectedCount * 2) + 'px';
-                                card.style.transform = 'rotate(0deg)';
-                                card.style.zIndex = 30 + collectedCount;
-                                
-                                if (collectedCount >= cardCount) {
-                                    setTimeout(() => finishShuffle(), 500);
-                                }
-                            }, i * 100);
+                            setTimeout(() => collectOne(card), i * 100);
                         }
                     });
                 };
-                shuffleArea.appendChild(collectAllBtn);
-                
+                collectRow.appendChild(collectAllBtn);
+                shuffleWrap.appendChild(collectRow);
+
             }, 1500);
             
             // カードを引く処理
@@ -8396,11 +8481,11 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                 }));
                 
                 // フェードアウト
-                shuffleArea.style.transition = 'opacity 0.3s';
-                shuffleArea.style.opacity = '0';
-                
+                shuffleWrap.style.transition = 'opacity 0.3s';
+                shuffleWrap.style.opacity = '0';
+
                 setTimeout(() => {
-                    shuffleArea.remove();
+                    shuffleWrap.remove();
                     inner.style.minHeight = '';
                     setupSpread(currentSpread, currentSpreadSize);
 
@@ -8409,6 +8494,13 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
                     if (existingOverlay) existingOverlay.remove();
                     const overlay = document.createElement('div');
                     overlay.className = 'spread-reveal-overlay';
+                    // 演出だと分かるよう案内文を重ねる（薄い水面＝演出中であることを明示）
+                    const revealMsg = document.createElement('div');
+                    revealMsg.className = 'spread-reveal-message';
+                    revealMsg.innerHTML = currentLang === 'ja'
+                        ? '🫧 カードが水面に浮かび上がっています…'
+                        : '🫧 The cards are rising to the surface…';
+                    overlay.appendChild(revealMsg);
                     document.body.appendChild(overlay);
 
                     // 3秒待ってからカードめくりを開始
