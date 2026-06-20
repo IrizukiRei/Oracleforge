@@ -2830,7 +2830,7 @@
             <div class="welcome-sub" data-ja="OracleForge へ" data-en="to OracleForge">OracleForge へ</div>
             <div class="welcome-divider"></div>
 
-            <div class="welcome-lead" data-ja="ルノルマン39枚のカードはもう準備できています。難しい設定は要りません。" data-en="All 39 Lenormand cards are ready. No setup needed.">ルノルマン39枚のカードはもう準備できています。難しい設定は要りません。</div>
+            <div class="welcome-lead" data-ja="ルノルマン36枚のカードはもう準備できています。難しい設定は要りません。" data-en="All 36 Lenormand cards are ready. No setup needed.">ルノルマン36枚のカードはもう準備できています。難しい設定は要りません。</div>
 
             <button class="welcome-btn-primary" type="button" onclick="welcomeStartOneCard()" data-ja="まず1枚引いてみる" data-en="Pull a single card">まず1枚引いてみる</button>
             <button class="welcome-btn-secondary" type="button" onclick="welcomeGoToSpread()" data-ja="自分で展開を選ぶ" data-en="Pick a spread myself">自分で展開を選ぶ</button>
@@ -2927,18 +2927,18 @@
                 <div class="lenormand-intro-title">
                     <span class="lenormand-intro-icon" aria-hidden="true">♡🃏</span>
                     <span data-ja="シンプルで現実的なメッセージを読むカード" data-en="A sweet, practical oracle style">シンプルで現実的なメッセージを読むカード</span>
-                    <span class="lenormand-intro-badge" data-ja="39 CARDS" data-en="39 CARDS">39 CARDS</span>
+                    <span class="lenormand-intro-badge" data-ja="36 CARDS" data-en="36 CARDS">36 CARDS</span>
                 </div>
                 <p class="lenormand-intro-body" data-ja="ルノルマンは、日常に寄り添う具体的なヒントを読み解く占術です。
-このアプリでは通常36枚に加え、あなたの構成に合わせた39枚版デッキをプリセットしています。
+このアプリでは伝統的な36枚をプリセットしています（必要なら追加3枚＝紳士・淑女・Person もあとから有効化できます）。
 1枚で『今日のテーマ』、3枚で『流れ』、多枚数で『全体像』を見るのがおすすめです。"
                    data-en="Lenormand is an oracle system known for clear, down-to-earth guidance.
-In this app, your preset uses a 39-card Lenormand deck (including your extra cards) instead of only the classic 36.
+This app comes with the traditional 36-card deck preset (3 optional extras — Gentleman, Lady, Person — can be enabled later).
 Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigger picture.">ルノルマンは、日常に寄り添う具体的なヒントを読み解く占術です。
-このアプリでは通常36枚に加え、あなたの構成に合わせた39枚版デッキをプリセットしています。
+このアプリでは伝統的な36枚をプリセットしています（必要なら追加3枚＝紳士・淑女・Person もあとから有効化できます）。
 1枚で『今日のテーマ』、3枚で『流れ』、多枚数で『全体像』を見るのがおすすめです。</p>
                 <div class="lenormand-chip-row">
-                    <span class="lenormand-chip" data-ja="✨ 全39枚" data-en="✨ Full 39 cards">✨ 全39枚</span>
+                    <span class="lenormand-chip" data-ja="✨ 伝統の36枚" data-en="✨ Classic 36 cards">✨ 伝統の36枚</span>
                     <span class="lenormand-chip" data-ja="🌿 日常の問い向き" data-en="🌿 Great for daily questions">🌿 日常の問い向き</span>
                     <span class="lenormand-chip" data-ja="🔎 具体的で読みやすい" data-en="🔎 Concrete & easy to read">🔎 具体的で読みやすい</span>
                 </div>
@@ -3006,23 +3006,23 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
             <!-- ユーザーが作ったカード -->
             <div id="card-grid" class="card-grid"></div>
 
-            <!-- ルノルマン39枚プリセット（折りたたみ） -->
+            <!-- ルノルマンプリセット（折りたたみ）伝統36枚＋上級者向け追加3枚 -->
             <details class="advanced-section">
-                <summary><span data-ja="🃏 ルノルマン39枚（プリセット・編集不可）" data-en="🃏 Lenormand preset (39 cards, read-only)">🃏 ルノルマン39枚（プリセット・編集不可）</span></summary>
+                <summary><span data-ja="🃏 ルノルマン（プリセット・編集不可）" data-en="🃏 Lenormand preset (read-only)">🃏 ルノルマン（プリセット・編集不可）</span></summary>
                 <div class="advanced-body">
-                    <p style="margin:0 0 12px;font-size:12px;color:var(--text-soft);" data-ja="既に用意されている39枚のルノルマンです。下のチェックで一部のカードを使う／使わないを切り替えられます。" data-en="The 39 ready-made Lenormand cards. Use the checkboxes below to include or exclude specific cards.">既に用意されている39枚のルノルマンです。下のチェックで一部のカードを使う／使わないを切り替えられます。</p>
+                    <p style="margin:0 0 12px;font-size:12px;color:var(--text-soft);" data-ja="伝統の36枚をそのまま使えます。追加の紳士・淑女・Person（00）はシグニフィケーター用の上級者向けカードで、初期設定では使いません。必要なら下のチェックで個別に使う設定にできます。" data-en="The classic 36-card deck is ready to use. The extra Gentleman, Lady and Person (00) are advanced significator cards and are off by default. Enable them below if you need them.">伝統の36枚をそのまま使えます。追加の紳士・淑女・Person（00）はシグニフィケーター用の上級者向けカードで、初期設定では使いません。必要なら下のチェックで個別に使う設定にできます。</p>
                     <div class="lenormand-options">
                         <label>
                             <input type="checkbox" id="lenormand-extra-gentleman">
-                            <span data-ja="追加・紳士を使う" data-en="Use Extra Gentleman">追加・紳士を使う</span>
+                            <span data-ja="追加・紳士を使う（上級者向け）" data-en="Use Extra Gentleman (advanced)">追加・紳士を使う（上級者向け）</span>
                         </label>
                         <label>
                             <input type="checkbox" id="lenormand-extra-lady">
-                            <span data-ja="追加・淑女を使う" data-en="Use Extra Lady">追加・淑女を使う</span>
+                            <span data-ja="追加・淑女を使う（上級者向け）" data-en="Use Extra Lady (advanced)">追加・淑女を使う（上級者向け）</span>
                         </label>
                         <label>
                             <input type="checkbox" id="lenormand-person">
-                            <span data-ja="00.Personを使う" data-en="Use 00.Person">00.Personを使う</span>
+                            <span data-ja="00.Person を使う（上級者向け）" data-en="Use 00.Person (advanced)">00.Person を使う（上級者向け）</span>
                         </label>
                     </div>
                     <div id="lenormand-grid" class="card-grid" style="margin-top:10px;"></div>
@@ -5043,9 +5043,13 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
         let useReversal = false; // 正逆を取るかどうか（ルノルマン伝統的にOFF、初心者にも分かりやすい）
         let currentLang = 'ja'; // 言語設定
         const LENORMAND_OPTIONAL_DEFAULT = {
-            extraGentleman: true,
-            extraLady: true,
-            person: true
+            // 伝統的ルノルマンは36枚。追加3枚（紳士・淑女・Person）は
+            // シグニフィケーター用の上級者向けオプションなので、
+            // 初心者がいきなり混乱しないようデフォルトは全てOFF。
+            // 「すべてのカード → ルノルマン39枚」のチェックで個別にONにできる。
+            extraGentleman: false,
+            extraLady: false,
+            person: false
         };
         let lenormandOptional = {...LENORMAND_OPTIONAL_DEFAULT};
         const cardFilterState = {
@@ -5057,7 +5061,7 @@ Try 1 card for today's theme, 3 cards for flow, and larger spreads for the bigge
             density: 'large'
         };
         
-        // ルノルマンプリセット（36枚+追加淑女&紳士&Person=39枚）- 編集不可
+        // ルノルマンプリセット（伝統36枚 + 追加紳士・淑女・Person の上級者向け3枚）- 編集不可
         // 画像はcard-imagesフォルダからファイルパスで参照
         const LENORMAND_PRESET = {
             nameJa: 'ルノルマン',
